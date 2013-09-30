@@ -1,6 +1,7 @@
 extern mod extra;
 
 use std::os::change_dir;
+use std::os::path_exists;
 use std::str::from_utf8_owned;
 use std::run::process_output;
 
@@ -49,23 +50,28 @@ fn main() {
     println(fmt!("    %s", r_version));
     println("_________________________________________________________________________");
     
+    // Maybe later I will need to have ability to write conf from commandline
     let mut t = WorkMap(TreeMap::new());
     t.insert(Repository{ loc: ~"../NemerleWeb", t: git}, ~"NWeb");
-    
-    let encf = io::file_writer(& Path( "zz" ), [io::Create, io::Truncate]).unwrap();
+    let encf = io::file_writer(& Path( "repolist.conf" ), [io::Create, io::Truncate]).unwrap();
     t.encode(&mut json::Encoder(encf));
     
-    let mut total = 0;
-    let myRepo = Repository { loc: ~"../NemerleWeb", t: git };
-    match myRepo.t {
-        git => {
-            println(fmt!("    repo: %s", myRepo.loc));
-            gitSync(myRepo);
-            total += 1
+    if (std::os::path_exists(& Path( "repolist.conf" ))) {
+        let mut total = 0;
+        let myRepo = Repository { loc: ~"../NemerleWeb", t: git };
+        match myRepo.t {
+            git => {
+                println(fmt!("    repo: %s", myRepo.loc));
+                gitSync(myRepo);
+                total += 1
+                }
+            _   => { println("not supported yet") }
             }
-        _   => { println("not supported yet") }
+        println("_________________________________________________________________________");
+        println(fmt!("  total    %?", total));
+        println("_________________________________________________________________________");
         }
-    println("_________________________________________________________________________");
-    println(fmt!("  total    %?", total));
-    println("_________________________________________________________________________");
+    else {
+        println("No config file found, consider providing one");
+        }
     }
