@@ -1,5 +1,6 @@
 // Core:
 use Crystal::*;
+use Maiden::*;
 use Config::*;
 // Modules:
 use Git::*;
@@ -55,14 +56,28 @@ fn main() {
 
     let cfg = & Path (
         if cfg!(target_os = "win32") { "repolist.conf" }
-        else { "/etc/repolist.conf" }
+        else { "/ec/repolist.conf" }
         );
     let mut repoList = load_RepoList( cfg );
     
     if (path_exists( cfg )) {        
         let mut total = 0;
         for r in repoList.iter() {
-            let loc = & Path( r.loc );
+            let loc = & if r.loc.starts_with("git@") {
+                    let gitps: ~[&str] = r.loc.split_iter('/').collect();
+                    if gitps.len() > 1 {
+                        let gitp = gitps[1];
+                        let ps: ~[&str] = gitp.split_iter('.').collect();
+                        if gitps.len() > 0 {
+                            let p = ps[0];
+                            if !path_exists(&Path( p )) {
+                                e("git", [&"clone", r.loc.as_slice(), p]);
+                            }
+                            Path( p )
+                        } else { Path( r.loc ) }
+                    } else { Path( r.loc ) }
+                }
+                else { Path( r.loc ) };
             if path_exists(loc) {
                 change_dir(loc);
                 match r.t {
