@@ -92,7 +92,7 @@ fn main() {
                 upstream: ~"upstream"
             });
         let encf = io::file_writer( cfg, [io::Create, io::Truncate]).unwrap();
-        repoList.encode(&mut json::Encoder(encf));
+        repoList.encode(&mut json::PrettyEncoder(encf));
     }
     if cfg!(target_os = "win32") {
         println("Press Enter now");

@@ -1,21 +1,29 @@
 discovering rust
 ----------------
 
-config example:
+config example (it will be generated if you will run app first time w/o config):
 
 ``` json
-[   {   "loc":"../NemerleWeb"
-       ,"t":"git"
-       ,"branches":["master"]
-       ,"m":"master"
-       ,"upstream":"upstream"
-    },
-    {   "loc":"../fsharp"
-       ,"t":"git"
-       ,"branches":["master", "heather"]
-       ,"m":"master"
-       ,"upstream":"upstream"
-    }
+[
+  {
+    "loc": "../NemerleWeb",
+    "t": "git",
+    "branches": [
+      "master"
+    ],
+    "m": "master",
+    "upstream": "upstream"
+  },
+  {
+    "loc": "../fsharp",
+    "t": "git",
+    "branches": [
+      "master",
+      "heather"
+    ],
+    "m": "master",
+    "upstream": "upstream"
+  }
 ]
 ```
 
