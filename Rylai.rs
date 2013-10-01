@@ -10,6 +10,7 @@ pub mod Config;
 
 /* Supporting synchronization modes */
 pub mod Git;
+pub mod Hg;
 pub mod Gentoo_x86;
 
 /* Main */

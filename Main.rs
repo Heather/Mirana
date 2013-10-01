@@ -3,6 +3,7 @@ use Crystal::*;
 use Config::*;
 // Modules:
 use Git::*;
+use Hg::*;
 use Gentoo_x86::*;
 // Internal:
 use std::io;
@@ -12,7 +13,6 @@ use std::os::path_exists;
 use extra::json;
 use extra::serialize::{Encodable};
 use extra::getopts::*;
-
 
 static r_version: &'static str = "  Rylai v0.0.2";
 fn print_usage(program: &str, _opts: &[Opt]) {
@@ -60,7 +60,13 @@ fn main() {
                         println!(" *   branch: {:s}", *b);
                         gitSync(r.loc, *b, r.m, r.upstream);
                     }
-                    total += 1
+                    total += 1;
+                }
+                hg => {
+                    for b in r.branches.iter() {
+                        hgSync(r.loc, *b, r.m, r.upstream);
+                        }
+                    total += 1;
                 }
                 _   => { println("not supported yet") }
             }
