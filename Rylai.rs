@@ -23,13 +23,13 @@ struct Repository { loc: ~str, t: VCS, branches: ~[~str] }
 
 fn e(cmd: ~str, args : &[~str]) {
     let out = process_output(cmd, args);
-    let msg = fmt!("> %s", from_utf8_owned(out.output.clone()));
-    let err = fmt!(" %s", from_utf8_owned(out.error.clone()));
+    let msg = format!("> {}", from_utf8_owned(out.output.clone()));
+    let err = format!(" {}", from_utf8_owned(out.error.clone()));
     println(msg);
     println(err);
 }
-fn gitSync(r: &Repository) {
-    change_dir( & Path( r.loc ) );
+fn gitSync(loc: &str, branch: &str) {
+    change_dir( & Path( loc ) );
     e(~"git", [~"pull"]);
 }
 fn load_RepoList(p: &Path) -> ~[Repository] {
@@ -41,28 +41,31 @@ fn load_RepoList(p: &Path) -> ~[Repository] {
 }
 
 fn main() {
-    println("_________________________________________________________________________");
-    println(fmt!("    %s", r_version));
-    println("_________________________________________________________________________");
+    println!("_________________________________________________________________________");
+    println!("    {:s}", r_version);
+    println!("_________________________________________________________________________");
     
     let cfg = & Path ( "repolist.conf" );
     let mut repoList = load_RepoList( cfg );
     
     if (path_exists( cfg )) {        
         let mut total = 0;
-        for myRepo in repoList.iter() {
-           match myRepo.t {
+        for r in repoList.iter() {
+           match r.t {
                 git => {
-                    println(fmt!("    repo: %s", myRepo.loc));
-                    gitSync(myRepo);
+                    println!(" *  repo: {}", r.loc);
+                    for b in r.branches.iter() {
+                        println!(" *   branch: {:s}", *b);
+                        gitSync(r.loc, *b);
+                    }
                     total += 1
                 }
                 _   => { println("not supported yet") }
             }
         }
-        println("_________________________________________________________________________");
-        println(fmt!("  total    %?", total));
-        println("_________________________________________________________________________");
+        println!("_________________________________________________________________________");
+        println!("  total    {:?}", total);
+        println!("_________________________________________________________________________");
     } else {
         println("No config file found, consider providing one");
         println("For now one is created just for example");
