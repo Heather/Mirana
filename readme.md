@@ -8,21 +8,21 @@ config example (it will be generated if you will run app first time w/o config):
   {
     "loc": "../NemerleWeb",
     "t": "git",
+    "upstream": "upstream",
+    "m": "master",
     "branches": [
       "master"
-    ],
-    "m": "master",
-    "upstream": "upstream"
+    ]
   },
   {
     "loc": "../fsharp",
     "t": "git",
+    "upstream": "upstream",
+    "m": "master",
     "branches": [
       "master",
       "heather"
-    ],
-    "m": "master",
-    "upstream": "upstream"
+    ]
   }
 ]
 ```
