@@ -19,7 +19,7 @@ static r_version: &'static str = "  Rylai v0.0.1";
 #[deriving(Encodable, Decodable, Clone)]
 enum VCS { git, hg }
 #[deriving(Encodable, Decodable, Clone)]
-struct Repository { loc: ~str, t: VCS }
+struct Repository { loc: ~str, t: VCS, branches: ~[~str] }
 
 fn e(cmd: ~str, args : &[~str]) {
     let out = process_output(cmd, args);
@@ -66,8 +66,8 @@ fn main() {
     } else {
         println("No config file found, consider providing one");
         println("For now one is created just for example");
-        repoList.push( Repository { loc: ~"../NemerleWeb", t: git } );
-        repoList.push( Repository { loc: ~"../fsharp", t: git } );
+        repoList.push( Repository { loc: ~"../NemerleWeb", t: git, branches: ~[~"master"] } );
+        repoList.push( Repository { loc: ~"../fsharp", t: git, branches: ~[~"master"] } );
         let encf = io::file_writer( cfg, [io::Create, io::Truncate]).unwrap();
         repoList.encode(&mut json::Encoder(encf));
     }
