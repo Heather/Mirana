@@ -4,6 +4,7 @@ use std::os::change_dir;
 use std::os::path_exists;
 use std::str::from_utf8_owned;
 use std::run::process_output;
+use std::io;
 
 /*  use std::rt::io::file::FileStream;
     use std::rt::io::file::FileReader;
@@ -12,7 +13,6 @@ use std::run::process_output;
 use extra::json;
 use extra::json::*;
 use extra::serialize::{Decodable, Encodable};
-use std::io;
 
 static r_version: &'static str = "  Rylai v0.0.1";
 
@@ -48,7 +48,7 @@ fn main() {
     let cfg = & Path ( "repolist.conf" );
     let mut repoList = load_RepoList( cfg );
     
-    if (std::os::path_exists( cfg )) {        
+    if (path_exists( cfg )) {        
         let mut total = 0;
         for myRepo in repoList.iter() {
            match myRepo.t {
@@ -67,7 +67,12 @@ fn main() {
         println("No config file found, consider providing one");
         println("For now one is created just for example");
         repoList.push( Repository { loc: ~"../NemerleWeb", t: git } );
+        repoList.push( Repository { loc: ~"../fsharp", t: git } );
         let encf = io::file_writer( cfg, [io::Create, io::Truncate]).unwrap();
         repoList.encode(&mut json::Encoder(encf));
+    }
+    if cfg!(target_os = "win32") {
+        println("Press Enter now");
+        io::stdin().read_line();
     }
 }
