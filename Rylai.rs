@@ -19,7 +19,7 @@ static r_version: &'static str = "  Rylai v0.0.1";
 #[deriving(Encodable, Decodable, Clone)]
 enum VCS { git, hg }
 #[deriving(Encodable, Decodable, Clone)]
-struct Repository { loc: ~str, t: VCS, branches: ~[~str] }
+struct Repository { loc: ~str, t: VCS, branches: ~[~str], m: ~str }
 
 fn e(cmd: ~str, args : &[~str]) {
     let out = process_output(cmd, args);
@@ -28,7 +28,7 @@ fn e(cmd: ~str, args : &[~str]) {
     println(msg);
     println(err);
 }
-fn gitSync(loc: &str, branch: &str) {
+fn gitSync(loc: &str, branch: &str, master: &str) {
     change_dir( & Path( loc ) );
     e(~"git", [~"pull"]);
 }
@@ -56,7 +56,7 @@ fn main() {
                     println!(" *  repo: {}", r.loc);
                     for b in r.branches.iter() {
                         println!(" *   branch: {:s}", *b);
-                        gitSync(r.loc, *b);
+                        gitSync(r.loc, *b, r.m);
                     }
                     total += 1
                 }
@@ -69,8 +69,18 @@ fn main() {
     } else {
         println("No config file found, consider providing one");
         println("For now one is created just for example");
-        repoList.push( Repository { loc: ~"../NemerleWeb", t: git, branches: ~[~"master"] } );
-        repoList.push( Repository { loc: ~"../fsharp", t: git, branches: ~[~"master"] } );
+        repoList.push( Repository { 
+                loc: ~"../NemerleWeb", 
+                t: git, 
+                branches: ~[~"master"],
+                m: ~"master" 
+            });
+        repoList.push( Repository { 
+                loc: ~"../fsharp", 
+                t: git, 
+                branches: ~[~"master"],
+                m: ~"master" 
+            });
         let encf = io::file_writer( cfg, [io::Create, io::Truncate]).unwrap();
         repoList.encode(&mut json::Encoder(encf));
     }
