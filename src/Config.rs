@@ -6,6 +6,9 @@ use extra::json;
 use extra::json::*;
 use extra::serialize::{Decodable};
 
+///<Summary>
+///Load JSON config
+///</Summary>
 pub fn load_RepoList(p: &Path) -> ~[Repository] {
     match do io::file_reader(p).map |rdr| {
         json::from_reader(*rdr).expect("Repo list is broken")
