@@ -9,6 +9,7 @@ use Gentoo_x86::*;
 use std::io;
 use std::os;
 use std::os::path_exists;
+use std::os::change_dir;
 // ExtrA:
 use extra::json;
 use extra::serialize::{Encodable};
@@ -36,7 +37,15 @@ fn main() {
         Err(f) => { fail!(f.to_err_msg()) }
     };
     if matches.opt_present("g") || matches.opt_present("gentoo") {
-        gentoo("/home/gentoo-x86");
+        let x86 = "/home/gentoo-x86";
+        let p86 = & Path( x86 );
+        if path_exists(p86) {
+            change_dir(p86);
+            gentoo(x86);
+            }
+        else {
+            println!("Path doesn't exist: {}", x86);
+            }
         return;
     }
     if matches.opt_present("h") || matches.opt_present("help") {
@@ -53,22 +62,26 @@ fn main() {
     if (path_exists( cfg )) {        
         let mut total = 0;
         for r in repoList.iter() {
-           match r.t {
-                git => {
-                    println!(" *  repo: {}", r.loc);
-                    for b in r.branches.iter() {
-                        println!(" *   branch: {:s}", *b);
-                        gitSync(r.loc, *b, r.m, r.upstream);
-                    }
-                    total += 1;
-                }
-                hg => {
-                    for b in r.branches.iter() {
-                        hgSync(r.loc, *b, r.m, r.upstream);
+            let loc = & Path( r.loc );
+            if path_exists(loc) {
+                change_dir(loc);
+                match r.t {
+                    git => {
+                        println!(" *  repo: {}", r.loc);
+                        for b in r.branches.iter() {
+                            println!(" *   branch: {:s}", *b);
+                            gitSync(*b, r.m, r.upstream);
                         }
-                    total += 1;
+                        total += 1;
+                    }
+                    hg => {
+                        for b in r.branches.iter() {
+                            hgSync(*b, r.m, r.upstream);
+                        }
+                        total += 1;
+                    }
+                    _   => { println("not supported yet") }
                 }
-                _   => { println("not supported yet") }
             }
         }
         println!("_________________________________________________________________________");

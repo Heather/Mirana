@@ -1,14 +1,11 @@
 use Maiden::e;
 
-use std::os::change_dir;
-
 ///<Summary>
 ///Sync Gentoo x86
 /// - run cvs update
 /// - regen cache
 ///</Summary>
 pub fn gentoo(loc: &str) {
-    change_dir( & Path( loc ) );
     println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
     println("# pulling gentoo-x86" );
     e("cvs", [&"update"]);

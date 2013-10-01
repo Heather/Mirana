@@ -1,12 +1,9 @@
 use Maiden::e;
 
-use std::os::change_dir;
-
 ///<Summary>
 ///Just git pull
 ///</Summary>
-pub fn gitPull(loc: &str, branch: &str) {
-    change_dir( & Path( loc ) );
+pub fn gitPull(branch: &str) {
     println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
     e("git", [&"checkout", branch]);
     e("git", [&"rebase", "--abort"]);
@@ -17,8 +14,7 @@ pub fn gitPull(loc: &str, branch: &str) {
 ///<Summary>
 ///Rebase forked commits on top of upstream
 ///</Summary>
-pub fn gitSync(loc: &str, branch: &str, master: &str, upstream: &str) {
-    change_dir( & Path( loc ) );
+pub fn gitSync(branch: &str, master: &str, upstream: &str) {
     println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
     e("git", [&"checkout", branch]);
     e("git", [&"rebase", "--abort"]);
