@@ -53,7 +53,10 @@ fn main() {
     println!("    {:s}", r_version);
     println!("_________________________________________________________________________");
     
-    let cfg = & Path ( "repolist.conf" );
+    let cfg = & Path (
+        if cfg!(target_os = "win32") { "repolist.conf" }
+        else { "/etc/repolist.conf" }
+        );
     let mut repoList = load_RepoList( cfg );
     
     if (path_exists( cfg )) {        
