@@ -19,18 +19,26 @@ static r_version: &'static str = "  Rylai v0.0.1";
 #[deriving(Encodable, Decodable, Clone)]
 enum VCS { git, hg }
 #[deriving(Encodable, Decodable, Clone)]
-struct Repository { loc: ~str, t: VCS, branches: ~[~str], m: ~str }
+struct Repository { loc: ~str, t: VCS, branches: ~[~str], m: ~str, upstream: ~str }
 
-fn e(cmd: ~str, args : &[~str]) {
-    let out = process_output(cmd, args);
-    let msg = format!("> {}", from_utf8_owned(out.output.clone()));
-    let err = format!(" {}", from_utf8_owned(out.error.clone()));
-    println(msg);
-    println(err);
+fn e(cmd: &str, args : &[&str]) {
+    let oargs = args.map(|x|x.to_owned());
+    let out = process_output(cmd, oargs);
+    let msg = from_utf8_owned(out.output.clone());
+    let err = from_utf8_owned(out.error.clone());
+    print(msg);
+    print(err);
 }
-fn gitSync(loc: &str, branch: &str, master: &str) {
+fn gitSync(loc: &str, branch: &str, master: &str, upstream: &str) {
     change_dir( & Path( loc ) );
-    e(~"git", [~"pull"]);
+    println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+    e("git", [&"checkout", branch]);
+    e("git", [&"rebase", "--abort"]);
+    e("git", [&"pull", "origin", branch]);
+    e("git", [&"fetch", upstream, master]);
+    e("git", [&"pull", "--rebase", upstream, master]);
+    e("git", [&"push", "-f", "origin", branch]);
+    println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
 }
 fn load_RepoList(p: &Path) -> ~[Repository] {
     match do io::file_reader(p).map |rdr| {
@@ -56,7 +64,7 @@ fn main() {
                     println!(" *  repo: {}", r.loc);
                     for b in r.branches.iter() {
                         println!(" *   branch: {:s}", *b);
-                        gitSync(r.loc, *b, r.m);
+                        gitSync(r.loc, *b, r.m, r.upstream);
                     }
                     total += 1
                 }
@@ -73,13 +81,15 @@ fn main() {
                 loc: ~"../NemerleWeb", 
                 t: git, 
                 branches: ~[~"master"],
-                m: ~"master" 
+                m: ~"master",
+                upstream: ~"upstream"
             });
         repoList.push( Repository { 
                 loc: ~"../fsharp", 
                 t: git, 
-                branches: ~[~"master"],
-                m: ~"master" 
+                branches: ~[~"master", ~"heather"],
+                m: ~"master",
+                upstream: ~"upstream"
             });
         let encf = io::file_writer( cfg, [io::Create, io::Truncate]).unwrap();
         repoList.encode(&mut json::Encoder(encf));
