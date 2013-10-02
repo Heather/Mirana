@@ -56,33 +56,39 @@ fn main() {
 
     let cfg = & Path (
         if cfg!(target_os = "win32") { "repolist.conf" }
-        else { "/ec/repolist.conf" }
+        else { "/etc/repolist.conf" }
         );
     let mut repoList = load_RepoList( cfg );
     
     if (path_exists( cfg )) {        
         let mut total = 0;
         for r in repoList.iter() {
+            println!(" *  repo: {}", r.loc);
             let loc = & if r.loc.starts_with("git@") {
-                    let gitps: ~[&str] = r.loc.split_iter('/').collect();
-                    if gitps.len() > 1 {
-                        let gitp = gitps[1];
-                        let ps: ~[&str] = gitp.split_iter('.').collect();
-                        if gitps.len() > 0 {
-                            let p = ps[0];
-                            if !path_exists(&Path( p )) {
-                                e("git", [&"clone", r.loc.as_slice(), p]);
-                            }
-                            Path( p )
-                        } else { Path( r.loc ) }
+                let gitps: ~[&str] = r.loc.split_iter('/').collect();
+                if gitps.len() > 1 {
+                    let gitp = gitps[1];
+                    let ps: ~[&str] = gitp.split_iter('.').collect();
+                    if gitps.len() > 0 {
+                        let project = ps[0];
+                        let p = if cfg!(target_os = "win32") {
+                            format!("../{}", project)
+                        }
+                        else {
+                            format!("/home/{}", project)
+                            };
+                        if !path_exists(&Path( p )) {
+                            e("git", [&"clone", r.loc.as_slice(), p.as_slice()]);
+                        }
+                        Path( p )
                     } else { Path( r.loc ) }
-                }
-                else { Path( r.loc ) };
+                } else { Path( r.loc ) }
+            }
+            else { Path( r.loc ) };
             if path_exists(loc) {
                 change_dir(loc);
                 match r.t {
                     git => {
-                        println!(" *  repo: {}", r.loc);
                         for b in r.branches.iter() {
                             println!(" *   branch: {:s}", *b);
                             gitSync(*b, r.m, r.upstream);
@@ -106,11 +112,11 @@ fn main() {
         println("No config file found, consider providing one");
         println("For now one is created just for example");
         repoList.push( Repository { 
-                loc: ~"../NemerleWeb", 
+                loc: ~"git@github.com:Cynede/portage.git",
                 t: git, 
                 branches: ~[~"master"],
                 m: ~"master",
-                upstream: ~"upstream"
+                upstream: ~"git@github.com:zmedico/portage.git"
             });
         repoList.push( Repository { 
                 loc: ~"../fsharp", 
