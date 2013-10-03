@@ -5,6 +5,7 @@ use Config::*;
 // Modules:
 use Git::*;
 use Hg::*;
+use Cvs::*;
 use Gentoo_x86::*;
 // Internal:
 use std::io;
@@ -101,6 +102,12 @@ fn main() {
                         }
                         total += 1;
                     }
+                    cvs => {
+                        for b in r.branches.iter() {
+                            cvsSync(*b, r.m, r.upstream);
+                        }
+                        total += 1;
+                    }
                     _   => { println("not supported yet") }
                 }
             }
@@ -112,11 +119,11 @@ fn main() {
         println("No config file found, consider providing one");
         println("For now one is created just for example");
         repoList.push( Repository { 
-                loc: ~"git@github.com:Cynede/portage.git",
+                loc: ~"git@github.com:Heather/rust.git",
                 t: git, 
-                branches: ~[~"master"],
+                branches: ~[~"master", ~"heather"],
                 m: ~"master",
-                upstream: ~"git@github.com:zmedico/portage.git"
+                upstream: ~"git@github.com:mozilla/rust.git"
             });
         repoList.push( Repository { 
                 loc: ~"../fsharp", 
