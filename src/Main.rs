@@ -61,8 +61,18 @@ fn main() {
         );
     let mut repoList = load_RepoList( cfg );
     if matches.opt_present("a") || matches.opt_present("add") {
-        repoList.push( add_Repo(opts) );
-        save_RepoList( cfg, repoList );
+        let add = if matches.opt_present("a") {
+            matches.opt_str("a")
+        } else {
+            matches.opt_str("add")
+        };
+        match add {
+            Some(a) => {
+                repoList.push( add_Repo(a) );
+                save_RepoList( cfg, repoList );
+                },
+            None => println("No add argument provided")
+        };
         return;
     }
     

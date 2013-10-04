@@ -6,8 +6,6 @@ use extra::json;
 use extra::json::*;
 use extra::serialize::{Decodable, Encodable};
 
-use extra::getopts::*;
-
 ///<Summary>
 ///Load JSON config
 ///</Summary>
@@ -30,10 +28,10 @@ pub fn save_RepoList(p: &Path, repoList: ~[Repository]) {
 ///<Summary>
 ///Add repository to RepoList
 ///</Summary>
-pub fn add_Repo(_opts: &[Opt]) -> Repository {
+pub fn add_Repo(repo: &str) -> Repository {
     Repository { 
-            loc: ~"../fsharp", 
-            t: git, 
+            loc: (repo.to_owned()),
+            t: git,
             branches: ~[~"master", ~"heather"],
             m: ~"master",
             upstream: ~"upstream"
