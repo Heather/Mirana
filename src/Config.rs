@@ -4,7 +4,9 @@ use std::io;
 
 use extra::json;
 use extra::json::*;
-use extra::serialize::{Decodable};
+use extra::serialize::{Decodable, Encodable};
+
+use extra::getopts::*;
 
 ///<Summary>
 ///Load JSON config
@@ -15,4 +17,25 @@ pub fn load_RepoList(p: &Path) -> ~[Repository] {
     } { Err(_) => ~[],
         Ok(json) => Decodable::decode(&mut json::Decoder(json))
     }
+}
+
+///<Summary>
+///Load JSON config
+///</Summary>
+pub fn save_RepoList(p: &Path, repoList: ~[Repository]) {
+    let encf = io::file_writer( p, [io::Create, io::Truncate]).unwrap();
+    repoList.encode(&mut json::PrettyEncoder(encf));
+}
+
+///<Summary>
+///Add repository to RepoList
+///</Summary>
+pub fn add_Repo(_opts: &[Opt]) -> Repository {
+    Repository { 
+            loc: ~"../fsharp", 
+            t: git, 
+            branches: ~[~"master", ~"heather"],
+            m: ~"master",
+            upstream: ~"upstream"
+        }
 }

@@ -13,15 +13,14 @@ use std::os;
 use std::os::path_exists;
 use std::os::change_dir;
 // ExtrA:
-use extra::json;
-use extra::serialize::{Encodable};
 use extra::getopts::*;
 
 static r_version: &'static str = "  Rylai v0.0.2";
 fn print_usage(program: &str, _opts: &[Opt]) {
     println!("Usage: {} [options]", program);
-    println("-g --gentoo\tSync Gentoo-x86");
     println("-h --help\tUsage");
+    println("-g --gentoo\tSync Gentoo-x86");
+    println("-a --add\tAdd repo to repolist");
 }
 #[main]
 fn main() {
@@ -31,13 +30,18 @@ fn main() {
     let args = os::args();
     let program = args[0].clone();
     let opts = ~[
+        optflag("h"), optflag("help"),
         optflag("g"), optflag("gentoo"),
-        optflag("h"), optflag("help")
+        optopt("a"), optopt("add")
     ];
     let matches = match getopts(args.tail(), opts) {
         Ok(m) => { m }
         Err(f) => { fail!(f.to_err_msg()) }
     };
+    if matches.opt_present("h") || matches.opt_present("help") {
+        print_usage(program, opts);
+        return;
+    }
     if matches.opt_present("g") || matches.opt_present("gentoo") {
         let x86 = "/home/gentoo-x86";
         let p86 = & Path( x86 );
@@ -50,16 +54,17 @@ fn main() {
             }
         return;
     }
-    if matches.opt_present("h") || matches.opt_present("help") {
-        print_usage(program, opts);
-        return;
-    }
 
     let cfg = & Path (
         if cfg!(target_os = "win32") { "repolist.conf" }
         else { "/etc/repolist.conf" }
         );
     let mut repoList = load_RepoList( cfg );
+    if matches.opt_present("a") || matches.opt_present("add") {
+        repoList.push( add_Repo(opts) );
+        save_RepoList( cfg, repoList );
+        return;
+    }
     
     if (path_exists( cfg )) {        
         let mut total = 0;
@@ -132,8 +137,7 @@ fn main() {
                 m: ~"master",
                 upstream: ~"upstream"
             });
-        let encf = io::file_writer( cfg, [io::Create, io::Truncate]).unwrap();
-        repoList.encode(&mut json::PrettyEncoder(encf));
+        save_RepoList( cfg, repoList );
     }
     if cfg!(target_os = "win32") {
         println("Press Enter now");
