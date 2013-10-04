@@ -124,28 +124,25 @@ fn main() {
             else { Path( r.loc ) };
             if path_exists(loc) {
                 change_dir(loc);
-                match r.t {
-                    git => {
-                        for b in r.branches.iter() {
-                            println!(" *   branch: {:s}", *b);
+                for b in r.branches.iter() {
+                    println!(" *   branch: {:s}", *b);
+                    match r.t {
+                        git => {
                             gitSync(*b, r.m, r.upstream);
                         }
-                        total += 1;
-                    }
-                    hg => {
-                        for b in r.branches.iter() {
+                        git_pull => {
+                            gitPull(*b);
+                        }
+                        hg => {
                             hgSync(*b, r.m, r.upstream);
                         }
-                        total += 1;
-                    }
-                    cvs => {
-                        for b in r.branches.iter() {
+                        cvs => {
                             cvsSync(*b, r.m, r.upstream);
                         }
-                        total += 1;
+                        _   => { println("not supported yet") }
                     }
-                    _   => { println("not supported yet") }
                 }
+                total += 1;
             }
         }
         println!("_________________________________________________________________________");

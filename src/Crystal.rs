@@ -1,8 +1,8 @@
 #[deriving(Encodable, Decodable, Clone)]
-pub enum VCS {git
+pub enum VCS {git, git_pull
               , hg
               , svn
-              , cvs 
+              , cvs
 }
 
 #[deriving(Encodable, Decodable, Clone)]
