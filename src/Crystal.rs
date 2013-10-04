@@ -12,3 +12,19 @@ pub struct Repository { loc: ~str
                         , m: ~str
                         , branches: ~[~str] 
 }
+
+///<Summary>
+///Convert to VCS
+///
+/// git as default
+///
+///</Summary>
+pub fn toVCS(s: ~str) -> VCS {
+    match s {
+        ~"git" => git,
+        ~"hg"  => hg,
+        ~"svn" => svn,
+        ~"cvs" => cvs,
+        _ => git
+    }
+}

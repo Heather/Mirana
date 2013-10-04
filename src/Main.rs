@@ -21,6 +21,7 @@ fn print_usage(program: &str, _opts: &[Opt]) {
     println("-h --help\tUsage");
     println("-g --gentoo\tSync Gentoo-x86");
     println("-a --add\tAdd repo to repolist");
+    println("-t\tTypo of adding repo or filtering type");
 }
 #[main]
 fn main() {
@@ -60,6 +61,9 @@ fn main() {
         else { "/etc/repolist.conf" }
         );
     let mut repoList = load_RepoList( cfg );
+    let at = if matches.opt_present("t") {
+        matches.opt_str("t")
+    } else { None };
     if matches.opt_present("a") || matches.opt_present("add") {
         let add = if matches.opt_present("a") {
             matches.opt_str("a")
@@ -68,7 +72,7 @@ fn main() {
         };
         match add {
             Some(a) => {
-                repoList.push( add_Repo(a) );
+                repoList.push( add_Repo(a, at) );
                 save_RepoList( cfg, repoList );
                 },
             None => println("No add argument provided")
