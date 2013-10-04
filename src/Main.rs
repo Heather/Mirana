@@ -20,8 +20,9 @@ fn print_usage(program: &str, _opts: &[Opt]) {
     println!("Usage: {} [options]", program);
     println("-h --help\tUsage");
     println("-g --gentoo\tSync Gentoo-x86");
+    println("-l\t\tPretty print repositories in sync");
     println("-a --add\tAdd repo to repolist");
-    println("-t\tTypo of adding repo or filtering type");
+    println("-t\t\tType of adding repo or filtering type");
 }
 #[main]
 fn main() {
@@ -33,6 +34,8 @@ fn main() {
     let opts = ~[
         optflag("h"), optflag("help"),
         optflag("g"), optflag("gentoo"),
+        optflag("l"),
+        optopt("t"),
         optopt("a"), optopt("add")
     ];
     let matches = match getopts(args.tail(), opts) {
@@ -64,6 +67,20 @@ fn main() {
     let at = if matches.opt_present("t") {
         matches.opt_str("t")
     } else { None };
+    if matches.opt_present("l") {
+        if (path_exists( cfg )) {
+            for r in repoList.iter() {
+                println!("> - repo: {:s}", r.loc);
+                println!(" *  type: {:?}", r.t);
+                println!(" *  upstream: {} {}", r.upstream, r.m);
+                for b in r.branches.iter() {
+                    println!("> * branch: {:s}", *b);
+                }
+                println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+            }
+        }
+        return;
+        }
     if matches.opt_present("a") || matches.opt_present("add") {
         let add = if matches.opt_present("a") {
             matches.opt_str("a")
@@ -80,7 +97,7 @@ fn main() {
         return;
     }
     
-    if (path_exists( cfg )) {        
+    if (path_exists( cfg )) {
         let mut total = 0;
         for r in repoList.iter() {
             println!(" *  repo: {}", r.loc);
