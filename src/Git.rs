@@ -7,7 +7,7 @@ pub fn gitPull(branch: &str) {
     println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
     e("git", [&"checkout", branch]);
     e("git", [&"rebase", "--abort"]);
-    e("git", [&"pull", "origin", branch]);
+    e("git", [&"pull", "origin"]);
     println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
 }
 
@@ -18,7 +18,7 @@ pub fn gitSync(branch: &str, master: &str, upstream: &str) {
     println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
     e("git", [&"checkout", branch]);
     e("git", [&"rebase", "--abort"]);
-    e("git", [&"pull", "origin", branch]);
+    e("git", [&"pull", "origin"]);
     e("git", [&"fetch", upstream, master]);
     e("git", [&"pull", "--rebase", upstream, master]);
     e("git", [&"push", "-f", "origin", branch]);
