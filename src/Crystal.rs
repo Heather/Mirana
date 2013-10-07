@@ -1,4 +1,4 @@
-#[deriving(Encodable, Decodable, Clone)]
+#[deriving(Encodable, Decodable, Clone, Eq)]
 pub enum VCS {git, git_pull
               , hg
               , svn

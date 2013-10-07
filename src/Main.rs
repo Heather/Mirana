@@ -69,7 +69,11 @@ fn main() {
     } else { None };
     if matches.opt_present("l") {
         if (path_exists( cfg )) {
-            for r in repoList.iter() {
+            for r in repoList.iter().filter(
+                |&r| match at.clone() {
+                    Some(rt) => r.t == toVCS(rt),
+                    None => true
+                        }) {
                 println!("> - repo: {:s}", r.loc);
                 println!(" *  type: {:?}", r.t);
                 println!(" *  upstream: {} {}", r.upstream, r.m);
@@ -99,7 +103,11 @@ fn main() {
     
     if (path_exists( cfg )) {
         let mut total = 0;
-        for r in repoList.iter() {
+        for r in repoList.iter().filter(
+            |&r| match at.clone() {
+                Some(rt) => r.t == toVCS(rt),
+                None => true
+            }) {
             println!(" *  repo: {}", r.loc);
             let loc = & if r.loc.starts_with("git@") {
                 let gitps: ~[&str] = r.loc.split_iter('/').collect();
