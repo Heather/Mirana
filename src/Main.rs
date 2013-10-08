@@ -22,6 +22,7 @@ fn print_usage(program: &str, _opts: &[Opt]) {
     println("-g --gentoo\tSync Gentoo-x86");
     println("-l\t\tPretty print repositories in sync");
     println("-a --add\tAdd repo to repolist");
+    println("-d --delete\tDelete repo from repolist");
     println("-t\t\tType of adding repo or filtering type");
 }
 #[main]
@@ -36,6 +37,7 @@ fn main() {
         optflag("g"), optflag("gentoo"),
         optflag("l"),
         optopt("t"),
+        optopt("d"), optopt("delete"),
         optopt("a"), optopt("add")
     ];
     let matches = match getopts(args.tail(), opts) {
@@ -96,6 +98,34 @@ fn main() {
                 repoList.push( add_Repo(a, at) );
                 save_RepoList( cfg, repoList );
                 },
+            None => println("No add argument provided")
+        };
+        return;
+    }
+    if matches.opt_present("d") || matches.opt_present("delete") {
+        let del = if matches.opt_present("a") {
+            matches.opt_str("d")
+        } else {
+            matches.opt_str("delete")
+        };
+        match del {
+            Some(d) => {
+                let mut i = 0;
+                let mut index = None;
+                for r in repoList.iter() {
+                    if r.loc == d {
+                        index = Some(i);
+                    }
+                    i += 1;
+                }
+                match index {
+                    Some(ind) => {
+                        repoList.remove( ind );
+                        save_RepoList( cfg, repoList );
+                    },
+                    None => println!("{:s} not found", d)
+                }
+            },
             None => println("No add argument provided")
         };
         return;
