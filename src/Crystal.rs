@@ -1,5 +1,5 @@
 #[deriving(Encodable, Decodable, Clone, Eq)]
-pub enum VCS {git, git_pull
+pub enum VCS {git, git_merge, git_pull
               , hg
               , svn
               , cvs

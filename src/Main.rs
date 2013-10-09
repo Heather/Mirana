@@ -168,6 +168,9 @@ fn main() {
                         git => {
                             gitSync(*b, r.m, r.upstream);
                         }
+                        git_merge => {
+                            gitMerge(*b, r.m, r.upstream);
+                        }
                         git_pull => {
                             gitPull(*b);
                         }
