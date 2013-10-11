@@ -68,9 +68,10 @@ fn main() {
         else { "/etc/repolist.conf" }
         );
     let mut repoList = load_RepoList( cfg );
-    let at = if matches.opt_present("t") {
-        matches.opt_str("t")
-    } else { None };
+    let at = match matches.opt_present("t") {
+        true  => matches.opt_str("t"),
+        false => None
+    };
     if matches.opt_present("l") {
         if (path_exists( cfg )) {
             for r in repoList.iter().filter(
@@ -90,14 +91,13 @@ fn main() {
         return;
         }
     if matches.opt_present("a") || matches.opt_present("add") {
-        let add = if matches.opt_present("a") {
-            matches.opt_str("a")
-        } else {
-            matches.opt_str("add")
+        let add = match matches.opt_present("a") {
+            true  => matches.opt_str("a"),
+            false => matches.opt_str("add")
         };
         match add {
             Some(a) => {
-                repoList.push( add_Repo(a, at, matches.opt_str("u")) );
+                repoList.push( add_Repo(a, at, matches.opt_str("u")));
                 save_RepoList( cfg, repoList );
                 },
             None => println("No add argument provided")
@@ -105,10 +105,9 @@ fn main() {
         return;
     }
     if matches.opt_present("d") || matches.opt_present("delete") {
-        let del = if matches.opt_present("a") {
-            matches.opt_str("d")
-        } else {
-            matches.opt_str("delete")
+        let del = match matches.opt_present("a") {
+            true  => matches.opt_str("d"),
+            false => matches.opt_str("delete")
         };
         match del {
             Some(d) => {
@@ -117,8 +116,7 @@ fn main() {
                 for r in repoList.iter() {
                     if r.loc == d {
                         index = Some(i);
-                    }
-                    i += 1;
+                    } i += 1;
                 }
                 match index {
                     Some(ind) => {
@@ -148,12 +146,10 @@ fn main() {
                     let ps: ~[&str] = gitp.split_iter('.').collect();
                     if gitps.len() > 0 {
                         let project = ps[0];
-                        let p = if cfg!(target_os = "win32") {
-                            format!("../{}", project)
-                        }
-                        else {
-                            format!("/home/{}", project)
-                            };
+                        let p = match cfg!(target_os = "win32") {
+                            true  => format!("../{}", project),
+                            false => format!("/home/{}", project)
+                        };
                         if !path_exists(&Path( p )) {
                             e("git", [&"clone", r.loc.as_slice(), p.as_slice()]);
                         }

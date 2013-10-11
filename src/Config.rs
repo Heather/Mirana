@@ -37,11 +37,11 @@ pub fn add_Repo(repo: &str, t: Option<~str>, u: Option<~str>) -> Repository {
         Some(up) => up,
         None => ~"upstream"
     };
-    Repository { 
-            loc: (repo.to_owned()),
-            t: repoType,
-            branches: ~[~"master", ~"heather"],
-            m: ~"master",
-            upstream: upstream
-        }
+    Repository {
+        loc: (repo.to_owned()),
+        t: repoType,
+        branches: ~[~"master"],
+        m: ~"master",
+        upstream: upstream
+    }
 }
