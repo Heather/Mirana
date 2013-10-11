@@ -24,6 +24,7 @@ fn print_usage(program: &str, _opts: &[Opt]) {
     println("-a --add\tAdd repo to repolist");
     println("-d --delete\tDelete repo from repolist");
     println("-t\t\tType of adding repo or filtering type");
+    println("-u\t\tSpecify upstream of adding repo");
 }
 #[main]
 fn main() {
@@ -38,7 +39,8 @@ fn main() {
         optflag("l"),
         optopt("t"),
         optopt("d"), optopt("delete"),
-        optopt("a"), optopt("add")
+        optopt("a"), optopt("add"),
+        optopt("u")
     ];
     let matches = match getopts(args.tail(), opts) {
         Ok(m) => { m }
@@ -95,7 +97,7 @@ fn main() {
         };
         match add {
             Some(a) => {
-                repoList.push( add_Repo(a, at) );
+                repoList.push( add_Repo(a, at, matches.opt_str("u")) );
                 save_RepoList( cfg, repoList );
                 },
             None => println("No add argument provided")

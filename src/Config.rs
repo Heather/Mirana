@@ -28,16 +28,20 @@ pub fn save_RepoList(p: &Path, repoList: ~[Repository]) {
 ///<Summary>
 ///Add repository to RepoList
 ///</Summary>
-pub fn add_Repo(repo: &str, t: Option<~str>) -> Repository {
+pub fn add_Repo(repo: &str, t: Option<~str>, u: Option<~str>) -> Repository {
     let repoType = match t {
         Some(at) => toVCS(at),
         None => git
+    };
+    let upstream = match u {
+        Some(up) => up,
+        None => ~"upstream"
     };
     Repository { 
             loc: (repo.to_owned()),
             t: repoType,
             branches: ~[~"master", ~"heather"],
             m: ~"master",
-            upstream: ~"upstream"
+            upstream: upstream
         }
 }
