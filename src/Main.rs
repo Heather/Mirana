@@ -165,22 +165,12 @@ fn main() {
                 for b in r.branches.iter() {
                     println!(" *   branch: {:s}", *b);
                     match r.t {
-                        git => {
-                            gitSync(*b, r.m, r.upstream);
-                        }
-                        git_merge => {
-                            gitMerge(*b, r.m, r.upstream);
-                        }
-                        git_pull => {
-                            gitPull(*b);
-                        }
-                        hg => {
-                            hgSync(*b, r.m, r.upstream);
-                        }
-                        cvs => {
-                            cvsSync(*b, r.m, r.upstream);
-                        }
-                        _   => { println("not supported yet") }
+                        git        => gitSync(*b, r.m, r.upstream),
+                        git_merge  => gitMerge(*b, r.m, r.upstream),
+                        git_pull   => gitPull(*b),
+                        hg         => hgSync(*b, r.m, r.upstream),
+                        cvs        => cvsSync(*b, r.m, r.upstream),
+                        _          => println("not supported yet")
                     }
                 }
                 total += 1;
