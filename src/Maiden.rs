@@ -2,6 +2,16 @@ use std::run::process_output;
 use std::str::from_utf8_owned;
 
 ///<Summary>
+///Shell execute without error out
+///</Summary>
+pub fn exec(cmd: &str, args : &[&str]) {
+    let oargs = args.map(|x|x.to_owned());
+    print(from_utf8_owned(
+            process_output(cmd, oargs)
+                .output.clone()));
+}
+
+///<Summary>
 ///Shell execute
 ///</Summary>
 pub fn e(cmd: &str, args : &[&str]) {

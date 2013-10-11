@@ -195,7 +195,7 @@ fn main() {
         repoList.push( Repository { 
                 loc: ~"git@github.com:Heather/rust.git",
                 t: git, 
-                branches: ~[~"master", ~"heather"],
+                branches: ~[~"master"],
                 m: ~"master",
                 upstream: ~"git@github.com:mozilla/rust.git"
             });

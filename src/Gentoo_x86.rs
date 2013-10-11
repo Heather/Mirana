@@ -1,4 +1,4 @@
-use Maiden::e;
+use Maiden::{e, exec};
 
 ///<Summary>
 ///Sync Gentoo x86
@@ -17,4 +17,18 @@ pub fn gentoo(loc: &str) {
        ,repo.as_slice()
        ,"--jobs=2"]);
     println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+}
+
+///<Summary>
+///emerge --sync
+///</Summary>
+pub fn emerge_sync() {
+    exec("emerge", [&"--sync"]);
+}
+
+///<Summary>
+///eix-update
+///</Summary>
+pub fn eix_update() {
+    e("eix-update", []);
 }
