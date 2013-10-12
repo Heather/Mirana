@@ -153,6 +153,7 @@ fn main() {
                             false => format!("/home/{}", project)
                         };
                         if !path_exists(&Path( p )) {
+                            println!(" * > clone into : {:s}", p);
                             e("git", [&"clone", r.loc.as_slice(), p.as_slice()]);
                         }
                         Path( p )

@@ -1,6 +1,6 @@
 @echo off
 cd src
-rustc Rylai.rs -O -o ../Rylai.exe
+rust build Rylai.rs -O -o ../Rylai.exe
 
 ::handle error messages
 pause
