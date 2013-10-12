@@ -114,7 +114,7 @@ fn main() {
                 let mut i = 0;
                 let mut index = None;
                 for r in repoList.iter() {
-                    if r.loc == d {
+                    if r.loc.contains( d ) {
                         index = Some(i);
                     } i += 1;
                 }
