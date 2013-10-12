@@ -105,7 +105,7 @@ fn main() {
         return;
     }
     if matches.opt_present("d") || matches.opt_present("delete") {
-        let del = match matches.opt_present("a") {
+        let del = match matches.opt_present("d") {
             true  => matches.opt_str("d"),
             false => matches.opt_str("delete")
         };
