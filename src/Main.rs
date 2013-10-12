@@ -99,6 +99,7 @@ fn main() {
             Some(a) => {
                 repoList.push( add_Repo(a, at, matches.opt_str("u")));
                 save_RepoList( cfg, repoList );
+                println!("{:?} added", a);
                 },
             None => println("No add argument provided")
         };
@@ -120,6 +121,7 @@ fn main() {
                 }
                 match index {
                     Some(ind) => {
+                        println!("{:?} removed", repoList[ind].loc);
                         repoList.remove( ind );
                         save_RepoList( cfg, repoList );
                     },
