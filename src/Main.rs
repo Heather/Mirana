@@ -190,13 +190,6 @@ fn main() {
                 m: ~"master",
                 upstream: ~"git@github.com:mozilla/rust.git"
             });
-        repoList.push( Repository { 
-                loc: ~"../fsharp", 
-                t: git, 
-                branches: ~[~"master", ~"heather"],
-                m: ~"master",
-                upstream: ~"upstream"
-            });
         save_RepoList( cfg, repoList );
     }
     if cfg!(target_os = "win32") {
