@@ -12,7 +12,7 @@ BINDIR    ?= $(PREFIX)/bin
 DESTDIR   ?=
 
 r:	$(SRCDIR)
-	cd $^ && $(RUSTC) -o ../r $(SRC) ${RCFLAGS}
+	cd $^ && $(RUSTC) -o ../Rylai $(SRC) ${RCFLAGS}
 
 .PHONY: clean rebuild
 
@@ -20,7 +20,7 @@ rebuild: clean | r
 
 clean:
 	@echo " --- Clean binaries --- "
-	rm -f r
+	rm -f Rylai
 	@echo " --- Clean temp files --- "
 	find . -name '*~' -delete;
 	find . -name '#*#' -delete;

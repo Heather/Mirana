@@ -21,8 +21,8 @@ fn print_usage(program: &str, _opts: &[Opt]) {
     println("-h --help\tUsage");
     println("-g --gentoo\tSync Gentoo-x86");
     println("-l\t\tPretty print repositories in sync");
-    println("-a --add\tAdd repo to repolist");
-    println("-d --delete\tDelete repo from repolist");
+    println("-a --add\tAdd repo to configuration");
+    println("-d --delete\tDelete repo from configuration");
     println("-t\t\tType of adding repo or filtering type");
     println("-u\t\tSpecify upstream of adding repo");
 }
@@ -64,8 +64,8 @@ fn main() {
     }
 
     let cfg = & Path (
-        if cfg!(target_os = "win32") { "repolist.conf" }
-        else { "/home/repolist.conf" }
+        if cfg!(target_os = "win32") { "Rylai.conf" }
+        else { "/etc/Rylai.conf" }
         );
     let mut repoList = load_RepoList( cfg );
     let at = match matches.opt_present("t") {
