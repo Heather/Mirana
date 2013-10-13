@@ -65,7 +65,7 @@ fn main() {
 
     let cfg = & Path (
         if cfg!(target_os = "win32") { "repolist.conf" }
-        else { "/etc/repolist.conf" }
+        else { "/home/repolist.conf" }
         );
     let mut repoList = load_RepoList( cfg );
     let at = match matches.opt_present("t") {
