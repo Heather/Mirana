@@ -27,4 +27,4 @@ clean:
 
 install:
 	$(MKDIR) $(DESTDIR)$(BINDIR)
-	$(INSTALL) r$(EXE) $(DESTDIR)$(BINDIR)/
+	$(INSTALL) Rylai$(EXE) $(DESTDIR)$(BINDIR)/
