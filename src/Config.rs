@@ -1,9 +1,8 @@
-use Crystal::*;
+use Crystal::{Repository, toVCS, git};
 
 use std::io;
 
 use extra::json;
-use extra::json::*;
 use extra::serialize::{Decodable, Encodable};
 
 ///<Summary>

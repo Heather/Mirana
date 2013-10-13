@@ -1,19 +1,22 @@
 // Core:
-use Crystal::*;
-use Maiden::*;
-use Config::*;
+use Crystal::{toVCS,Repository
+	, git , git_merge,git_pull
+	, hg
+        , cvs};
+use Maiden::{e};
+use Config::{save_RepoList, load_RepoList, add_Repo};
 // Modules:
-use Git::*;
-use Hg::*;
-use Cvs::*;
-use Gentoo_x86::*;
+use Git::{gitSync, gitMerge, gitPull};
+use Hg::{hgSync};
+use Cvs::{cvsSync};
+use Gentoo_x86::{gentoo};
 // Internal:
 use std::io;
 use std::os;
 use std::os::path_exists;
 use std::os::change_dir;
 // ExtrA:
-use extra::getopts::*;
+use extra::getopts::{optflag, optopt, getopts, Opt};
 
 static r_version: &'static str = "  Rylai v0.0.2";
 fn print_usage(program: &str, _opts: &[Opt]) {
