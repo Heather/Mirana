@@ -163,6 +163,25 @@ fn main() {
                     } else { Path( r.loc ) }
                 } else { Path( r.loc ) }
             }
+            else if r.loc.starts_with("hg@") {
+                let hgps: ~[&str] = r.loc.split_iter('/').collect();
+                if hgps.len() > 1 {
+                    let hgp = hgps[1];
+                    let ps: ~[&str] = hgp.split_iter('.').collect();
+                    if hgps.len() > 0 {
+                        let project = ps[0];
+                        let p = match cfg!(target_os = "win32") {
+                            true  => format!("../{}", project),
+                            false => format!("/home/{}", project)
+                        };
+                        if !path_exists(&Path( p )) {
+                            println!(" * > clone into : {:s}", p);
+                            e("hg", [&"clone", r.loc.as_slice(), p.as_slice()]);
+                        }
+                        Path( p )
+                    } else { Path( r.loc ) }
+                } else { Path( r.loc ) }
+            }
             else { Path( r.loc ) };
             if path_exists(loc) {
                 change_dir(loc);
