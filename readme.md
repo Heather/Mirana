@@ -28,50 +28,47 @@ config example (it will be generated if you will run app first time w/o config):
 ```
 
 ``` rust
-    if matches.opt_present("l") {
-        if (path_exists( cfg )) {
-            for r in repoList.iter().filter(
-                |&r| match at.clone() {
-                    Some(rt) => r.t == toVCS(rt),
-                    None => true
-                        }) {
-                println!("> - repo: {:s}", r.loc);
-                println!(" *  type: {:?}", r.t);
-                println!(" *  upstream: {} {}", r.upstream, r.m);
-                for b in r.branches.iter() {
-                    println!("> * branch: {:s}", *b);
-
-    if matches.opt_present("a") || matches.opt_present("add") {
-        let add = if matches.opt_present("a") {
-            matches.opt_str("a")
-        } else { matches.opt_str("add") };
-        match add {
-            Some(a) => {
-                repoList.push( add_Repo(a, at) );
-                save_RepoList( cfg, repoList );
-                },
-            None => println("No add argument provided")
-
-    if matches.opt_present("d") || matches.opt_present("delete") {
-        let del = if matches.opt_present("a") {
-            matches.opt_str("d")
-        } else { matches.opt_str("delete") };
-        match del {
-            Some(d) => {
-                let mut i = 0;
-                let mut index = None;
-                for r in repoList.iter() {
-                    if r.loc == d {
-                        index = Some(i);
-                    }
-                    i += 1;
+for r in repoList.iter().filter(
+    |&r| match at.clone() {
+        Some(rt) => r.t == toVCS(rt),
+        None => true
+    }) {
+    println!(" *  repo: {}", r.loc);
+    let smartpath = |l : ~str| -> Path {
+        let ssps: ~[&str] = l.split_iter('/').collect();
+        if ssps.len() > 1 {
+            let ssp = ssps[1];
+            let ps: ~[&str] = ssp.split_iter('.').collect();
+            if ssps.len() > 0 {
+                let project = ps[0];
+                let p = match cfg!(target_os = "win32") {
+                    true  => format!("../{}", project),
+                    false => format!("/home/{}", project)
+                };
+                if !path_exists(&Path( p )) {
+                    println!(" * > clone into : {:s}", p);
+                    e("git", [&"clone", l.as_slice(), p.as_slice()]);
                 }
-                match index {
-                    Some(ind) => {
-                        repoList.remove( ind );
-                        save_RepoList( cfg, repoList );
-                    },
-                    None => println!("{:s} not found", d)
+                Path( p )
+            } else { Path( l ) }
+        } else { Path( l ) }
+    };
+    let loc= if r.loc.starts_with("git@")
+             || r.loc.starts_with("hg@") {
+        smartpath(r.loc.clone())
+    } else { Path( r.loc ) };
+    let rclone = Cell::new( r.clone() );
+    let lclone = Cell::new( loc );
+    let res= do task::try { /* try is synchronous, blocking
+                               until it gets the result of the task. */
+        sync(rclone.take(), lclone.take());
+    };
+    match res { 
+        Ok(_) => { success += 1; },
+        Err(e) => {
+            println!("  * failed: {:?}", e);
+            failed += 1; 
+        }
 ```
 
 currently this app should be replacement for python sync script that I use to keep git repos up to date

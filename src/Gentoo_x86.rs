@@ -6,7 +6,7 @@ use Maiden::{e, exec};
 /// - regen cache
 ///</Summary>
 pub fn gentoo(loc: &str) {
-    println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+    println("_________________________________________________________________________");
     println("# pulling gentoo-x86" );
     e("cvs", [&"update"]);
     println("#regen cache for ::gentoo-x86" );
@@ -16,7 +16,7 @@ pub fn gentoo(loc: &str) {
        ,"--repo=gentoo"
        ,repo.as_slice()
        ,"--jobs=2"]);
-    println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+    println("_________________________________________________________________________");
 }
 
 ///<Summary>

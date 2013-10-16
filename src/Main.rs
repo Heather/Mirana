@@ -21,7 +21,7 @@ use std::os::change_dir;
 use extra::time;
 use extra::getopts::{optflag, optopt, getopts, Opt};
 
-static r_version: &'static str = "  Rylai v0.0.2";
+static r_version: &'static str = "  Rylai v0.0.3";
 fn print_usage(program: &str, _opts: &[Opt]) {
     println!("Usage: {} [options]", program);
     println("-h --help\tUsage");
@@ -169,13 +169,12 @@ fn main() {
                 None => true
             }) {
             println!(" *  repo: {}", r.loc);
-            let rloc = Path( r.loc );
-            let loc = & if r.loc.starts_with("git@") {
-                let gitps: ~[&str] = r.loc.split_iter('/').collect();
-                if gitps.len() > 1 {
-                    let gitp = gitps[1];
-                    let ps: ~[&str] = gitp.split_iter('.').collect();
-                    if gitps.len() > 0 {
+            let smartpath = |l : ~str| -> Path {
+                let ssps: ~[&str] = l.split_iter('/').collect();
+                if ssps.len() > 1 {
+                    let ssp = ssps[1];
+                    let ps: ~[&str] = ssp.split_iter('.').collect();
+                    if ssps.len() > 0 {
                         let project = ps[0];
                         let p = match cfg!(target_os = "win32") {
                             true  => format!("../{}", project),
@@ -183,39 +182,20 @@ fn main() {
                         };
                         if !path_exists(&Path( p )) {
                             println!(" * > clone into : {:s}", p);
-                            e("git", [&"clone", r.loc.as_slice(), p.as_slice()]);
+                            e("git", [&"clone", l.as_slice(), p.as_slice()]);
                         }
                         Path( p )
-                    } else { rloc }
-                } else { rloc }
-            }
-            else if r.loc.starts_with("hg@") {
-                let hgps: ~[&str] = r.loc.split_iter('/').collect();
-                if hgps.len() > 1 {
-                    let hgp = hgps[1];
-                    let ps: ~[&str] = hgp.split_iter('.').collect();
-                    if hgps.len() > 0 {
-                        let project = ps[0];
-                        let p = match cfg!(target_os = "win32") {
-                            true  => format!("../{}", project),
-                            false => format!("/home/{}", project)
-                        };
-                        if !path_exists(&Path( p )) {
-                            println!(" * > clone into : {:s}", p);
-                            e("hg", [&"clone", r.loc.as_slice(), p.as_slice()]);
-                        }
-                        Path( p )
-                    } else { rloc }
-                } else { rloc }
-            }
-            else { rloc };
+                    } else { Path( l ) }
+                } else { Path( l ) }
+            };
+            let loc= if r.loc.starts_with("git@")
+                     || r.loc.starts_with("hg@") {
+                smartpath(r.loc.clone())
+            } else { Path( r.loc ) };
             let rclone = Cell::new( r.clone() );
-            let lclone = Cell::new( loc.clone() );
-            let res= do task::try {
-                /*
-                try is synchronous, blocking
-                until it gets the result of the task.
-                */
+            let lclone = Cell::new( loc );
+            let res= do task::try { /* try is synchronous, blocking
+                                       until it gets the result of the task. */
                 sync(rclone.take(), lclone.take());
             };
             match res { 

@@ -4,10 +4,10 @@ use Maiden::e;
 ///Just hg pull & update yet
 ///</Summary>
 pub fn hgSync(branch: &str, master: &str, upstream: &str) {
-    println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+    println("_________________________________________________________________________");
     e("hg", [&"pull"]);
     e("hg", [&"update"]);
     println!("warnings reslove about : {} {} {}", branch, master, upstream);
     //TODO: write stuff
-    println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+    println("_________________________________________________________________________");
 }
