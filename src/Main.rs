@@ -1,7 +1,7 @@
 // Core:
 use Crystal::{toVCS,Repository
-	, git , git_merge,git_pull
-	, hg
+    , git , git_merge,git_pull
+    , hg
     , cvs};
 use Maiden::{e};
 use Config::{save_RepoList, load_RepoList, add_Repo};
