@@ -18,6 +18,7 @@ use std::cell::Cell;
 use std::os::path_exists;
 use std::os::change_dir;
 // ExtrA:
+use extra::time;
 use extra::getopts::{optflag, optopt, getopts, Opt};
 
 static r_version: &'static str = "  Rylai v0.0.2";
@@ -34,10 +35,12 @@ fn print_usage(program: &str, _opts: &[Opt]) {
 fn sync(repo: Repository, location: Path) {
     let r = &repo;
     let loc = &location;
+    let nowt = time::now_utc();
+    let nowt_str = nowt.rfc3339();
     if path_exists(loc) {
         change_dir(loc);
         for b in r.branches.iter() {
-            println!(" *   branch: {:s}", *b);
+            println!(" [{:s}]  branch: {:s}", nowt_str, *b);
             match r.t {
                 git        => gitSync(*b, r.m, r.upstream),
                 git_merge  => gitMerge(*b, r.m, r.upstream),
@@ -209,6 +212,10 @@ fn main() {
             let rclone = Cell::new( r.clone() );
             let lclone = Cell::new( loc.clone() );
             let res= do task::try {
+                /*
+                try is synchronous, blocking
+                until it gets the result of the task.
+                */
                 sync(rclone.take(), lclone.take());
             };
             match res { 
