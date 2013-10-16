@@ -2,7 +2,7 @@
 use Crystal::{toVCS,Repository
 	, git , git_merge,git_pull
 	, hg
-        , cvs};
+    , cvs};
 use Maiden::{e};
 use Config::{save_RepoList, load_RepoList, add_Repo};
 // Modules:
@@ -13,6 +13,8 @@ use Gentoo_x86::{gentoo};
 // Internal:
 use std::io;
 use std::os;
+use std::task;
+use std::cell::Cell;
 use std::os::path_exists;
 use std::os::change_dir;
 // ExtrA:
@@ -28,6 +30,24 @@ fn print_usage(program: &str, _opts: &[Opt]) {
     println("-d --delete\tDelete repo from configuration");
     println("-t\t\tType of adding repo or filtering type");
     println("-u\t\tSpecify upstream of adding repo");
+}
+fn sync(repo: Repository, location: Path) {
+    let r = &repo;
+    let loc = &location;
+    if path_exists(loc) {
+        change_dir(loc);
+        for b in r.branches.iter() {
+            println!(" *   branch: {:s}", *b);
+            match r.t {
+                git        => gitSync(*b, r.m, r.upstream),
+                git_merge  => gitMerge(*b, r.m, r.upstream),
+                git_pull   => gitPull(*b),
+                hg         => hgSync(*b, r.m, r.upstream),
+                cvs        => cvsSync(*b, r.m, r.upstream),
+                _          => println("not supported yet")
+            }
+        }
+    }
 }
 #[main]
 fn main() {
@@ -138,12 +158,15 @@ fn main() {
     
     if (path_exists( cfg )) {
         let mut total = 0;
+        let mut success = 0;
+        let mut failed = 0;
         for r in repoList.iter().filter(
             |&r| match at.clone() {
                 Some(rt) => r.t == toVCS(rt),
                 None => true
             }) {
             println!(" *  repo: {}", r.loc);
+            let rloc = Path( r.loc );
             let loc = & if r.loc.starts_with("git@") {
                 let gitps: ~[&str] = r.loc.split_iter('/').collect();
                 if gitps.len() > 1 {
@@ -160,8 +183,8 @@ fn main() {
                             e("git", [&"clone", r.loc.as_slice(), p.as_slice()]);
                         }
                         Path( p )
-                    } else { Path( r.loc ) }
-                } else { Path( r.loc ) }
+                    } else { rloc }
+                } else { rloc }
             }
             else if r.loc.starts_with("hg@") {
                 let hgps: ~[&str] = r.loc.split_iter('/').collect();
@@ -179,27 +202,27 @@ fn main() {
                             e("hg", [&"clone", r.loc.as_slice(), p.as_slice()]);
                         }
                         Path( p )
-                    } else { Path( r.loc ) }
-                } else { Path( r.loc ) }
+                    } else { rloc }
+                } else { rloc }
             }
-            else { Path( r.loc ) };
-            if path_exists(loc) {
-                change_dir(loc);
-                for b in r.branches.iter() {
-                    println!(" *   branch: {:s}", *b);
-                    match r.t {
-                        git        => gitSync(*b, r.m, r.upstream),
-                        git_merge  => gitMerge(*b, r.m, r.upstream),
-                        git_pull   => gitPull(*b),
-                        hg         => hgSync(*b, r.m, r.upstream),
-                        cvs        => cvsSync(*b, r.m, r.upstream),
-                        _          => println("not supported yet")
-                    }
+            else { rloc };
+            let rclone = Cell::new( r.clone() );
+            let lclone = Cell::new( loc.clone() );
+            let res= do task::try {
+                sync(rclone.take(), lclone.take());
+            };
+            match res { 
+                Ok(_) => { success += 1; },
+                Err(e) => {
+                    println!("  * failed: {:?}", e);
+                    failed += 1; 
                 }
-                total += 1;
             }
+            total += 1;
         }
         println!("_________________________________________________________________________");
+        println!("  success  {:?}", success);
+        println!("  failed   {:?}", failed);
         println!("  total    {:?}", total);
         println!("_________________________________________________________________________");
     } else {
