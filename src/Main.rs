@@ -1,6 +1,6 @@
 // Core:
-use Crystal::{toVCS,Repository
-    , git , git_merge,git_pull
+use Crystal::{toVCS, Repository
+    , git, git_merge, git_pull
     , hg
     , cvs};
 use Maiden::{e};
@@ -78,7 +78,7 @@ fn main() {
     }
     if matches.opt_present("g") || matches.opt_present("gentoo") {
         let x86 = "/home/gentoo-x86";
-        let p86 = & Path( x86 );
+        let p86 = & Path::new( x86 );
         if path_exists(p86) {
             change_dir(p86);
             gentoo(x86);
@@ -89,7 +89,7 @@ fn main() {
         return;
     }
 
-    let cfg = & Path (
+    let cfg = & Path::new (
         if cfg!(target_os = "win32") { "Rylai.conf" }
         else { "/etc/Rylai.conf" }
         );
@@ -180,18 +180,18 @@ fn main() {
                             true  => format!("../{}", project),
                             false => format!("/home/{}", project)
                         };
-                        if !path_exists(&Path( p )) {
+                        if !path_exists(&Path::new( p.clone() )) {
                             println!(" * > clone into : {:s}", p);
                             e("git", [&"clone", l.as_slice(), p.as_slice()]);
                         }
-                        Path( p )
-                    } else { Path( l ) }
-                } else { Path( l ) }
+                        Path::new( p )
+                    } else { Path::new( l ) }
+                } else { Path::new( l ) }
             };
             let loc= if r.loc.starts_with("git@")
                      || r.loc.starts_with("hg@") {
                 smartpath(r.loc.clone())
-            } else { Path( r.loc ) };
+            } else { Path::new( r.loc.clone() ) };
             let rclone = Cell::new( r.clone() );
             let lclone = Cell::new( loc );
             let res= do task::try { /* try is synchronous, blocking
