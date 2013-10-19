@@ -21,7 +21,7 @@ pub struct Repository { loc: ~str
 ///</Summary>
 pub fn toVCS(s: ~str) -> VCS {
     match s {
-        ~"git" => git,
+        ~"git" => git, ~"git_pull" => git_pull, ~"git_merge" => git_merge,
         ~"hg"  => hg,
         ~"svn" => svn,
         ~"cvs" => cvs,
