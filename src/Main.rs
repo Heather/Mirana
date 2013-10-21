@@ -194,18 +194,14 @@ fn main() {
             } else { Path::new( r.loc.clone() ) };
             let rclone = Cell::new( r.clone() );
             let lclone = Cell::new( loc );
-            let res= do task::try { /* try is synchronous, blocking
-                                       until it gets the result of the task. */
+            match do task::try {
                 sync(rclone.take(), lclone.take());
-            };
-            match res { 
-                Ok(_) => { success += 1; },
+            } { Ok(_) => { success += 1; },
                 Err(e) => {
                     println!("  * failed: {:?}", e);
                     failed += 1; 
                 }
-            }
-            total += 1;
+            } total += 1;
         }
         println!("_________________________________________________________________________");
         println!("  success  {:?}", success);
