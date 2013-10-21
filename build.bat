@@ -1,7 +1,7 @@
 @echo off
 rustc --version
 cd src
-rustc Rylai.rs -O -o ../Rylai.exe
+rustc Mirana.rs -O -o ../mirana.exe
 
 ::handle error messages
 pause

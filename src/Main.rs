@@ -1,9 +1,9 @@
 // Core:
-use Crystal::{toVCS, Repository
+use Moon::{toVCS, Repository
     , git, git_merge, git_pull
     , hg
     , cvs};
-use Maiden::{e};
+use Shell::{e};
 use Config::{save_RepoList, load_RepoList, add_Repo};
 // Modules:
 use Git::{gitSync, gitMerge, gitPull};
@@ -21,16 +21,17 @@ use std::os::change_dir;
 use extra::time;
 use extra::getopts::{optflag, optopt, getopts, Opt};
 
-static r_version: &'static str = "  Rylai v0.0.3";
+static r_version: &'static str = "  Mirana v0.0.4";
 fn print_usage(program: &str, _opts: &[Opt]) {
     println!("Usage: {} [options]", program);
-    println("-h --help\tUsage");
-    println("-g --gentoo\tSync Gentoo-x86");
-    println("-l\t\tPretty print repositories in sync");
-    println("-a --add\tAdd repo to configuration");
-    println("-d --delete\tDelete repo from configuration");
-    println("-t\t\tType of adding repo or filtering type");
-    println("-u\t\tSpecify upstream of adding repo");
+    println("");
+    println(" -h --help\tUsage");
+    println(" -g --gentoo\tSync Gentoo-x86");
+    println(" -l\t\tPretty print repositories in sync");
+    println(" -a --add\tAdd repo to configuration");
+    println(" -d --delete\tDelete repo from configuration");
+    println(" -t\t\tType of adding repo or filtering type");
+    println(" -u\t\tSpecify upstream of adding repo");
 }
 fn sync(repo: Repository, location: Path) {
     let r = &repo;
@@ -90,8 +91,8 @@ fn main() {
     }
 
     let cfg = & Path::new (
-        if cfg!(target_os = "win32") { "Rylai.conf" }
-        else { "/etc/Rylai.conf" }
+        if cfg!(target_os = "win32") { "mirana.conf" }
+        else { "/etc/mirana.conf" }
         );
     let mut repoList = load_RepoList( cfg );
     let at = match matches.opt_present("t") {

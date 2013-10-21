@@ -2,8 +2,8 @@
 extern mod extra;
 
 /* Base modules */
-pub mod Crystal;
-pub mod Maiden;
+pub mod Moon;
+pub mod Shell;
 
 /* Json config is the only one yet I found in rust */
 pub mod Config;

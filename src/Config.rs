@@ -1,4 +1,4 @@
-use Crystal::{Repository, toVCS, git};
+use Moon::{Repository, toVCS, git};
 
 use std::io;
 

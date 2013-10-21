@@ -1,4 +1,4 @@
-use Maiden::{e, exec};
+use Shell::{e, exec};
 
 ///<Summary>
 ///Sync Gentoo x86
