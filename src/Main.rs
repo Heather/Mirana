@@ -22,17 +22,19 @@ use extra::time;
 use extra::getopts::{optflag, optopt, getopts, Opt};
 
 static r_version: &'static str = "  Mirana v0.0.4";
-fn print_usage(program: &str, _opts: &[Opt]) {
+fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
     println!("Usage: {} [options]", program);
     println("");
     println(" -h --help\tUsage");
-    println(" -g --gentoo\tSync Gentoo-x86");
     println(" -l\t\tPretty print repositories in sync");
     println(" -s --shade\tShade config");
     println(" -a --add\tAdd repo to configuration");
     println(" -d --delete\tDelete repo from configuration");
     println(" -t\t\tType of adding repo or filtering type");
     println(" -u\t\tSpecify upstream of adding repo");
+    if nix {
+        println(" -g --gentoo\tSync Gentoo-x86");
+    }
 }
 fn sync(repo: Repository, location: Path) {
     let r = &repo;
@@ -57,11 +59,11 @@ fn sync(repo: Repository, location: Path) {
 #[main]
 fn main() {
     println!("_________________________________________________________________________");
-    println!(" {:s}", r_version);
+    print!(" {:s} ", r_version);
     let nix = !cfg!(target_os = "win32");
     let ncore = if nix {
-        print   ("    -> POSIX, ");
-        let envproc = os::getenv("nproc");
+        print   (", POSIX");
+        let envproc = os::getenv("$(nproc)");
         let cores = match envproc {
             Some(p) => {
                 match from_str::<uint> (p) {
@@ -71,8 +73,8 @@ fn main() {
                     }
             }, None => 2
         };
-        println!(" {:u} cores", cores); cores
-    } else { println ("    -> Windows"); 1
+        println!(", {:u} Core", cores); cores
+    } else { println (", Windows"); 1
     };
     println("_________________________________________________________________________");
     let args = os::args();
@@ -92,10 +94,10 @@ fn main() {
         Err(f) => { fail!(f.to_err_msg()) }
     };
     if matches.opt_present("h") || matches.opt_present("help") {
-        print_usage(program, opts);
+        print_usage(program, opts, nix);
         return;
     }
-    if matches.opt_present("g") || matches.opt_present("gentoo") {
+    if nix && ( matches.opt_present("g") || matches.opt_present("gentoo") ) {
         let x86 = "/home/gentoo-x86";
         let p86 = & Path::new( x86 );
         if path_exists(p86) {
