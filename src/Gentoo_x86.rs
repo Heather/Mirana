@@ -21,6 +21,26 @@ pub fn gentoo(loc: &str, ncores: uint) {
 }
 
 ///<Summary>
+///Update the world
+///</Summary>
+pub fn gentooUpdate(ncores: uint, keep: bool) {
+    let jobs = format!("--jobs={:?}", ncores);
+    let ifkeep =
+        if keep { "--keep-going"
+        } else { ""
+        };
+    println("_________________________________________________________________________");
+    e("emerge", 
+      [&"-vuDN"
+       ,"@world"
+       ,"--with-bdeps=y"
+       ,"--complete-graph"
+       ,ifkeep.as_slice()
+       ,jobs.as_slice()]);
+    println("_________________________________________________________________________");
+}
+
+///<Summary>
 ///emerge --sync
 ///</Summary>
 pub fn emerge_sync() {

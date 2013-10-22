@@ -3,7 +3,7 @@ use Moon::{toVCS, Repository, Night
     , git, git_merge, git_pull
     , hg
     , cvs};
-use Shell::{e, exe};
+use Shell::{e, exe, exec};
 use Config::{save_RepoList, load_RepoList, add_Repo};
 // Modules:
 use Git::{gitSync, gitMerge, gitPull};
@@ -57,10 +57,14 @@ fn sync(repo: Repository, location: Path) {
 #[main]
 fn main() {
     println!("_________________________________________________________________________");
-    println!("    {:s}", r_version);
+    println!(" {:s}", r_version);
     let nix = !cfg!(target_os = "win32");
     let ncore = if nix {
-        print   ("    <> POSIX, ");
+        print   ("    -> POSIX, ");
+        
+        //TEST:
+        exec("echo", ["$(nproc)"]);
+        
         match do task::try {
             match from_str::<uint> (
                 exe("echo", ["$(nproc)"])) {
@@ -71,11 +75,11 @@ fn main() {
         } { Ok(n) => {
                 println!(" {:?} cores", n); n
             }, Err(e)  => {
-                println!("    <> can't get cores count: {:?}", e);
-                println!("    <> use 2 as default"); 2
+                println!("    -> can't get cores count: {:?}", e);
+                println!("    -> use 2 as default"); 2
             }
         }
-    } else { println ("    <> Windows"); 1
+    } else { println ("    -> Windows"); 1
     };
     println("_________________________________________________________________________");
     let args = os::args();
