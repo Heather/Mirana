@@ -13,6 +13,11 @@ pub struct Repository { loc: ~str
                         , branches: ~[~str] 
 }
 
+#[deriving(Encodable, Decodable, Clone)]
+pub struct Night { pretty: bool
+    , repositories: ~[Repository]
+}
+
 ///<Summary>
 ///Convert to VCS
 ///

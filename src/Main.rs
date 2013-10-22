@@ -1,5 +1,5 @@
 // Core:
-use Moon::{toVCS, Repository
+use Moon::{toVCS, Repository, Night
     , git, git_merge, git_pull
     , hg
     , cvs};
@@ -91,17 +91,17 @@ fn main() {
     }
 
     let cfg = & Path::new (
-        if cfg!(target_os = "win32") { "mirana.conf" }
-        else { "/etc/mirana.conf" }
+        if cfg!(target_os = "win32") { "shades.conf" }
+        else { "/etc/shades.conf" }
         );
-    let mut repoList = load_RepoList( cfg );
+    let mut night = load_RepoList( cfg );
     let at = match matches.opt_present("t") {
         true  => matches.opt_str("t"),
         false => None
     };
     if matches.opt_present("l") {
         if (path_exists( cfg )) {
-            for r in repoList.iter().filter(
+            for r in night[0].repositories.iter().filter(
                 |&r| match at.clone() {
                     Some(rt) => r.t == toVCS(rt),
                     None => true
@@ -124,8 +124,8 @@ fn main() {
         };
         match add {
             Some(a) => {
-                repoList.push( add_Repo(a, at, matches.opt_str("u")));
-                save_RepoList( cfg, repoList );
+                night[0].repositories.push( add_Repo(a, at, matches.opt_str("u")));
+                save_RepoList( cfg, night );
                 println!("{:?} added", a);
                 },
             None => println("No add argument provided")
@@ -141,16 +141,16 @@ fn main() {
             Some(d) => {
                 let mut i = 0;
                 let mut index = None;
-                for r in repoList.iter() {
+                for r in night[0].repositories.iter() {
                     if r.loc.contains( d ) {
                         index = Some(i);
                     } i += 1;
                 }
                 match index {
                     Some(ind) => {
-                        println!("{:?} removed", repoList[ind].loc);
-                        repoList.remove( ind );
-                        save_RepoList( cfg, repoList );
+                        println!("{:?} removed", night[0].repositories[ind].loc);
+                        night[0].repositories.remove( ind );
+                        save_RepoList( cfg, night );
                     },
                     None => println!("{:s} not found", d)
                 }
@@ -164,7 +164,7 @@ fn main() {
         let mut total = 0;
         let mut success = 0;
         let mut failed = 0;
-        for r in repoList.iter().filter(
+        for r in night[0].repositories.iter().filter(
             |&r| match at.clone() {
                 Some(rt) => r.t == toVCS(rt),
                 None => true
@@ -212,14 +212,17 @@ fn main() {
     } else {
         println("No config file found, consider providing one");
         println("For now one is created just for example");
-        repoList.push( Repository { 
-                loc: ~"git@github.com:Heather/rust.git",
-                t: git, 
-                branches: ~[~"master"],
-                m: ~"master",
-                upstream: ~"git@github.com:mozilla/rust.git"
+        night.push( Night {
+            pretty: true,
+            repositories: ~[ Repository { 
+                    loc: ~"git@github.com:Heather/rust.git",
+                    t: git, 
+                    branches: ~[~"master"],
+                    m: ~"master",
+                    upstream: ~"git@github.com:mozilla/rust.git"
+                }]
             });
-        save_RepoList( cfg, repoList );
+        save_RepoList( cfg, night );
     }
     if cfg!(target_os = "win32") {
         println("Press Enter now");

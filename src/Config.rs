@@ -1,4 +1,4 @@
-use Moon::{Repository, toVCS, git};
+use Moon::{Night, Repository, toVCS, git};
 
 use std::io;
 
@@ -8,7 +8,7 @@ use extra::serialize::{Decodable, Encodable};
 ///<Summary>
 ///Load JSON config
 ///</Summary>
-pub fn load_RepoList(p: &Path) -> ~[Repository] {
+pub fn load_RepoList(p: &Path) -> ~[Night] {
     match do io::file_reader(p).map |rdr| {
         json::from_reader(*rdr).expect("Repo list is broken")
     } { Err(_) => ~[],
@@ -19,9 +19,9 @@ pub fn load_RepoList(p: &Path) -> ~[Repository] {
 ///<Summary>
 ///Load JSON config
 ///</Summary>
-pub fn save_RepoList(p: &Path, repoList: ~[Repository]) {
+pub fn save_RepoList(p: &Path, night: ~[Night]) {
     let encf = io::file_writer( p, [io::Create, io::Truncate]).unwrap();
-    repoList.encode(&mut json::PrettyEncoder(encf));
+    night.encode(&mut json::PrettyEncoder(encf));
 }
 
 ///<Summary>
