@@ -22,7 +22,7 @@ use std::rt::io::timer::sleep;
 use extra::time;
 use extra::getopts::{optflag, optopt, getopts, Opt};
 
-static r_version: &'static str = "  Mirana v0.0.4";
+static r_version: &'static str = "  Mirana v0.0.5";
 fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
     println!("Usage: {} [options]", program);
     println("");
@@ -249,7 +249,7 @@ fn main() {
     }
     if !nix {
         println("Press Enter now");
-        let (port, chan): (Port<int>, Chan<int>) = stream();
+        let (port, chan) = stream();
         do task::spawn_sched(task::SingleThreaded) {
             while !port.peek() {
                 print("|");         sleep(100);
@@ -260,6 +260,6 @@ fn main() {
             }
         }
         io::stdin().read_line();
-        chan.send(1);
+        chan.send(());
     }
 }
