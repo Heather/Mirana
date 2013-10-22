@@ -5,7 +5,8 @@ use Shell::{e, exec};
 /// - run cvs update
 /// - regen cache
 ///</Summary>
-pub fn gentoo(loc: &str) {
+pub fn gentoo(loc: &str, ncores: uint) {
+    let jobs = format!("--jobs={:?}", ncores);
     println("_________________________________________________________________________");
     println("# pulling gentoo-x86" );
     e("cvs", [&"update"]);
@@ -15,7 +16,7 @@ pub fn gentoo(loc: &str) {
       [&"--update"
        ,"--repo=gentoo"
        ,repo.as_slice()
-       ,"--jobs=2"]);
+       ,jobs.as_slice()]);
     println("_________________________________________________________________________");
 }
 

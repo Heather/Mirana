@@ -13,6 +13,15 @@ pub fn exec(cmd: &str, args : &[&str]) {
 }
 
 ///<Summary>
+///Shell execute without error, returns result
+///</Summary>
+#[inline]
+pub fn exe(cmd: &str, args : &[&str]) -> ~str {
+    let oargs = args.map(|x|x.to_owned());
+    from_utf8_owned(process_output(cmd, oargs).output.clone())
+}
+
+///<Summary>
 ///Shell execute
 ///</Summary>
 #[inline]

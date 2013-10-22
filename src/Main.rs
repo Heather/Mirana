@@ -3,7 +3,7 @@ use Moon::{toVCS, Repository, Night
     , git, git_merge, git_pull
     , hg
     , cvs};
-use Shell::{e};
+use Shell::{e, exe};
 use Config::{save_RepoList, load_RepoList, add_Repo};
 // Modules:
 use Git::{gitSync, gitMerge, gitPull};
@@ -58,7 +58,26 @@ fn sync(repo: Repository, location: Path) {
 fn main() {
     println!("_________________________________________________________________________");
     println!("    {:s}", r_version);
-    println!("_________________________________________________________________________");
+    let nix = !cfg!(target_os = "win32");
+    let ncore = if nix {
+        print   ("    <> POSIX, ");
+        match do task::try {
+            match from_str::<uint> (
+                exe("echo", ["$(nproc)"])) {
+                Some(0) => 1,
+                Some(n) => n + 1,
+                None => 1
+            }
+        } { Ok(n) => {
+                println!(" {:?} cores", n); n
+            }, Err(e)  => {
+                println!("    <> can't get cores count: {:?}", e);
+                println!("    <> use 2 as default"); 2
+            }
+        }
+    } else { println ("    <> Windows"); 1
+    };
+    println("_________________________________________________________________________");
     let args = os::args();
     let program = args[0].clone();
     let opts = ~[
@@ -84,17 +103,16 @@ fn main() {
         let p86 = & Path::new( x86 );
         if path_exists(p86) {
             change_dir(p86);
-            gentoo(x86);
+            gentoo(x86, ncore);
             }
         else {
             println!("Path doesn't exist: {}", x86);
             }
         return;
     }
-
     let cfg = & Path::new (
-        if cfg!(target_os = "win32") { "shades.conf" }
-        else { "/etc/shades.conf" }
+        if nix  { "/etc/shades.conf" }
+        else    { "shades.conf" }
         );
     let mut night = load_RepoList( cfg );
     let at = match matches.opt_present("t") {
@@ -179,9 +197,9 @@ fn main() {
                     let ps: ~[&str] = ssp.split_iter('.').collect();
                     if ssps.len() > 0 {
                         let project = ps[0];
-                        let p = match cfg!(target_os = "win32") {
-                            true  => format!("../{}", project),
-                            false => format!("/home/{}", project)
+                        let p = match nix {
+                            false   => format!("../{}", project),
+                            true    => format!("/home/{}", project)
                         };
                         if !path_exists(&Path::new( p.clone() )) {
                             println!(" * > clone into : {:s}", p);
@@ -227,7 +245,7 @@ fn main() {
             });
         save_RepoList( cfg, night );
     }
-    if cfg!(target_os = "win32") {
+    if !nix {
         println("Press Enter now");
         io::stdin().read_line();
     }
