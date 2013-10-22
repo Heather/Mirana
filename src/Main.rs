@@ -17,6 +17,7 @@ use std::task;
 use std::cell::Cell;
 use std::os::path_exists;
 use std::os::change_dir;
+use std::rt::io::timer::sleep;
 // ExtrA:
 use extra::time;
 use extra::getopts::{optflag, optopt, getopts, Opt};
@@ -77,7 +78,7 @@ fn main() {
                 println!(" -> use 2 as default"); 2
             }
         }
-    } else { println (" -> Windows"); 1 };
+    } else { println (", Windows"); 1 };
     println("_________________________________________________________________________");
     let args = os::args();
     let program = args[0].clone();
@@ -248,6 +249,17 @@ fn main() {
     }
     if !nix {
         println("Press Enter now");
+        let (port, chan): (Port<int>, Chan<int>) = stream();
+        do task::spawn_sched(task::SingleThreaded) {
+            while !port.peek() {
+                print("|");         sleep(100);
+                print("\x08/");     sleep(100);
+                print("\x08-");     sleep(100);
+                print("\x08\\");    sleep(100);
+                print("\x08");
+            }
+        }
         io::stdin().read_line();
+        chan.send(1);
     }
 }
