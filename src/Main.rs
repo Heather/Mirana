@@ -248,7 +248,7 @@ fn main() {
         save_RepoList( cfg, night );
     }
     if !nix {
-        println("Press Enter now");
+        print("Press Enter now ");
         let (port, chan) = stream();
         do task::spawn_sched(task::SingleThreaded) {
             while !port.peek() {
@@ -259,6 +259,7 @@ fn main() {
                 print("\x08");
             }
         }
+        sleep(10);
         io::stdin().read_line();
         chan.send(());
     }
