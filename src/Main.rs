@@ -62,7 +62,7 @@ fn main() {
     let ncore = if nix {
         print   ("    -> POSIX, ");
         let envproc = os::getenv("nproc");
-        match envproc {
+        let cores = match envproc {
             Some(p) => {
                 match from_str::<uint> (p) {
                         Some(0) => 1,
@@ -70,7 +70,8 @@ fn main() {
                         None => 1
                     }
             }, None => 2
-        }
+        };
+        println!(" {:u} cores", cores); cores
     } else { println ("    -> Windows"); 1
     };
     println("_________________________________________________________________________");
