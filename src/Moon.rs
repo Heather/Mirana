@@ -15,6 +15,7 @@ pub struct Repository { loc: ~str
 
 #[deriving(Encodable, Decodable, Clone)]
 pub struct Night { pretty: bool
+    , shade: ~str
     , repositories: ~[Repository]
 }
 

@@ -4,6 +4,7 @@ use std::str::from_utf8_owned;
 ///<Summary>
 ///Shell execute without error out
 ///</Summary>
+#[inline]
 pub fn exec(cmd: &str, args : &[&str]) {
     let oargs = args.map(|x|x.to_owned());
     print(from_utf8_owned(
@@ -14,6 +15,7 @@ pub fn exec(cmd: &str, args : &[&str]) {
 ///<Summary>
 ///Shell execute
 ///</Summary>
+#[inline]
 pub fn e(cmd: &str, args : &[&str]) {
     let oargs = args.map(|x|x.to_owned());
     let out = process_output(cmd, oargs);

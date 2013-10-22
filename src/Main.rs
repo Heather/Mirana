@@ -28,6 +28,7 @@ fn print_usage(program: &str, _opts: &[Opt]) {
     println(" -h --help\tUsage");
     println(" -g --gentoo\tSync Gentoo-x86");
     println(" -l\t\tPretty print repositories in sync");
+    println(" -s --shade\tShade config");
     println(" -a --add\tAdd repo to configuration");
     println(" -d --delete\tDelete repo from configuration");
     println(" -t\t\tType of adding repo or filtering type");
@@ -64,6 +65,7 @@ fn main() {
         optflag("h"), optflag("help"),
         optflag("g"), optflag("gentoo"),
         optflag("l"),
+        optopt("s"), optopt("shade"),
         optopt("t"),
         optopt("d"), optopt("delete"),
         optopt("a"), optopt("add"),
@@ -112,7 +114,7 @@ fn main() {
                 for b in r.branches.iter() {
                     println!("> * branch: {:s}", *b);
                 }
-                println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+                println("_________________________________________________________________________");
             }
         }
         return;
@@ -213,6 +215,7 @@ fn main() {
         println("No config file found, consider providing one");
         println("For now one is created just for example");
         night.push( Night {
+            shade: ~"default",
             pretty: true,
             repositories: ~[ Repository { 
                     loc: ~"git@github.com:Heather/rust.git",
