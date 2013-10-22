@@ -64,7 +64,8 @@ fn main() {
     let ncore = if nix {
         print   (", POSIX");
         match do task::try {
-            match from_str::<uint> (exe("nproc", [])) {
+            let nproc = exe("nproc", []);
+            match from_str::<uint> (nproc.trim()) {
                 Some(0) => 1,
                 Some(n) => n + 1,
                 None => 1
