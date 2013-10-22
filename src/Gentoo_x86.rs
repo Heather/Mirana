@@ -1,6 +1,5 @@
 use Shell::{e, exec};
-use std::task;
-use std::rt::io::timer::sleep;
+use Butterfly::butterfly;
 
 ///<Summary>
 ///Sync Gentoo x86
@@ -11,37 +10,16 @@ pub fn gentoo(loc: &str, ncores: uint) {
     let jobs = format!("--jobs={:u}", ncores);
     println("_________________________________________________________________________");
     print("# pulling gentoo-x86 " );
-    let (port, chan) = stream();
-    do task::spawn_sched(task::SingleThreaded) {
-        while !port.peek() {
-            print("|");         sleep(100);
-            print("\x08/");     sleep(100);
-            print("\x08-");     sleep(100);
-            print("\x08\\");    sleep(100);
-            print("\x08");
-        }
-    }
-    e("cvs", [&"update"]);
-    chan.send(());
+    do butterfly { e("cvs", [&"update"]); }
     println("");
     print("#regen cache for ::gentoo-x86 " );
     let repo = (format!("--portdir={}", loc));
-    let (portz, chanz) = stream();
-    do task::spawn_sched(task::SingleThreaded) {
-        while !portz.peek() {
-            print("|");         sleep(100);
-            print("\x08/");     sleep(100);
-            print("\x08-");     sleep(100);
-            print("\x08\\");    sleep(100);
-            print("\x08");
-        }
+    do butterfly { e("egencache", 
+                      [&"--update"
+                       ,"--repo=gentoo"
+                       ,repo.as_slice()
+                       ,jobs.as_slice()]);
     }
-    e("egencache", 
-      [&"--update"
-       ,"--repo=gentoo"
-       ,repo.as_slice()
-       ,jobs.as_slice()]);
-    chanz.send(());
     println("_________________________________________________________________________");
 }
 

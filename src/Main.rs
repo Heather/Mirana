@@ -4,6 +4,7 @@ use Moon::{toVCS, Repository, Night
     , hg
     , cvs};
 use Shell::{e, exe};
+use Butterfly::butterfly;
 use Config::{save_RepoList, load_RepoList, add_Repo};
 // Modules:
 use Git::{gitSync, gitMerge, gitPull};
@@ -17,7 +18,6 @@ use std::task;
 use std::cell::Cell;
 use std::os::path_exists;
 use std::os::change_dir;
-use std::rt::io::timer::sleep;
 // ExtrA:
 use extra::time;
 use extra::getopts::{optflag, optopt, getopts, Opt};
@@ -249,18 +249,8 @@ fn main() {
     }
     if !nix {
         print("Press Enter now ");
-        let (port, chan) = stream();
-        do task::spawn_sched(task::SingleThreaded) {
-            while !port.peek() {
-                print("|");         sleep(100);
-                print("\x08/");     sleep(100);
-                print("\x08-");     sleep(100);
-                print("\x08\\");    sleep(100);
-                print("\x08");
-            }
+        do butterfly {
+            io::stdin().read_line();
         }
-        sleep(10);
-        io::stdin().read_line();
-        chan.send(());
     }
 }
