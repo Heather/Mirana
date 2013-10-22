@@ -10,10 +10,10 @@ pub fn butterfly<U>(f: &fn() -> U) -> U {
         while !port.peek() {
             print(" ");
             let bug3911 = ["|","/","-","\\"];
-            bug3911.iter().map( |fly| {
-                print( format!("\x08{:s}", *fly) );
+            for fly in bug3911.iter() {
+                print!("\x08{:s}", *fly);
                 sleep(100);
-            });
+            };
         }
     }
     let ret = f();
