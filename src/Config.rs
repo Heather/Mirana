@@ -19,10 +19,10 @@ pub fn load_RepoList(p: &Path) -> ~[Night] {
 ///<Summary>
 ///Load JSON config
 ///</Summary>
-pub fn save_RepoList(p: &Path, night: ~[Night]) {
+pub fn save_RepoList(p: &Path, night: ~[Night], shade: uint) {
     let encf = io::file_writer( p, [io::Create, io::Truncate]).unwrap();
     if night.len() > 0 {
-        if night[0].pretty {
+        if night[shade].pretty {
             night.encode(&mut json::PrettyEncoder(encf));
         } else {
             night.encode(&mut json::Encoder(encf));

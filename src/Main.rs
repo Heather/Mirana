@@ -121,9 +121,23 @@ fn main() {
         true  => matches.opt_str("t"),
         false => None
     };
+    let shade = if matches.opt_present("s") || matches.opt_present("shade") {
+        let ashade = match matches.opt_present("s") {
+            true  => matches.opt_str("s"),
+            false => matches.opt_str("shade")
+        };
+        match ashade {
+            Some(ss) => {
+                match night.iter().position( |shd| shd.shade == ss ) {
+                    Some(ps)    => ps,
+                    None        => 0
+                }
+            }, None => 0
+        }
+    } else { 0 };
     if matches.opt_present("l") {
         if (path_exists( cfg )) {
-            for r in night[0].repositories.iter().filter(
+            for r in night[shade].repositories.iter().filter(
                 |&r| match at.clone() {
                     Some(rt) => r.t == toVCS(rt),
                     None => true
@@ -146,8 +160,8 @@ fn main() {
         };
         match add {
             Some(a) => {
-                night[0].repositories.push( add_Repo(a, at, matches.opt_str("u")));
-                save_RepoList( cfg, night );
+                night[shade].repositories.push( add_Repo(a, at, matches.opt_str("u")));
+                save_RepoList( cfg, night, shade );
                 println!("{:?} added", a);
                 },
             None => println("No add argument provided")
@@ -163,16 +177,16 @@ fn main() {
             Some(d) => {
                 let mut i = 0;
                 let mut index = None;
-                for r in night[0].repositories.iter() {
+                for r in night[shade].repositories.iter() {
                     if r.loc.contains( d ) {
                         index = Some(i);
                     } i += 1;
                 }
                 match index {
                     Some(ind) => {
-                        println!("{:?} removed", night[0].repositories[ind].loc);
-                        night[0].repositories.remove( ind );
-                        save_RepoList( cfg, night );
+                        println!("{:?} removed", night[shade].repositories[ind].loc);
+                        night[shade].repositories.remove( ind );
+                        save_RepoList( cfg, night, shade );
                     },
                     None => println!("{:s} not found", d)
                 }
@@ -186,7 +200,7 @@ fn main() {
         let mut total = 0;
         let mut success = 0;
         let mut failed = 0;
-        for r in night[0].repositories.iter().filter(
+        for r in night[shade].repositories.iter().filter(
             |&r| match at.clone() {
                 Some(rt) => r.t == toVCS(rt),
                 None => true
@@ -245,7 +259,7 @@ fn main() {
                     upstream: ~"git@github.com:mozilla/rust.git"
                 }]
             });
-        save_RepoList( cfg, night );
+        save_RepoList( cfg, night, shade );
     }
     if !nix {
         print("Press Enter now ");
