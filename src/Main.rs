@@ -81,7 +81,7 @@ fn main() {
     } else { println (", Windows"); 1 };
     println("_________________________________________________________________________");
     let args = os::args();
-    let program = args[0].clone();
+    let program = args[0].as_slice();
     let opts = ~[
         optflag("h"), optflag("help"),
         optflag("g"), optflag("gentoo"),
@@ -121,25 +121,51 @@ fn main() {
         true  => matches.opt_str("t"),
         false => None
     };
+    let ashade = match matches.opt_present("s") {
+        true  => matches.opt_str("s"),
+        false => matches.opt_str("shade")
+    };
     let shade = if matches.opt_present("s") || matches.opt_present("shade") {
-        let ashade = match matches.opt_present("s") {
-            true  => matches.opt_str("s"),
-            false => matches.opt_str("shade")
-        };
         match ashade {
-            Some(ss) => {
-                match night.iter().position( |shd| shd.shade == ss ) {
+            Some(ref ss) => {
+                match night.iter().position( |shd| shd.shade == *ss ) {
                     Some(ps)    => ps,
-                    None        => 0
+                    None        => -1
                 }
             }, None => 0
         }
     } else { 0 };
+    if matches.opt_present("a") || matches.opt_present("add") {
+        let add = match matches.opt_present("a") {
+            true  => matches.opt_str("a"),
+            false => matches.opt_str("add")
+        };
+        match add {
+            Some(a) => {
+                if shade == -1 {
+                    match ashade {
+                        Some(ref ss)    => println!("Error: there is no such shade: {}", *ss),
+                        None            => println ("Error: there is no such shade")
+                    };
+                } else {
+                    night[shade].repositories.push( add_Repo(a, at, matches.opt_str("u")));
+                    save_RepoList( cfg, night, shade );
+                    println!("{:?} added", a);
+                }
+            }, None => println("No add argument provided")
+        }; return;
+    }
+    if shade == -1 {
+        match ashade {
+            Some(ref ss)    => println!("Error: there is no such shade: {}", *ss),
+            None            => println ("Error: there is no such shade")
+        }; return;
+    }
     if matches.opt_present("l") {
         if (path_exists( cfg )) {
             for r in night[shade].repositories.iter().filter(
-                |&r| match at.clone() {
-                    Some(rt) => r.t == toVCS(rt),
+                |&r| match at {
+                    Some(ref rt) => r.t == toVCS(rt.to_owned()),
                     None => true
                         }) {
                 println!("> - repo: {:s}", r.loc);
@@ -153,21 +179,6 @@ fn main() {
         }
         return;
         }
-    if matches.opt_present("a") || matches.opt_present("add") {
-        let add = match matches.opt_present("a") {
-            true  => matches.opt_str("a"),
-            false => matches.opt_str("add")
-        };
-        match add {
-            Some(a) => {
-                night[shade].repositories.push( add_Repo(a, at, matches.opt_str("u")));
-                save_RepoList( cfg, night, shade );
-                println!("{:?} added", a);
-                },
-            None => println("No add argument provided")
-        };
-        return;
-    }
     if matches.opt_present("d") || matches.opt_present("delete") {
         let del = match matches.opt_present("d") {
             true  => matches.opt_str("d"),
@@ -192,21 +203,19 @@ fn main() {
                 }
             },
             None => println("No add argument provided")
-        };
-        return;
+        };  return;
     }
-    
     if (path_exists( cfg )) {
         let mut total = 0;
         let mut success = 0;
         let mut failed = 0;
         for r in night[shade].repositories.iter().filter(
-            |&r| match at.clone() {
-                Some(rt) => r.t == toVCS(rt),
+            |&r| match at {
+                Some(ref rt) => r.t == toVCS(rt.to_owned()),
                 None => true
             }) {
             println!(" *  repo: {}", r.loc);
-            let smartpath = |l : ~str| -> Path {
+            let smartpath = |l : &str| -> Path {
                 let ssps: ~[&str] = l.split_iter('/').collect();
                 if ssps.len() > 1 {
                     let ssp = ssps[1];
@@ -217,7 +226,7 @@ fn main() {
                             false   => format!("../{}", project),
                             true    => format!("/home/{}", project)
                         };
-                        if !path_exists(&Path::new( p.clone() )) {
+                        if !path_exists(&Path::new( p.as_slice() )) {
                             println!(" * > clone into : {:s}", p);
                             e("git", [&"clone", l.as_slice(), p.as_slice()]);
                         }
@@ -227,8 +236,8 @@ fn main() {
             };
             let loc= if r.loc.starts_with("git@")
                      || r.loc.starts_with("hg@") {
-                smartpath(r.loc.clone())
-            } else { Path::new( r.loc.clone() ) };
+                smartpath(r.loc)
+            } else { Path::new( r.loc.as_slice() ) };
             let rclone = Cell::new( r.clone() );
             let lclone = Cell::new( loc );
             match do task::try {
