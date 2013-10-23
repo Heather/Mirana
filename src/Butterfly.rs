@@ -4,6 +4,7 @@ use std::rt::io::timer::sleep;
 ///<Summary>
 ///Core how to Fly function
 ///</Summary>
+#[inline]
 fn fly<U>(animation: &[&str], symbols: int, f: &fn() -> U) -> U {
     let howtofly = animation.map(|x|x.to_owned());
     let (port, chan) = stream();
@@ -36,7 +37,12 @@ pub fn butterfly<U>(f: &fn() -> U) -> U {
 ///<Summary>
 ///Stupid butterfly
 ///</Summary>
-pub fn weird<U>(f: &fn() -> U) -> U {
-    let animation = [&"|","/","-","\\"];
-    fly(animation, 1, f)
+pub fn rustbuildbotdance<U>(f: &fn() -> U) -> U {
+    let animation = [
+        &"<(^.^<)"
+        ,"<(^.^)>"
+        ,"(>^.^)>"
+        ,"(7^.^)7"
+        ,"(>^.^<)"];
+    fly(animation, 7, f)
 }

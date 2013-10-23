@@ -4,7 +4,7 @@ use Moon::{toVCS, Repository, Night
     , hg
     , cvs};
 use Shell::{e, exe};
-use Butterfly::butterfly;
+use Butterfly::{rustbuildbotdance};
 use Config::{save_RepoList, load_RepoList, add_Repo};
 // Modules:
 use Git::{gitSync, gitMerge, gitPull};
@@ -276,7 +276,7 @@ fn main() {
     }
     if !nix {
         print("Press Enter now ");
-        do butterfly {
+        do rustbuildbotdance {
             io::stdin().read_line();
         }
     }
