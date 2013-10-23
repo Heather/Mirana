@@ -143,10 +143,15 @@ fn main() {
         match add {
             Some(a) => {
                 if shade == -1 {
-                    match ashade {
-                        Some(ref ss)    => fail!("Error: there is no such shade: {}", *ss),
-                        None            => fail!("Error: impossible case #1")
-                    };
+                    night.push( Night {
+                        shade: ashade.unwrap(),
+                        pretty: true,
+                        repositories: ~[ 
+                            add_Repo(a, at, matches.opt_str("u"))
+                            ]
+                        });
+                    save_RepoList( cfg, night, 0 );
+                    return;
                 } else {
                     night[shade].repositories.push( add_Repo(a, at, matches.opt_str("u")));
                     save_RepoList( cfg, night, shade );
@@ -157,10 +162,7 @@ fn main() {
         };
     }
     if shade == -1 {
-        match ashade {
-            Some(ref ss)    => fail!("Error: there is no such shade: {}", *ss),
-            None            => fail!("Error: impossible case #2")
-        };
+        fail!("Error: there is no such shade: {}", ashade.unwrap());
     }
     if matches.opt_present("l") {
         if (path_exists( cfg )) {
