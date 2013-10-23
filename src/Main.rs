@@ -144,22 +144,23 @@ fn main() {
             Some(a) => {
                 if shade == -1 {
                     match ashade {
-                        Some(ref ss)    => println!("Error: there is no such shade: {}", *ss),
-                        None            => println ("Error: there is no such shade")
+                        Some(ref ss)    => fail!("Error: there is no such shade: {}", *ss),
+                        None            => fail!("Error: impossible case #1")
                     };
                 } else {
                     night[shade].repositories.push( add_Repo(a, at, matches.opt_str("u")));
                     save_RepoList( cfg, night, shade );
                     println!("{:?} added", a);
+                    return;
                 }
-            }, None => println("No add argument provided")
-        }; return;
+            }, None => fail!("No add argument provided")
+        };
     }
     if shade == -1 {
         match ashade {
-            Some(ref ss)    => println!("Error: there is no such shade: {}", *ss),
-            None            => println ("Error: there is no such shade")
-        }; return;
+            Some(ref ss)    => fail!("Error: there is no such shade: {}", *ss),
+            None            => fail!("Error: impossible case #2")
+        };
     }
     if matches.opt_present("l") {
         if (path_exists( cfg )) {
@@ -198,12 +199,13 @@ fn main() {
                         println!("{:?} removed", night[shade].repositories[ind].loc);
                         night[shade].repositories.remove( ind );
                         save_RepoList( cfg, night, shade );
+                        return;
                     },
-                    None => println!("{:s} not found", d)
+                    None => fail!("{:s} not found", d)
                 }
             },
-            None => println("No add argument provided")
-        };  return;
+            None => fail!("No add argument provided")
+        };
     }
     if (path_exists( cfg )) {
         let mut total = 0;
