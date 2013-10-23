@@ -44,5 +44,5 @@ pub fn rustbuildbotdance<U>(f: &fn() -> U) -> U {
         ,"(>^.^)>"
         ,"(7^.^)7"
         ,"(>^.^<)"];
-    fly(animation, 7, 200, f)
+    fly(animation, 7, 100, f)
 }
