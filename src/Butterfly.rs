@@ -2,15 +2,15 @@ use std::task;
 use std::rt::io::timer::sleep;
 
 ///<Summary>
-///Simple butterfly
+///Core how to Fly function
 ///</Summary>
-pub fn butterfly<U>(f: &fn() -> U) -> U { 
+fn fly<U>(animation: &[&str], f: &fn() -> U) -> U {
+    let howtofly = animation.map(|x|x.to_owned());
     let (port, chan) = stream();
     do task::spawn_sched(task::SingleThreaded) {
         print(" ");
         while !port.peek() {
-            let bug3911 = ["|","/","-","\\"];
-            for fly in bug3911.iter() {
+            for fly in howtofly.iter() {
                 print!("\x08{:s}", *fly);
                 sleep(100);
             };
@@ -19,4 +19,12 @@ pub fn butterfly<U>(f: &fn() -> U) -> U {
     let ret = f();
     chan.send(());
     ret
+}
+
+///<Summary>
+///Simple butterfly
+///</Summary>
+pub fn butterfly<U>(f: &fn() -> U) -> U {
+    let animation = [&"|","/","-","\\"];
+    fly(animation, f)
 }

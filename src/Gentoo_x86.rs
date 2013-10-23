@@ -14,11 +14,12 @@ pub fn gentoo(loc: &str, ncores: uint) {
     println("");
     print("#regen cache for ::gentoo-x86 " );
     let repo = (format!("--portdir={}", loc));
-    do butterfly { e("egencache", 
-                      [&"--update"
-                       ,"--repo=gentoo"
-                       ,repo.as_slice()
-                       ,jobs.as_slice()]);
+    do butterfly { 
+        e ("egencache", 
+              [&"--update"
+               ,"--repo=gentoo"
+               ,repo.as_slice()
+               ,jobs.as_slice()]);
     }
     println("_________________________________________________________________________");
 }
