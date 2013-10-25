@@ -12,7 +12,6 @@ use Hg::{hgSync};
 use Cvs::{cvsSync};
 use Gentoo_x86::{gentoo};
 // Internal:
-use std::io;
 use std::os;
 use std::task;
 use std::cell::Cell;
@@ -275,9 +274,11 @@ fn main() {
         save_RepoList( cfg, night, shade );
     }
     if !nix {
-        print("Press Enter now ");
+        print("Please, kill me ");
         do rustbuildbotdance {
-            io::stdin().read_line();
+            // noone knows how to do it in new IO:
+            // io::stdin().read_line();
+            while(true) { ; }
         }
     }
 }

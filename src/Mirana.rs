@@ -1,3 +1,4 @@
+#[feature(managed_boxes)];
 #[crate_type = "bin"];
 extern mod extra;
 

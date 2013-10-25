@@ -1,6 +1,8 @@
 use Moon::{Night, Repository, toVCS, git};
 
-use std::io;
+use std::rt::io;
+use std::path::Path;
+use std::rt::io::file::{FileInfo};
 
 use extra::json;
 use extra::serialize::{Decodable, Encodable};
@@ -9,10 +11,13 @@ use extra::serialize::{Decodable, Encodable};
 ///Load JSON config
 ///</Summary>
 pub fn load_RepoList(p: &Path) -> ~[Night] {
-    match do io::file_reader(p).map |rdr| {
-        json::from_reader(*rdr).expect("Repo list is broken")
-    } { Err(_) => ~[],
-        Ok(json) => Decodable::decode(&mut json::Decoder(json))
+    let filereader = p.open_reader(io::Open);
+    match filereader {
+        Some(f) => {
+            let reader  = @mut f as @mut io::Reader;
+            let res     = json::from_reader(reader).expect("Repo list is broken");
+            Decodable::decode(&mut json::Decoder(res))
+        }, None => ~[]
     }
 }
 
@@ -20,16 +25,21 @@ pub fn load_RepoList(p: &Path) -> ~[Night] {
 ///Load JSON config
 ///</Summary>
 pub fn save_RepoList(p: &Path, night: ~[Night], shade: uint) {
-    let encf = io::file_writer( p, [io::Create, io::Truncate]).unwrap();
-    if night.len() > 0 {
-        if night[shade].pretty {
-            night.encode(&mut json::PrettyEncoder(encf));
-        } else {
-            night.encode(&mut json::Encoder(encf));
-        }
-    } else {
-        night.encode(&mut json::Encoder(encf));
-    }
+    let encfile = p.open_writer(io::Create);
+    match encfile {
+        Some(f) => {
+            let encf = @mut f as @mut io::Writer;
+            if night.len() > 0 {
+                if night[shade].pretty {
+                    night.encode(&mut json::PrettyEncoder(encf));
+                } else {
+                    night.encode(&mut json::Encoder(encf));
+                }
+            } else {
+                night.encode(&mut json::Encoder(encf));
+            }
+        }, None => fail!("failed to save json")
+    };
 }
 
 ///<Summary>
