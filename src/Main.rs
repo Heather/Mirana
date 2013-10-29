@@ -170,12 +170,14 @@ fn main() {
                     Some(ref rt) => r.t == toVCS(rt.to_owned()),
                     None => true
                         }) {
-                println!("> - repo: {:s}", r.loc);
+                println!(">-- repo: {:s}", r.loc);
                 println!(" *  type: {:?}", r.t);
                 println!(" *  upstream: {} {}", r.upstream, r.m);
+                print   (" *  branches:");
                 for b in r.branches.iter() {
-                    println!("> * branch: {:s}", *b);
+                    print!(" {:s}", *b);
                 }
+                println("");
                 println("_________________________________________________________________________");
             }
         }
@@ -274,11 +276,9 @@ fn main() {
         save_RepoList( cfg, night, shade );
     }
     if !nix {
-        print("Please, kill me ");
-        do rustbuildbotdance {
-            // noone knows how to do it in new IO:
-            // io::stdin().read_line();
-            while(true) { ; }
+        println("Please, kill me ");    /* println because print FAILS here... no idea why...           */
+        do rustbuildbotdance {          /* even butterflies feels buggy now...                          */
+            while(true) { ; }           /* noone knows how to do it in new IO: io::stdin().read_line()  */
         }
     }
 }

@@ -31,7 +31,7 @@ fn fly<U>(animation: &[&str], symbols: int, delay: u64, f: &fn() -> U) -> U {
 ///</Summary>
 pub fn butterfly<U>(f: &fn() -> U) -> U {
     let animation = [&"|","/","-","\\"];
-    fly(animation, 1, 100, f)
+    fly(animation, 1, 1, f)
 }
 
 ///<Summary>
@@ -44,5 +44,5 @@ pub fn rustbuildbotdance<U>(f: &fn() -> U) -> U {
         ,"(>^.^)>"
         ,"(7^.^)7"
         ,"(>^.^<)"];
-    fly(animation, 7, 100, f)
+    fly(animation, 7, 2, f)
 }
