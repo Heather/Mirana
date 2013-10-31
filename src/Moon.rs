@@ -3,6 +3,7 @@ pub enum VCS {git, git_merge, git_pull
               , hg
               , svn
               , cvs
+              , Gentoo
 }
 
 #[deriving(Encodable, Decodable, Clone)]

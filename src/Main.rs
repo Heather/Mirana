@@ -2,7 +2,8 @@
 use Moon::{toVCS, Repository, Night
     , git, git_merge, git_pull
     , hg
-    , cvs};
+    , cvs
+    , Gentoo};
 use Shell::{e, exe};
 use Butterfly::{rustbuildbotdance};
 use Config::{save_RepoList, load_RepoList, add_Repo};
@@ -10,18 +11,19 @@ use Config::{save_RepoList, load_RepoList, add_Repo};
 use Git::{gitSync, gitMerge, gitPull};
 use Hg::{hgSync};
 use Cvs::{cvsSync};
-use Gentoo_x86::{gentoo};
+use Gentoo_x86::{gentoo, gentooFullUpdate};
 // Internal:
 use std::os;
 use std::task;
 use std::cell::Cell;
-use std::os::path_exists;
-use std::os::change_dir;
+use std::os::{path_exists, change_dir};
 // ExtrA:
 use extra::time;
 use extra::getopts::{optflag, optopt, getopts, Opt};
 
-static r_version: &'static str = "  Mirana v0.0.5";
+static r_version: &'static str = "  Mirana v0.0.6";
+static mut ncore: uint = 1;
+
 fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
     println!("Usage: {} [options]", program);
     println("");
@@ -51,6 +53,7 @@ fn sync(repo: Repository, location: Path) {
                 git_pull   => gitPull(*b),
                 hg         => hgSync(*b, r.m, r.upstream),
                 cvs        => cvsSync(*b, r.m, r.upstream),
+                Gentoo     => unsafe { gentooFullUpdate(*b, ncore) }, 
                 _          => println("not supported yet")
             }
         }
@@ -61,8 +64,8 @@ fn main() {
     println!("_________________________________________________________________________");
     print!(" {:s} ", r_version);
     let nix = !cfg!(target_os = "win32");
-    let ncore = if nix {
-        print   (", POSIX");
+    if nix {
+        print (", POSIX");
         match do task::try {
             let nproc = exe("nproc", []);
             match from_str::<uint> (nproc.trim()) {
@@ -71,13 +74,13 @@ fn main() {
                 None => 1
             }
         } { Ok(n) => {
-                println!(", {:u} Core", n); n
+                println!(", {:u} Core", n);
+                unsafe { ncore = n; }
             }, Err(e) => {
                 println!(" -> can't get cores count: {:?}", e);
-                println!(" -> use 2 as default"); 2
             }
         }
-    } else { println (", Windows"); 1 };
+    } else { println (", Windows"); };
     println("_________________________________________________________________________");
     let args = os::args();
     let program = args[0].as_slice();
@@ -104,12 +107,10 @@ fn main() {
         let p86 = & Path::new( x86 );
         if path_exists(p86) {
             change_dir(p86);
-            gentoo(x86, ncore);
-            }
-        else {
+            unsafe { gentoo(x86, ncore); }
+        } else {
             println!("Path doesn't exist: {}", x86);
-            }
-        return;
+        } return;
     }
     let cfg = & Path::new (
         if nix  { "/etc/shades.conf" }
@@ -265,20 +266,36 @@ fn main() {
         night.push( Night {
             shade: ~"default",
             pretty: true,
-            repositories: ~[ Repository { 
-                    loc: ~"git@github.com:Heather/rust.git",
-                    t: git, 
-                    branches: ~[~"master"],
-                    m: ~"master",
-                    upstream: ~"git@github.com:mozilla/rust.git"
-                }]
-            });
+            repositories: ~[ Repository { /* Personal Rust update shade */
+                loc: ~"git@github.com:Heather/rust.git",
+                t: git, 
+                branches: ~[~"master"],
+                m: ~"master",
+                upstream: ~"git@github.com:mozilla/rust.git"
+            }]
+        });
+        if nix {
+            let portage = ~"/usr/portage";
+            let portagePath = & Path::new( portage.clone() );
+            if path_exists(portagePath) {
+                night.push( Night { /* Gentoo update shade */
+                    shade: ~"Gentoo",
+                    pretty: true,
+                    repositories: ~[ Repository { 
+                        loc: portage,
+                        t: Gentoo, 
+                        branches: ~[~"/home/gentoo-x86"],
+                        m: ~"", upstream: ~""
+                    }]
+                });
+            }
+        }
         save_RepoList( cfg, night, shade );
     }
     if !nix {
-        println("Please, kill me ");    /* println because print FAILS here... no idea why...           */
-        do rustbuildbotdance {          /* even butterflies feels buggy now...                          */
-            while(true) { ; }           /* noone knows how to do it in new IO: io::stdin().read_line()  */
+        println("Please, kill me ");    /* println because print FAILS here...    */
+        do rustbuildbotdance {          /* even butterflies feels buggy now...    */
+            while(true) { ; }           /* noone knows how to read_line in new IO */
         }
     }
 }
