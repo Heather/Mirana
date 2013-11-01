@@ -28,18 +28,14 @@ pub fn load_RepoList(p: &Path) -> ~[Night] {
 ///Load JSON config
 ///</Summary>
 pub fn save_RepoList(p: &Path, night: ~[Night], shade: uint) {
-    let encfile = p.open_writer(io::Create);
+    let encfile = p.open_writer(io::CreateOrTruncate);
     match encfile {
         Some(f) => {
             let encf = @mut f as @mut io::Writer;
             if night.len() > 0 {
-                if night[shade].pretty {
-                    night.encode(&mut json::PrettyEncoder(encf));
-                } else {
-                    night.encode(&mut json::Encoder(encf));
-                }
-            } else {
-                night.encode(&mut json::Encoder(encf));
+                if night[shade].pretty {    night.encode(&mut json::PrettyEncoder(encf));
+                }       else {              night.encode(&mut json::Encoder(encf));
+                }   }   else {              night.encode(&mut json::Encoder(encf));
             }
         }, None => fail!("failed to save json")
     };
