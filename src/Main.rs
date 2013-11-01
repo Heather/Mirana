@@ -117,10 +117,6 @@ fn main() {
         else    { "shades.conf" }
         );
     let mut night = load_RepoList( cfg );
-    let at = match matches.opt_present("t") {
-        true  => matches.opt_str("t"),
-        false => None
-    };
     let ashade = match matches.opt_present("s") {
         true  => matches.opt_str("s"),
         false => matches.opt_str("shade")
@@ -135,83 +131,87 @@ fn main() {
             }, None => 0
         }
     } else { 0 };
-    if matches.opt_present("a") || matches.opt_present("add") {
-        let add = match matches.opt_present("a") {
-            true  => matches.opt_str("a"),
-            false => matches.opt_str("add")
-        };
-        match add {
-            Some(a) => {
-                if shade == -1 {
-                    night.push( Night {
-                        shade: ashade.unwrap(),
-                        pretty: true,
-                        repositories: ~[ 
-                            add_Repo(a, at, matches.opt_str("u"))
-                            ]
-                        });
-                    save_RepoList( cfg, night, 0 );
-                    return;
-                } else {
-                    night[shade].repositories.push( add_Repo(a, at, matches.opt_str("u")));
-                    save_RepoList( cfg, night, shade );
-                    println!("{:?} added", a);
-                    return;
-                }
-            }, None => fail!("No add argument provided")
-        };
-    }
-    if shade == -1 {
-        fail!("Error: there is no such shade: {}", ashade.unwrap());
-    }
-    if matches.opt_present("l") {
-        if (path_exists( cfg )) {
-            for r in night[shade].repositories.iter().filter(
-                |&r| match at {
-                    Some(ref rt) => r.t == toVCS(rt.to_owned()),
-                    None => true
-                        }) {
-                println!(">-- repo: {:s}", r.loc);
-                println!(" *  type: {:?}", r.t);
-                println!(" *  upstream: {} {}", r.upstream, r.m);
-                print   (" *  branches:");
-                for b in r.branches.iter() {
-                    print!(" {:s}", *b);
-                }
-                println("");
-                println("_________________________________________________________________________");
-            }
-        }
-        return;
-        }
-    if matches.opt_present("d") || matches.opt_present("delete") {
-        let del = match matches.opt_present("d") {
-            true  => matches.opt_str("d"),
-            false => matches.opt_str("delete")
-        };
-        match del {
-            Some(d) => {
-                let mut i = 0;
-                let mut index = None;
-                for r in night[shade].repositories.iter() {
-                    if r.loc.contains( d ) {
-                        index = Some(i);
-                    } i += 1;
-                }
-                match index {
-                    Some(ind) => {
-                        println!("{:?} removed", night[shade].repositories[ind].loc);
-                        night[shade].repositories.remove( ind );
-                        save_RepoList( cfg, night, shade );
-                        return;
-                    },
-                    None => fail!("{:s} not found", d)
-                }
-            },
-            None => fail!("No add argument provided")
-        };
-    }
     if (path_exists( cfg )) {
+        let at = match matches.opt_present("t") {
+            true  => matches.opt_str("t"),
+            false => None
+        };
+        if matches.opt_present("a") || matches.opt_present("add") {
+            let add = match matches.opt_present("a") {
+                true  => matches.opt_str("a"),
+                false => matches.opt_str("add")
+            };
+            match add {
+                Some(a) => {
+                    if shade == -1 {
+                        night.push( Night {
+                            shade: ashade.unwrap(),
+                            pretty: true,
+                            repositories: ~[ 
+                                add_Repo(a, at, matches.opt_str("u"))
+                                ]
+                            });
+                        save_RepoList( cfg, night, 0 );
+                        return;
+                    } else {
+                        night[shade].repositories.push( add_Repo(a, at, matches.opt_str("u")));
+                        save_RepoList( cfg, night, shade );
+                        println!("{:?} added", a);
+                        return;
+                    }
+                }, None => fail!("No add argument provided")
+            };
+        }
+        if shade == -1 {
+            fail!("Error: there is no such shade: {}", ashade.unwrap());
+        }
+        if matches.opt_present("l") {
+            if (path_exists( cfg )) {
+                for r in night[shade].repositories.iter().filter(
+                    |&r| match at {
+                        Some(ref rt) => r.t == toVCS(rt.to_owned()),
+                        None => true
+                            }) {
+                    println!(">-- repo: {:s}", r.loc);
+                    println!(" *  type: {:?}", r.t);
+                    println!(" *  upstream: {} {}", r.upstream, r.m);
+                    print   (" *  branches:");
+                    for b in r.branches.iter() {
+                        print!(" {:s}", *b);
+                    }
+                    println("");
+                    println("_________________________________________________________________________");
+                }
+            }
+            return;
+            }
+        if matches.opt_present("d") || matches.opt_present("delete") {
+            let del = match matches.opt_present("d") {
+                true  => matches.opt_str("d"),
+                false => matches.opt_str("delete")
+            };
+            match del {
+                Some(d) => {
+                    let mut i = 0;
+                    let mut index = None;
+                    for r in night[shade].repositories.iter() {
+                        if r.loc.contains( d ) {
+                            index = Some(i);
+                        } i += 1;
+                    }
+                    match index {
+                        Some(ind) => {
+                            println!("{:?} removed", night[shade].repositories[ind].loc);
+                            night[shade].repositories.remove( ind );
+                            save_RepoList( cfg, night, shade );
+                            return;
+                        },
+                        None => fail!("{:s} not found", d)
+                    }
+                },
+                None => fail!("No add argument provided")
+            };
+        }
         let mut total = 0;
         let mut success = 0;
         let mut failed = 0;
