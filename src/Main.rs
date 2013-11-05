@@ -238,7 +238,7 @@ fn main() {
         for rep in night[shade].repositories.iter() {
             println!(" *  repo: {}", rep.loc);
             //----------------------- Smart path ----------------------------------
-            let smartpath = |l : &str| -> Path {
+            let smartpath = |l : &str, cloneThing: &fn(p : &str)| -> Path {
                 let ssps: ~[&str] = l.split_iter('/').collect();
                 if ssps.len() > 1 {
                     let ssp = ssps[1];
@@ -251,16 +251,21 @@ fn main() {
                         };
                         if ! (&Path::new( p.as_slice() )).exists() {
                             println!(" * > clone into : {:s}", p);
-                            e("git", [&"clone", l.as_slice(), p.as_slice()]);
+                            cloneThing(p);
                         }
                         Path::new( p )
                     } else { Path::new( l ) }
                 } else { Path::new( l ) }
             };
             //-------------------------- Real loc ----------------------------------
-            let loc= if rep.loc.starts_with("git@")
-                     || rep.loc.starts_with("hg@") {
-                smartpath(rep.loc)
+            let loc= if rep.loc.starts_with("git@") {
+                do smartpath(rep.loc) | p: &str | {
+                    e("git", [&"clone", rep.loc.as_slice(), p]);
+                    }
+            } else if rep.loc.starts_with("hg@") {
+                do smartpath(rep.loc) | p: &str | {
+                    e("hg", [&"clone", rep.loc.as_slice(), p]);
+                    }
             } else { Path::new( rep.loc.as_slice() ) };
             //---------------------------- CELL -----------------------------------
             let rclone  = Cell::new( rep.clone() );
