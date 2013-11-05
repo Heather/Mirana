@@ -15,10 +15,12 @@ pub struct Repository { loc: ~str
 }
 
 #[deriving(Encodable, Decodable, Clone)]
-pub struct Night { pretty: bool
-    , shade: ~str
+pub struct Night { shade: ~str
     , repositories: ~[Repository]
 }
+
+#[deriving(Encodable, Decodable, Clone)]
+pub struct POTM { pretty: bool }
 
 ///<Summary>
 ///Convert to VCS

@@ -6,7 +6,7 @@ use Moon::{toVCS, Repository, Night
     , Gentoo};
 use Shell::{e, exe};
 use Butterfly::{rustbuildbotdance};
-use Config::{save_RepoList, load_RepoList, add_Repo};
+use Config::{save_RepoList, save_App, load_RepoList, load_App, add_Repo};
 // Modules:
 use Git::{gitSync, gitMerge, gitPull};
 use Hg::{hgSync};
@@ -21,7 +21,7 @@ use std::os::change_dir;
 use extra::time;
 use extra::getopts::{optflag, optopt, getopts, Opt};
 
-static r_version: &'static str = "  Mirana v0.0.6";
+static r_version: &'static str = "  Mirana v0.0.7";
 static mut ncore: uint = 1;
 
 fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
@@ -112,11 +112,18 @@ fn main() {
             println!("Path doesn't exist: {}", x86);
         } return;
     }
+    //Load JSON configuration---------------------------------------------
     let cfg = & Path::new (
         if nix  { "/etc/shades.conf" }
         else    { "shades.conf" }
         );
+    let appCfg = & Path::new (
+        if nix  { "/etc/mirana.conf" }
+        else    { "mirana.conf" }
+        );
     let mut night = load_RepoList( cfg );
+    let app = load_App( appCfg );
+    //--------------------------------------------------------------------
     let ashade = match matches.opt_present("s") {
         true  => matches.opt_str("s"),
         false => matches.opt_str("shade")
@@ -146,16 +153,15 @@ fn main() {
                     if shade == -1 {
                         night.push( Night {
                             shade: ashade.unwrap(),
-                            pretty: true,
                             repositories: ~[ 
                                 add_Repo(a, at, matches.opt_str("u"))
                                 ]
                             });
-                        save_RepoList( cfg, night, 0 );
+                        save_RepoList( cfg, night, app.pretty );
                         return;
                     } else {
                         night[shade].repositories.push( add_Repo(a, at, matches.opt_str("u")));
-                        save_RepoList( cfg, night, shade );
+                        save_RepoList( cfg, night, app.pretty );
                         println!("{:?} added", a);
                         return;
                     }
@@ -203,7 +209,7 @@ fn main() {
                         Some(ind) => {
                             println!("{:?} removed", night[shade].repositories[ind].loc);
                             night[shade].repositories.remove( ind );
-                            save_RepoList( cfg, night, shade );
+                            save_RepoList( cfg, night, app.pretty );
                             return;
                         },
                         None => fail!("{:s} not found", d)
@@ -265,7 +271,6 @@ fn main() {
         println("For now one is created just for example");
         night.push( Night {
             shade: ~"default",
-            pretty: true,
             repositories: ~[ Repository { /* Personal Rust update shade */
                 loc: ~"git@github.com:Heather/rust.git",
                 t: git, 
@@ -280,7 +285,6 @@ fn main() {
             if portagePath.exists() {
                 night.push( Night { /* Gentoo update shade */
                     shade: ~"Gentoo",
-                    pretty: true,
                     repositories: ~[ Repository { 
                         loc: portage,
                         t: Gentoo, 
@@ -290,7 +294,8 @@ fn main() {
                 });
             }
         }
-        save_RepoList( cfg, night, shade );
+        save_RepoList( cfg, night, app.pretty);
+        save_App( appCfg, app, app.pretty);
     }
     if !nix {
         println("Please, kill me ");    /* println because print FAILS here...    */

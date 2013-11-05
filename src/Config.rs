@@ -1,4 +1,4 @@
-use Moon::{Night, Repository, toVCS, git};
+use Moon::{Night, POTM, Repository, toVCS, git};
 
 use std::rt::io;
 use std::rt::io::File;
@@ -6,17 +6,18 @@ use std::path::Path;
 
 use extra::json;
 use extra::serialize::{Decodable, Encodable};
+use extra::serialize::Encoder;
 
 ///<Summary>
 ///Load JSON config
 ///</Summary>
-pub fn load_RepoList(p: &Path) -> ~[Night] {
+fn load_JSON<T: Decodable<json::Decoder>>(p: &Path) -> ~[T] {
     if ( p.exists() ) {
         let filereader = File::open(p);
         match filereader {
             Some(f) => {
                 let reader  = @mut f as @mut io::Reader;
-                let res     = json::from_reader(reader).expect("Repo list is broken");
+                let res     = json::from_reader(reader).expect("JSON is broken");
                 Decodable::decode(&mut json::Decoder(res))
             }, None => ~[]
         }
@@ -24,20 +25,67 @@ pub fn load_RepoList(p: &Path) -> ~[Night] {
 }
 
 ///<Summary>
-///Load JSON config
+///Save JSON with custom PrettyEncoder
 ///</Summary>
-pub fn save_RepoList(p: &Path, night: ~[Night], shade: uint) {
+fn save_PrettyJSON<T: Encodable<json::PrettyEncoder>>(p: &Path, toEncode: ~[T]) {
     let encfile = File::create(p);
     match encfile {
         Some(f) => {
             let encf = @mut f as @mut io::Writer;
-            if night.len() > 0 {
-                if night[shade].pretty {    night.encode(&mut json::PrettyEncoder(encf));
-                }       else {              night.encode(&mut json::Encoder(encf));
-                }   }   else {              night.encode(&mut json::Encoder(encf));
-            }
+            toEncode.encode(&mut json::PrettyEncoder(encf));
         }, None => fail!("failed to save json")
     };
+}
+
+///<Summary>
+///Save JSON with custom PrettyEncoder
+///</Summary>
+fn save_JSON<T: Encodable<json::Encoder>>(p: &Path, toEncode: ~[T]) {
+    let encfile = File::create(p);
+    match encfile {
+        Some(f) => {
+            let encf = @mut f as @mut io::Writer;
+            toEncode.encode(&mut json::Encoder(encf));
+        }, None => fail!("failed to save json")
+    };
+}
+
+///<Summary>
+///Load Repositories
+///</Summary>
+pub fn load_RepoList(p: &Path) -> ~[Night] {
+    load_JSON::<Night>(p)
+}
+
+///<Summary>
+///Load App.conf
+///</Summary>
+pub fn load_App(p: &Path) -> POTM {
+    let potm = load_JSON::<POTM>(p);
+    if potm.len() > 0 {
+        potm[0]
+    } else {
+        POTM { pretty: true
+        }
+    }
+}
+
+///<Summary>
+///Save Repo List
+///</Summary>
+pub fn save_RepoList(p: &Path, night: ~[Night], pretty : bool) {
+    if pretty { save_PrettyJSON::<Night>(p, night);
+    } else {    save_JSON::<Night>(p, night);    
+    }
+}
+
+///<Summary>
+///Save App conf
+///</Summary>
+pub fn save_App(p: &Path, potm: POTM, pretty : bool) {
+    if pretty { save_PrettyJSON::<POTM>(p, ~[potm]);
+    } else {    save_JSON::<POTM>(p, ~[potm]);    
+    }
 }
 
 ///<Summary>
