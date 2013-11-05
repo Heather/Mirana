@@ -1,5 +1,5 @@
 // Core:
-use Moon::{toVCS, Repository, Night
+use Moon::{toVCS, Repository, Remote, Night
     , git, git_merge, git_pull
     , hg
     , cvs
@@ -21,7 +21,7 @@ use std::os::change_dir;
 use extra::time;
 use extra::getopts::{optflag, optopt, getopts, Opt};
 
-static r_version: &'static str = "  Mirana v0.0.7";
+static r_version: &'static str = "  Mirana v0.0.8";
 static mut ncore: uint = 1;
 
 fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
@@ -38,23 +38,28 @@ fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
         println(" -g --gentoo\tSync Gentoo-x86");
     }
 }
-fn sync(repo: Repository, location: Path) {
-    let r = &repo;
+fn sync(repo: Repository, location: Path, typeFilter : Option<~str>) {
     let loc = &location;
     let nowt = time::now_utc();
     let nowt_str = nowt.rfc3339();
     if loc.exists() {
         change_dir(loc);
-        for b in r.branches.iter() {
-            println!(" [{:s}]  branch: {:s}", nowt_str, *b);
-            match r.t {
-                git        => gitSync(*b, r.m, r.upstream),
-                git_merge  => gitMerge(*b, r.m, r.upstream),
-                git_pull   => gitPull(*b),
-                hg         => hgSync(*b, r.m, r.upstream),
-                cvs        => cvsSync(*b, r.m, r.upstream),
-                Gentoo     => unsafe { gentooFullUpdate(*b, ncore) }, 
-                _          => println("not supported yet")
+        for r in repo.remotes.iter().filter(
+            |&r| match typeFilter {
+                Some(ref rt) => r.t == toVCS(rt.to_owned()),
+                None => true
+            }) {
+            for b in r.branches.iter() {
+                println!(" [{:s}]  branch: {:s}", nowt_str, *b);
+                match r.t {
+                    git        => gitSync(*b, r.m, r.upstream),
+                    git_merge  => gitMerge(*b, r.m, r.upstream),
+                    git_pull   => gitPull(*b),
+                    hg         => hgSync(*b, r.m, r.upstream),
+                    cvs        => cvsSync(*b, r.m, r.upstream),
+                    Gentoo     => unsafe { gentooFullUpdate(*b, ncore) }, 
+                    _          => println("not supported yet")
+                }
             }
         }
     }
@@ -173,24 +178,25 @@ fn main() {
         }
         if matches.opt_present("l") {
             if ( cfg.exists() ) {
-                for r in night[shade].repositories.iter().filter(
-                    |&r| match at {
-                        Some(ref rt) => r.t == toVCS(rt.to_owned()),
-                        None => true
-                            }) {
-                    println!(">-- repo: {:s}", r.loc);
-                    println!(" *  type: {:?}", r.t);
-                    println!(" *  upstream: {} {}", r.upstream, r.m);
-                    print   (" *  branches:");
-                    for b in r.branches.iter() {
-                        print!(" {:s}", *b);
+                for rep in night[shade].repositories.iter() {
+                    for rem in rep.remotes.iter().filter(
+                        |&r| match at {
+                            Some(ref rt) => r.t == toVCS(rt.to_owned()),
+                            None => true
+                                }) {
+                        println!(">-- repo: {:s}", rep.loc);
+                        println!(" *  type: {:?}", rem.t);
+                        println!(" *  upstream: {} {}", rem.upstream, rem.m);
+                        print   (" *  branches:");
+                        for b in rem.branches.iter() {
+                            print!(" {:s}", *b);
+                        }
+                        println("");
+                        println("_________________________________________________________________________");
                     }
-                    println("");
-                    println("_________________________________________________________________________");
                 }
-            }
-            return;
-            }
+            } return;
+        }
         if matches.opt_present("d") || matches.opt_present("delete") {
             let del = match matches.opt_present("d") {
                 true  => matches.opt_str("d"),
@@ -221,12 +227,9 @@ fn main() {
         let mut total = 0;
         let mut success = 0;
         let mut failed = 0;
-        for r in night[shade].repositories.iter().filter(
-            |&r| match at {
-                Some(ref rt) => r.t == toVCS(rt.to_owned()),
-                None => true
-            }) {
-            println!(" *  repo: {}", r.loc);
+        for rep in night[shade].repositories.iter() {
+            println!(" *  repo: {}", rep.loc);
+            //----------------------- Smart path ----------------------------------
             let smartpath = |l : &str| -> Path {
                 let ssps: ~[&str] = l.split_iter('/').collect();
                 if ssps.len() > 1 {
@@ -246,14 +249,17 @@ fn main() {
                     } else { Path::new( l ) }
                 } else { Path::new( l ) }
             };
-            let loc= if r.loc.starts_with("git@")
-                     || r.loc.starts_with("hg@") {
-                smartpath(r.loc)
-            } else { Path::new( r.loc.as_slice() ) };
-            let rclone = Cell::new( r.clone() );
-            let lclone = Cell::new( loc );
-            match do task::try {
-                sync(rclone.take(), lclone.take());
+            //-------------------------- Real loc ----------------------------------
+            let loc= if rep.loc.starts_with("git@")
+                     || rep.loc.starts_with("hg@") {
+                smartpath(rep.loc)
+            } else { Path::new( rep.loc.as_slice() ) };
+            //---------------------------- CELL -----------------------------------
+            let rclone  = Cell::new( rep.clone() );
+            let lclone  = Cell::new( loc );
+            let atclone = Cell::new( at.clone() );
+            //---------------------------- sync -----------------------------------
+            match do task::try { sync(rclone.take(), lclone.take(), atclone.take());
             } { Ok(_) => { success += 1; },
                 Err(e) => {
                     println!("  * failed: {:?}", e);
@@ -273,12 +279,14 @@ fn main() {
             shade: ~"default",
             repositories: ~[ Repository { /* Personal Rust update shade */
                 loc: ~"git@github.com:Heather/rust.git",
-                t: git, 
-                branches: ~[~"master"],
-                m: ~"master",
-                upstream: ~"git@github.com:mozilla/rust.git"
-            }]
-        });
+                remotes: ~[ Remote {
+                        t: git, 
+                        branches: ~[~"master"],
+                        m: ~"master",
+                        upstream: ~"git@github.com:mozilla/rust.git"
+                    }]
+                }]
+            });
         if nix {
             let portage = ~"/usr/portage";
             let portagePath = & Path::new( portage.clone() );
@@ -287,13 +295,14 @@ fn main() {
                     shade: ~"Gentoo",
                     repositories: ~[ Repository { 
                         loc: portage,
-                        t: Gentoo, 
-                        branches: ~[~"/home/gentoo-x86"],
-                        m: ~"", upstream: ~""
-                    }]
-                });
-            }
-        }
+                        remotes: ~[ Remote {
+                                t: Gentoo, 
+                                branches: ~[~"/home/gentoo-x86"],
+                                m: ~"", upstream: ~""
+                            }]
+                        }]
+                    });
+            }}
         save_RepoList( cfg, night, app.pretty);
         save_App( appCfg, app, app.pretty);
     }
@@ -301,6 +310,5 @@ fn main() {
         println("Please, kill me ");    /* println because print FAILS here...    */
         do rustbuildbotdance {          /* even butterflies feels buggy now...    */
             while(true) { ; }           /* noone knows how to read_line in new IO */
-        }
-    }
+        }}
 }

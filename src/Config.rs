@@ -1,4 +1,4 @@
-use Moon::{Night, POTM, Repository, toVCS, git};
+use Moon::{Night, POTM, Repository, Remote, toVCS, git};
 
 use std::rt::io;
 use std::rt::io::File;
@@ -28,11 +28,11 @@ fn load_JSON<T: Decodable<json::Decoder>>(p: &Path) -> ~[T] {
 ///Save JSON with custom PrettyEncoder
 ///</Summary>
 fn save_PrettyJSON<T: Encodable<json::PrettyEncoder>>(p: &Path, toEncode: ~[T]) {
-    let encfile = File::create(p);
-    match encfile {
+    match File::create(p) {
         Some(f) => {
-            let encf = @mut f as @mut io::Writer;
-            toEncode.encode(&mut json::PrettyEncoder(encf));
+            toEncode.encode(
+                &mut json::PrettyEncoder(
+                    @mut f as @mut io::Writer));
         }, None => fail!("failed to save json")
     };
 }
@@ -41,11 +41,11 @@ fn save_PrettyJSON<T: Encodable<json::PrettyEncoder>>(p: &Path, toEncode: ~[T]) 
 ///Save JSON with custom PrettyEncoder
 ///</Summary>
 fn save_JSON<T: Encodable<json::Encoder>>(p: &Path, toEncode: ~[T]) {
-    let encfile = File::create(p);
-    match encfile {
+    match File::create(p) {
         Some(f) => {
-            let encf = @mut f as @mut io::Writer;
-            toEncode.encode(&mut json::Encoder(encf));
+            toEncode.encode(
+                &mut json::Encoder(
+                    @mut f as @mut io::Writer));
         }, None => fail!("failed to save json")
     };
 }
@@ -62,11 +62,8 @@ pub fn load_RepoList(p: &Path) -> ~[Night] {
 ///</Summary>
 pub fn load_App(p: &Path) -> POTM {
     let potm = load_JSON::<POTM>(p);
-    if potm.len() > 0 {
-        potm[0]
-    } else {
-        POTM { pretty: true
-        }
+    if potm.len() > 0   { potm[0]
+    } else              { POTM { pretty: true }
     }
 }
 
@@ -74,8 +71,8 @@ pub fn load_App(p: &Path) -> POTM {
 ///Save Repo List
 ///</Summary>
 pub fn save_RepoList(p: &Path, night: ~[Night], pretty : bool) {
-    if pretty { save_PrettyJSON::<Night>(p, night);
-    } else {    save_JSON::<Night>(p, night);    
+    if pretty { save_PrettyJSON ::<Night>(p, night);
+    } else {    save_JSON       ::<Night>(p, night);    
     }
 }
 
@@ -83,8 +80,8 @@ pub fn save_RepoList(p: &Path, night: ~[Night], pretty : bool) {
 ///Save App conf
 ///</Summary>
 pub fn save_App(p: &Path, potm: POTM, pretty : bool) {
-    if pretty { save_PrettyJSON::<POTM>(p, ~[potm]);
-    } else {    save_JSON::<POTM>(p, ~[potm]);    
+    if pretty { save_PrettyJSON ::<POTM>(p, ~[potm]);
+    } else {    save_JSON       ::<POTM>(p, ~[potm]);    
     }
 }
 
@@ -102,9 +99,13 @@ pub fn add_Repo(repo: &str, t: Option<~str>, u: Option<~str>) -> Repository {
     };
     Repository {
         loc: (repo.to_owned()),
-        t: repoType,
-        branches: ~[~"master"],
-        m: ~"master",
-        upstream: upstream
+        remotes: ~[
+            Remote {
+                t: repoType,
+                branches: ~[~"master"],
+                m: ~"master",
+                upstream: upstream
+            }
+        ]
     }
 }
