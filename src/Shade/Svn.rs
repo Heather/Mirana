@@ -1,12 +1,10 @@
 use Shell::e;
 
 ///<Summary>
-///Just cvs update yet
+///Svn update
 ///</Summary>
-pub fn cvsSync(branch: &str, master: &str, upstream: &str) {
+pub fn svnUpdate() {
     println("_________________________________________________________________________");
-    e("cvs", [&"update"]);
-    println!("warnings reslove about : {} {} {}", branch, master, upstream);
-    //TODO: write stuff
+    e("svn", [&"update"]);
     println("_________________________________________________________________________");
 }

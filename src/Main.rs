@@ -1,17 +1,19 @@
 // Core:
-use Moon::{toVCS, Repository, Remote, Night
+use Moon::{Repository, Remote, Night
     , git, git_merge, git_pull
-    , hg
+    , hg, hg_update
+    , svn
     , cvs
     , Gentoo};
-use Shell::{e, exe};
-use Butterfly::{rustbuildbotdance};
-use Config::{save_RepoList, save_App, load_RepoList, load_App, add_Repo};
+use Shell       ::{e, exe};
+use Butterfly   ::{rustbuildbotdance};
+use Config      ::{save_RepoList, save_App, load_RepoList, load_App, add_Repo, toVCS};
 // Modules:
-use Git::{gitSync, gitMerge, gitPull};
-use Hg::{hgSync};
-use Cvs::{cvsSync};
-use Gentoo_x86::{gentoo, gentooFullUpdate};
+use Shade::Git          ::{gitSync, gitMerge, gitPull};
+use Shade::Hg           ::{hgSync, hgUpdate};
+use Shade::Svn          ::{svnUpdate};
+use Shade::Cvs          ::{cvsUpdate};
+use Shade::Gentoo_x86   ::{gentoo, gentooFullUpdate};
 // Internal:
 use std::os;
 use std::task;
@@ -21,7 +23,7 @@ use std::os::change_dir;
 use extra::time;
 use extra::getopts::{optflag, optopt, getopts, Opt};
 
-static r_version: &'static str = "  Mirana v0.0.8";
+static r_version: &'static str = "  Mirana v0.0.9";
 static mut ncore: uint = 1;
 
 fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
@@ -52,13 +54,19 @@ fn sync(repo: Repository, location: Path, typeFilter : Option<~str>) {
             for b in r.branches.iter() {
                 println!(" [{:s}]  branch: {:s}", nowt_str, *b);
                 match r.t {
+                    // git     =>
                     git        => gitSync(*b, r.m, r.upstream),
                     git_merge  => gitMerge(*b, r.m, r.upstream),
                     git_pull   => gitPull(*b),
-                    hg         => hgSync(*b, r.m, r.upstream),
-                    cvs        => cvsSync(*b, r.m, r.upstream),
+                    // hg      =>
+                    hg         => hgSync(*b, r.upstream),
+                    hg_update  => hgUpdate(),
+                    // svn     =>
+                    svn        => svnUpdate(),
+                    // cvs     =>
+                    cvs        => cvsUpdate(),
+                    // Gentoo  =>
                     Gentoo     => unsafe { gentooFullUpdate(*b, ncore) }, 
-                    _          => println("not supported yet")
                 }
             }
         }

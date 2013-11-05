@@ -1,5 +1,9 @@
-use Moon::{Night, POTM, Repository, Remote, toVCS, git};
-
+use Moon::{Night, POTM, Repository, Remote, VCS
+    , git, git_merge, git_pull
+    , hg, hg_update
+    , svn
+    , cvs
+    , Gentoo};
 use std::rt::io;
 use std::rt::io::File;
 use std::path::Path;
@@ -82,6 +86,23 @@ pub fn save_RepoList(p: &Path, night: ~[Night], pretty : bool) {
 pub fn save_App(p: &Path, potm: POTM, pretty : bool) {
     if pretty { save_PrettyJSON ::<POTM>(p, ~[potm]);
     } else {    save_JSON       ::<POTM>(p, ~[potm]);    
+    }
+}
+
+///<Summary>
+///Convert to VCS
+///
+/// git as default
+///
+///</Summary>
+pub fn toVCS(s: ~str) -> VCS {
+    match s {
+        ~"git" => git, ~"git_pull" => git_pull, ~"git_merge" => git_merge,
+        ~"hg"  => hg, ~"hg_update" => hg_update,
+        ~"svn" => svn,
+        ~"cvs" => cvs,
+        ~"Gentoo" => Gentoo,
+        _ => git
     }
 }
 
