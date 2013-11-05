@@ -1,14 +1,14 @@
 use Shell::{e, exec};
 use Butterfly::butterfly;
 
-use std::os::{path_exists, change_dir};
+use std::os::{change_dir};
 
 ///<Summary>
 ///Full Gentoo Update
 ///</Summary>
 pub fn gentooFullUpdate(loc: &str, ncores: uint) {
     let p86 = & Path::new( loc );
-    if path_exists(p86) {
+    if p86.exists() {
         change_dir(p86);
         gentoo(loc, ncores);
     } else {

@@ -16,7 +16,7 @@ use Gentoo_x86::{gentoo, gentooFullUpdate};
 use std::os;
 use std::task;
 use std::cell::Cell;
-use std::os::{path_exists, change_dir};
+use std::os::change_dir;
 // ExtrA:
 use extra::time;
 use extra::getopts::{optflag, optopt, getopts, Opt};
@@ -43,7 +43,7 @@ fn sync(repo: Repository, location: Path) {
     let loc = &location;
     let nowt = time::now_utc();
     let nowt_str = nowt.rfc3339();
-    if path_exists(loc) {
+    if loc.exists() {
         change_dir(loc);
         for b in r.branches.iter() {
             println!(" [{:s}]  branch: {:s}", nowt_str, *b);
@@ -105,7 +105,7 @@ fn main() {
     if nix && ( matches.opt_present("g") || matches.opt_present("gentoo") ) {
         let x86 = "/home/gentoo-x86";
         let p86 = & Path::new( x86 );
-        if path_exists(p86) {
+        if p86.exists() {
             change_dir(p86);
             unsafe { gentoo(x86, ncore); }
         } else {
@@ -131,7 +131,7 @@ fn main() {
             }, None => 0
         }
     } else { 0 };
-    if (path_exists( cfg )) {
+    if ( cfg.exists() ) {
         let at = match matches.opt_present("t") {
             true  => matches.opt_str("t"),
             false => None
@@ -166,7 +166,7 @@ fn main() {
             fail!("Error: there is no such shade: {}", ashade.unwrap());
         }
         if matches.opt_present("l") {
-            if (path_exists( cfg )) {
+            if ( cfg.exists() ) {
                 for r in night[shade].repositories.iter().filter(
                     |&r| match at {
                         Some(ref rt) => r.t == toVCS(rt.to_owned()),
@@ -232,7 +232,7 @@ fn main() {
                             false   => format!("../{}", project),
                             true    => format!("/home/{}", project)
                         };
-                        if !path_exists(&Path::new( p.as_slice() )) {
+                        if ! (&Path::new( p.as_slice() )).exists() {
                             println!(" * > clone into : {:s}", p);
                             e("git", [&"clone", l.as_slice(), p.as_slice()]);
                         }
@@ -277,7 +277,7 @@ fn main() {
         if nix {
             let portage = ~"/usr/portage";
             let portagePath = & Path::new( portage.clone() );
-            if path_exists(portagePath) {
+            if portagePath.exists() {
                 night.push( Night { /* Gentoo update shade */
                     shade: ~"Gentoo",
                     pretty: true,

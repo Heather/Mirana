@@ -1,9 +1,8 @@
 use Moon::{Night, Repository, toVCS, git};
 
 use std::rt::io;
+use std::rt::io::File;
 use std::path::Path;
-use std::os::path_exists;
-use std::rt::io::file::{FileInfo};
 
 use extra::json;
 use extra::serialize::{Decodable, Encodable};
@@ -12,8 +11,8 @@ use extra::serialize::{Decodable, Encodable};
 ///Load JSON config
 ///</Summary>
 pub fn load_RepoList(p: &Path) -> ~[Night] {
-    if (path_exists( p )) {
-        let filereader = p.open_reader(io::Open);
+    if ( p.exists() ) {
+        let filereader = File::open(p);
         match filereader {
             Some(f) => {
                 let reader  = @mut f as @mut io::Reader;
@@ -28,7 +27,7 @@ pub fn load_RepoList(p: &Path) -> ~[Night] {
 ///Load JSON config
 ///</Summary>
 pub fn save_RepoList(p: &Path, night: ~[Night], shade: uint) {
-    let encfile = p.open_writer(io::CreateOrTruncate);
+    let encfile = File::create(p);
     match encfile {
         Some(f) => {
             let encf = @mut f as @mut io::Writer;
