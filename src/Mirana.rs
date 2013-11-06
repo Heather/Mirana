@@ -6,6 +6,7 @@ extern mod extra;
 pub mod Moon;
 pub mod Shell;
 pub mod Butterfly;
+pub mod Misc;
 
 /* Json config is the only one yet I found in rust */
 pub mod Config;

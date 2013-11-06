@@ -1,9 +1,6 @@
-use Moon::{Night, POTM, Repository, Remote, VCS
-    , git, git_merge, git_pull
-    , hg, hg_update
-    , svn
-    , cvs
-    , Gentoo};
+use Moon::{Night, POTM, Remote, Repository, git, Gentoo};
+use Misc::toVCS;
+
 use std::rt::io;
 use std::rt::io::File;
 use std::path::Path;
@@ -91,23 +88,6 @@ pub fn save_App(p: &Path, potm: POTM, pretty : bool) {
 }
 
 ///<Summary>
-///Convert to VCS
-///
-/// git as default
-///
-///</Summary>
-pub fn toVCS(s: ~str) -> VCS {
-    match s {
-        ~"git" => git, ~"git_pull" => git_pull, ~"git_merge" => git_merge,
-        ~"hg"  => hg, ~"hg_update" => hg_update,
-        ~"svn" => svn,
-        ~"cvs" => cvs,
-        ~"Gentoo" => Gentoo,
-        _ => git
-    }
-}
-
-///<Summary>
 ///Add repository to RepoList
 ///</Summary>
 pub fn add_Repo(repo: &str, t: Option<~str>, u: Option<~str>) -> Repository {
@@ -130,4 +110,41 @@ pub fn add_Repo(repo: &str, t: Option<~str>, u: Option<~str>) -> Repository {
             }
         ]
     }
+}
+
+///<Summary>
+///Load & Save default configuration
+///</Summary>
+pub fn save_Defaults(pr: &Path, mut night: ~[Night],
+                     pa: &Path, app: POTM, nix: bool)  {
+    night.push( Night {
+        shade: ~"default",
+        repositories: ~[ Repository { /* Personal Rust update shade */
+            loc: ~"git@github.com:Heather/rust.git",
+            remotes: ~[ Remote {
+                    t: git, 
+                    branches: ~[~"master"],
+                    m: ~"master",
+                    upstream: ~"git@github.com:mozilla/rust.git"
+                }]
+            }]
+        });
+    if nix {
+        let portage = ~"/usr/portage";
+        let portagePath = & Path::new( portage.clone() );
+        if portagePath.exists() {
+            night.push( Night { /* Gentoo update shade */
+                shade: ~"Gentoo",
+                repositories: ~[ Repository { 
+                    loc: portage,
+                    remotes: ~[ Remote {
+                            t: Gentoo, 
+                            branches: ~[~"/home/gentoo-x86"],
+                            m: ~"", upstream: ~""
+                        }]
+                    }]
+                });
+        }}
+    save_RepoList( pr, night, app.pretty);
+    save_App( pa, app, app.pretty);
 }

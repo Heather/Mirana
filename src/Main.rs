@@ -1,13 +1,19 @@
 // Core:
-use Moon::{Repository, Remote, Night
-    , git, git_merge, git_pull
-    , hg, hg_update
-    , svn
-    , cvs
-    , Gentoo};
+use Moon  ::{ Repository, Night
+            , git, git_merge, git_pull
+            , hg, hg_update
+            , svn
+            , cvs
+            , Gentoo};
+
 use Shell       ::{e, exe};
 use Butterfly   ::{rustbuildbotdance};
-use Config      ::{save_RepoList, save_App, load_RepoList, load_App, add_Repo, toVCS};
+use Misc        ::{toVCS};
+use Config      ::{ save_RepoList
+                  , save_Defaults
+                  , load_RepoList
+                  , load_App
+                  , add_Repo};
 // Modules:
 use Shade::Git          ::{gitSync, gitMerge, gitPull};
 use Shade::Hg           ::{hgSync, hgUpdate};
@@ -288,36 +294,7 @@ fn main() {
     } else {
         println("No config file found, consider providing one");
         println("For now one is created just for example");
-        night.push( Night {
-            shade: ~"default",
-            repositories: ~[ Repository { /* Personal Rust update shade */
-                loc: ~"git@github.com:Heather/rust.git",
-                remotes: ~[ Remote {
-                        t: git, 
-                        branches: ~[~"master"],
-                        m: ~"master",
-                        upstream: ~"git@github.com:mozilla/rust.git"
-                    }]
-                }]
-            });
-        if nix {
-            let portage = ~"/usr/portage";
-            let portagePath = & Path::new( portage.clone() );
-            if portagePath.exists() {
-                night.push( Night { /* Gentoo update shade */
-                    shade: ~"Gentoo",
-                    repositories: ~[ Repository { 
-                        loc: portage,
-                        remotes: ~[ Remote {
-                                t: Gentoo, 
-                                branches: ~[~"/home/gentoo-x86"],
-                                m: ~"", upstream: ~""
-                            }]
-                        }]
-                    });
-            }}
-        save_RepoList( cfg, night, app.pretty);
-        save_App( appCfg, app, app.pretty);
+        save_Defaults(cfg, night, appCfg, app, nix);
     }
     if app.wait {
         println("Please, kill me ");    /* println because print FAILS here...    */
