@@ -24,17 +24,23 @@ fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
     println!("Usage: {} [options]", program);
     println("");
     println(" -h --help\tUsage");
+    println("");
     println(" -l\t\tPretty print repositories in sync");
-    println(" -s --shade\tShade config");
-    println(" -a --add\tAdd repo to configuration");
     println(" -d --delete\tDelete repo from configuration");
+    println(" -a --add\tAdd repo to configuration");
+    println("");
+    println(" -e --edit\t\tEdit repo configuration");
+    println("");
+    println(" \t-a --add\tAdd something to repo configuration");
+    println(" \t-d --delete\tDelete something from repo configuration");
+    println("");
+    println(" -s --shade\tShade config");
+    println(" -u\t\tSpecify upstream repository");
     println(" -t\t\tType of adding repo or filtering type");
-    println(" -u\t\tSpecify upstream of adding repo");
     if nix {
         println(" -g --gentoo\tSync Gentoo-x86");
     }
 }
-
 #[main]
 fn main() {
     println!("_________________________________________________________________________");
@@ -62,13 +68,14 @@ fn main() {
     let program = args[0].as_slice();
     let opts = ~[
         optflag("h"), optflag("help"),
-        optflag("g"), optflag("gentoo"),
         optflag("l"),
-        optopt("s"), optopt("shade"),
-        optopt("t"),
-        optopt("d"), optopt("delete"),
         optopt("a"), optopt("add"),
-        optopt("u")
+        optopt("d"), optopt("delete"),
+        optopt("e"), optopt("edit"),
+        optopt("s"), optopt("shade"),
+        optopt("u"),
+        optopt("t"),
+        optflag("g"), optflag("gentoo")
     ];
     let matches = match getopts(args.tail(), opts) {
         Ok(m) => { m }
@@ -119,6 +126,12 @@ fn main() {
             true  => matches.opt_str("t"),
             false => None
         };
+        let edit = if matches.opt_present("e") || matches.opt_present("edit") {
+            match matches.opt_present("e") {
+                true  => matches.opt_str("e"),
+                false => matches.opt_str("edit")
+            }
+        } else { None };
         if matches.opt_present("a") || matches.opt_present("add") {
             let add = match matches.opt_present("a") {
                 true  => matches.opt_str("a"),
@@ -126,26 +139,70 @@ fn main() {
             };
             match add {
                 Some(a) => {
-                    if shade == -1 {
-                        night.push( Night {
-                            shade: ashade.unwrap(),
-                            repositories: ~[ 
-                                add_Repo(a, at, matches.opt_str("u"))
-                                ]
-                            });
-                        save_RepoList( cfg, night, app.pretty );
-                        return;
-                    } else {
-                        night[shade].repositories.push( add_Repo(a, at, matches.opt_str("u")));
-                        save_RepoList( cfg, night, app.pretty );
-                        println!("{:?} added", a);
-                        return;
+                    match edit {
+                        Some(ref e) => {
+                            if shade == -1 {
+                                fail!("Error: there is no such shade: {}", ashade.unwrap());
+                            }
+                            println("parsing repository adding options, not ready");
+                        },
+                        None => {
+                            if shade == -1 {
+                                night.push( Night {
+                                    shade: ashade.unwrap(),
+                                    repositories: ~[ 
+                                        add_Repo(a, at, matches.opt_str("u"))
+                                        ]
+                                    });
+                                save_RepoList( cfg, night, app.pretty );
+                                return;
+                            } else {
+                                night[shade].repositories.push( add_Repo(a, at, matches.opt_str("u")));
+                                save_RepoList( cfg, night, app.pretty );
+                                println!("{:?} added", a);
+                                return;
+                            }
+                        }
                     }
                 }, None => fail!("No add argument provided")
             };
         }
         if shade == -1 {
             fail!("Error: there is no such shade: {}", ashade.unwrap());
+        }
+        if matches.opt_present("d") || matches.opt_present("delete") {
+            let del = match matches.opt_present("d") {
+                true  => matches.opt_str("d"),
+                false => matches.opt_str("delete")
+            };
+            match del {
+                Some(d) => {
+                    match edit {
+                        Some(ref e) => {
+                            println("parsing repository delete options, not ready");
+                        },
+                        None => {
+                            let mut i = 0;
+                            let mut index = None;
+                            for r in night[shade].repositories.iter() {
+                                if r.loc.contains( d ) {
+                                    index = Some(i);
+                                } i += 1;
+                            }
+                            match index {
+                                Some(ind) => {
+                                    println!("{:?} removed", night[shade].repositories[ind].loc);
+                                    night[shade].repositories.remove( ind );
+                                    save_RepoList( cfg, night, app.pretty );
+                                    return;
+                                },
+                                None => fail!("{:s} not found", d)
+                            }
+                        }
+                    }
+                },
+                None => fail!("No add argument provided")
+            };
         }
         if matches.opt_present("l") {
             if ( cfg.exists() ) {
@@ -167,33 +224,6 @@ fn main() {
                     }
                 }
             } return;
-        }
-        if matches.opt_present("d") || matches.opt_present("delete") {
-            let del = match matches.opt_present("d") {
-                true  => matches.opt_str("d"),
-                false => matches.opt_str("delete")
-            };
-            match del {
-                Some(d) => {
-                    let mut i = 0;
-                    let mut index = None;
-                    for r in night[shade].repositories.iter() {
-                        if r.loc.contains( d ) {
-                            index = Some(i);
-                        } i += 1;
-                    }
-                    match index {
-                        Some(ind) => {
-                            println!("{:?} removed", night[shade].repositories[ind].loc);
-                            night[shade].repositories.remove( ind );
-                            save_RepoList( cfg, night, app.pretty );
-                            return;
-                        },
-                        None => fail!("{:s} not found", d)
-                    }
-                },
-                None => fail!("No add argument provided")
-            };
         }
         let mut total = 0;
         let mut success = 0;
