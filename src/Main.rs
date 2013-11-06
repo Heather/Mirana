@@ -15,9 +15,9 @@ use std::task;
 use std::cell::Cell;
 use std::os::change_dir;
 // ExtrA:
-use extra::getopts::{optflag, optopt, getopts, Opt};
+use extra::getopts::{optflag, optopt, getopts, Opt, Matches};
 
-static r_version: &'static str = "  Mirana v0.1.0";
+static r_version: &'static str = "  Mirana v0.1.1";
 static mut ncore: uint = 1;
 
 fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
@@ -35,11 +35,22 @@ fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
     println(" \t-d --delete\tDelete something from repo configuration");
     println("");
     println(" -s --shade\tShade config");
-    println(" -u\t\tSpecify upstream repository");
-    println(" -t\t\tType of adding repo or filtering type");
+    println(" -r --remote\tSpecify remote");
+    println(" -u --upstream\tSpecify upstream repository");
+    println(" -m --master\tSpecify upstream master branch");
+    println(" -b --branch\tBranch of adding / editing repo or filtering type");
+    println(" -t --type\tType of adding / editing repo or filtering type");
     if nix {
         println(" -g --gentoo\tSync Gentoo-x86");
     }
+}
+fn find_Repo(night: &[Night], shade: uint, pattern: &str) -> Option<uint> {
+    night[shade]    .repositories
+                    .iter()
+                    .position ( |r| r.loc.contains( pattern ) )
+}
+fn getOption(matches: &Matches, opts: &[&str]) -> Option<~str> {
+    opts.iter().filter_map(|opt| matches.opt_str(*opt)).next()
 }
 #[main]
 fn main() {
@@ -55,12 +66,9 @@ fn main() {
                 Some(n) => n + 1,
                 None => 1
             }
-        } { Ok(n) => {
-                println!(", {:u} Core", n);
-                unsafe { ncore = n; }
-            }, Err(e) => {
-                println!(" -> can't get cores count: {:?}", e);
-            }
+        } {  Ok(n)  => {  println!(", {:u} Core", n); unsafe { ncore = n; }
+          }, Err(e) => {  println!(" -> can't get cores count: {:?}", e);
+          }
         }
     } else { println (", Windows"); };
     println("_________________________________________________________________________");
@@ -73,8 +81,11 @@ fn main() {
         optopt("d"), optopt("delete"),
         optopt("e"), optopt("edit"),
         optopt("s"), optopt("shade"),
-        optopt("u"),
-        optopt("t"),
+        optopt("r"), optopt("remote"),
+        optopt("u"), optopt("upstream"),
+        optopt("m"), optopt("master"),
+        optopt("b"), optopt("branch"),
+        optopt("t"), optopt("type"),
         optflag("g"), optflag("gentoo")
     ];
     let matches = match getopts(args.tail(), opts) {
@@ -82,8 +93,7 @@ fn main() {
         Err(f) => { fail!(f.to_err_msg()) }
     };
     if matches.opt_present("h") || matches.opt_present("help") {
-        print_usage(program, opts, nix);
-        return;
+        print_usage(program, opts, nix); return;
     }
     if nix && ( matches.opt_present("g") || matches.opt_present("gentoo") ) {
         let x86 = "/home/gentoo-x86";
@@ -107,12 +117,9 @@ fn main() {
     let mut night = load_RepoList( cfg );
     let app = load_App( appCfg );
     //--------------------------------------------------------------------
-    let ashade = match matches.opt_present("s") {
-        true  => matches.opt_str("s"),
-        false => matches.opt_str("shade")
-    };
+    let maybe_shade = getOption(&matches, ["s", "shade"]);
     let shade = if matches.opt_present("s") || matches.opt_present("shade") {
-        match ashade {
+        match maybe_shade {
             Some(ref ss) => {
                 match night.iter().position( |shd| shd.shade == *ss ) {
                     Some(ps)    => ps,
@@ -122,93 +129,78 @@ fn main() {
         }
     } else { 0 };
     if ( cfg.exists() ) {
-        let at = match matches.opt_present("t") {
-            true  => matches.opt_str("t"),
-            false => None
-        };
-        let edit = if matches.opt_present("e") || matches.opt_present("edit") {
-            match matches.opt_present("e") {
-                true  => matches.opt_str("e"),
-                false => matches.opt_str("edit")
-            }
-        } else { None };
+        let maybe_type      = matches.opt_str("t");
+        let maybe_edit      = getOption(&matches, ["e", "edit"]);
+        let maybe_remote    = getOption(&matches, ["r", "remote"]);
+        let maybe_branch    = getOption(&matches, ["b", "branch"]);
         if matches.opt_present("a") || matches.opt_present("add") {
-            let add = match matches.opt_present("a") {
-                true  => matches.opt_str("a"),
-                false => matches.opt_str("add")
-            };
-            match add {
-                Some(a) => {
-                    match edit {
-                        Some(ref e) => {
-                            if shade == -1 {
-                                fail!("Error: there is no such shade: {}", ashade.unwrap());
+            match maybe_edit {
+                Some(ref e) => {
+                    if shade == -1 {
+                        fail!("Error: there is no such shade: {}", maybe_shade.unwrap());
+                    } else {
+                        let repo = find_Repo(night, shade, *e);
+                        match maybe_remote {
+                            Some(r) => {
+                            }, None => {
                             }
-                            println("parsing repository adding options, not ready");
-                        },
-                        None => {
+                        };
+                    }
+                },  None => {
+                    match getOption(&matches, ["a", "add"]) {
+                        Some(a) => {
                             if shade == -1 {
                                 night.push( Night {
-                                    shade: ashade.unwrap(),
+                                    shade: maybe_shade.unwrap(),
                                     repositories: ~[ 
-                                        add_Repo(a, at, matches.opt_str("u"))
+                                        add_Repo(a, maybe_type, matches.opt_str("u"))
                                         ]
                                     });
                                 save_RepoList( cfg, night, app.pretty );
-                                return;
                             } else {
-                                night[shade].repositories.push( add_Repo(a, at, matches.opt_str("u")));
+                                night[shade].repositories.push(
+                                    add_Repo(a, maybe_type, matches.opt_str("u")));
                                 save_RepoList( cfg, night, app.pretty );
                                 println!("{:?} added", a);
-                                return;
                             }
-                        }
-                    }
-                }, None => fail!("No add argument provided")
-            };
+                        }, None => fail!("No add argument provided")
+                    };
+                }
+            }; return;
         }
         if shade == -1 {
-            fail!("Error: there is no such shade: {}", ashade.unwrap());
+            fail!("Error: there is no such shade: {}", maybe_shade.unwrap());
         }
         if matches.opt_present("d") || matches.opt_present("delete") {
-            let del = match matches.opt_present("d") {
-                true  => matches.opt_str("d"),
-                false => matches.opt_str("delete")
-            };
-            match del {
-                Some(d) => {
-                    match edit {
-                        Some(ref e) => {
-                            println("parsing repository delete options, not ready");
-                        },
-                        None => {
-                            let mut i = 0;
-                            let mut index = None;
-                            for r in night[shade].repositories.iter() {
-                                if r.loc.contains( d ) {
-                                    index = Some(i);
-                                } i += 1;
-                            }
-                            match index {
+            match maybe_edit {
+                Some(ref e) => {
+                    let repo = find_Repo(night, shade, *e);
+                    match maybe_remote {
+                        Some(r) => {
+                        }, None => {
+                        }
+                    };
+                },  None => {
+                    match getOption(&matches, ["d", "delete"]) {
+                        Some(d) => {
+                            match find_Repo(night, shade, d) {
                                 Some(ind) => {
                                     println!("{:?} removed", night[shade].repositories[ind].loc);
                                     night[shade].repositories.remove( ind );
                                     save_RepoList( cfg, night, app.pretty );
-                                    return;
                                 },
                                 None => fail!("{:s} not found", d)
                             }
-                        }
-                    }
-                },
-                None => fail!("No add argument provided")
-            };
+                        }, None => fail!("No add argument provided")
+                    };
+                }
+            }; return;
         }
         if matches.opt_present("l") {
             if ( cfg.exists() ) {
                 for rep in night[shade].repositories.iter() {
                     for rem in rep.remotes.iter().filter(
-                        |&r| match at {
+                        |&r| match maybe_type {
                             Some(ref rt) => r.t == toVCS(rt.to_owned()),
                             None => true
                                 }) {
@@ -263,7 +255,7 @@ fn main() {
             //---------------------------- CELL -----------------------------------
             let rclone  = Cell::new( rep.clone() );
             let lclone  = Cell::new( loc );
-            let atclone = Cell::new( at.clone() );
+            let atclone = Cell::new( maybe_type.clone() );
             //---------------------------- sync -----------------------------------
             match do task::try { unsafe {
                 sync(rclone.take(), lclone.take(), atclone.take(), ncore);
