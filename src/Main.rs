@@ -1,32 +1,20 @@
-// Core:
-use Moon  ::{ Repository, Night
-            , git, git_merge, git_pull
-            , hg, hg_update
-            , svn
-            , cvs
-            , Gentoo};
-
+use Moon        ::{Night};
 use Shell       ::{e, exe};
 use Butterfly   ::{rustbuildbotdance};
 use Misc        ::{toVCS};
+use Core        ::{sync};
 use Config      ::{ save_RepoList
                   , save_Defaults
                   , load_RepoList
                   , load_App
                   , add_Repo};
-// Modules:
-use Shade::Git          ::{gitSync, gitMerge, gitPull};
-use Shade::Hg           ::{hgSync, hgUpdate};
-use Shade::Svn          ::{svnUpdate};
-use Shade::Cvs          ::{cvsUpdate};
-use Shade::Gentoo_x86   ::{gentoo, gentooFullUpdate};
+use Shade::Gentoo_x86::{gentoo};
 // Internal:
 use std::os;
 use std::task;
 use std::cell::Cell;
 use std::os::change_dir;
 // ExtrA:
-use extra::time;
 use extra::getopts::{optflag, optopt, getopts, Opt};
 
 static r_version: &'static str = "  Mirana v0.1.0";
@@ -46,38 +34,7 @@ fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
         println(" -g --gentoo\tSync Gentoo-x86");
     }
 }
-fn sync(repo: Repository, location: Path, typeFilter : Option<~str>) {
-    let loc = &location;
-    let nowt = time::now_utc();
-    let nowt_str = nowt.rfc3339();
-    if loc.exists() {
-        change_dir(loc);
-        for r in repo.remotes.iter().filter(
-            |&r| match typeFilter {
-                Some(ref rt) => r.t == toVCS(rt.to_owned()),
-                None => true
-            }) {
-            for b in r.branches.iter() {
-                println!(" [{:s}]  branch: {:s}", nowt_str, *b);
-                match r.t {
-                    // git     =>
-                    git        => gitSync(*b, r.m, r.upstream),
-                    git_merge  => gitMerge(*b, r.m, r.upstream),
-                    git_pull   => gitPull(*b),
-                    // hg      =>
-                    hg         => hgSync(*b, r.upstream),
-                    hg_update  => hgUpdate(),
-                    // svn     =>
-                    svn        => svnUpdate(),
-                    // cvs     =>
-                    cvs        => cvsUpdate(),
-                    // Gentoo  =>
-                    Gentoo     => unsafe { gentooFullUpdate(*b, ncore) }, 
-                }
-            }
-        }
-    }
-}
+
 #[main]
 fn main() {
     println!("_________________________________________________________________________");
@@ -278,7 +235,9 @@ fn main() {
             let lclone  = Cell::new( loc );
             let atclone = Cell::new( at.clone() );
             //---------------------------- sync -----------------------------------
-            match do task::try { sync(rclone.take(), lclone.take(), atclone.take());
+            match do task::try { unsafe {
+                sync(rclone.take(), lclone.take(), atclone.take(), ncore);
+                }
             } { Ok(_) => { success += 1; },
                 Err(e) => {
                     println!("  * failed: {:?}", e);

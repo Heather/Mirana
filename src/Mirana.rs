@@ -11,6 +11,7 @@ pub mod Misc;
 /* Json config is the only one yet I found in rust */
 pub mod Config;
 pub mod Shade;
+pub mod Core;
 
 /* Main */
 pub mod Main;
