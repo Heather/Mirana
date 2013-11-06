@@ -267,11 +267,12 @@ fn main() {
                 }
             } total += 1;
         }
-        println!("_________________________________________________________________________");
-        println!("  success  {:?}", success);
-        println!("  failed   {:?}", failed);
-        println!("  total    {:?}", total);
-        println!("_________________________________________________________________________");
+        print("_________________________________________________________________________");
+        println!("
+        success  {}
+        failed   {}
+        total    {}", success, failed, total);
+        println("_________________________________________________________________________");
     } else {
         println("
         No config file found, consider providing one
