@@ -10,7 +10,7 @@ pub enum VCS {git, git_merge, git_pull
 pub struct Remote { t: VCS
                   , upstream: ~str
                   , m: ~str
-                  , branches: ~[~str] 
+                  , branches: ~[~str]
 }
 
 #[deriving(Encodable, Decodable, Clone)]
@@ -24,4 +24,5 @@ pub struct Night { shade: ~str
 }
 
 #[deriving(Encodable, Decodable, Clone)]
-pub struct POTM { pretty: bool }
+pub struct POTM { pretty: bool
+                , wait: bool}

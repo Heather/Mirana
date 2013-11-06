@@ -67,8 +67,9 @@ pub fn load_RepoList(p: &Path) -> ~[Night] {
 pub fn load_App(p: &Path) -> POTM {
     let potm = load_JSON::<POTM>(p);
     if potm.len() > 0   { potm[0]
-    } else              { POTM { pretty: true }
-    }
+    } else  { POTM { pretty: true
+                   , wait: false
+            }}
 }
 
 ///<Summary>

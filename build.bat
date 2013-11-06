@@ -2,7 +2,7 @@
 rustc --version
 cd src
 
-rustc Mirana.rs -O -o ../mirana.exe
+rustc Mirana.rs -O -o ../Mirana.exe
 
 :: trying to understand compilation process -------
 :: rustc Mirana.rs -O --emit-llvm -o ../Mirana.bc

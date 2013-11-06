@@ -23,7 +23,7 @@ use std::os::change_dir;
 use extra::time;
 use extra::getopts::{optflag, optopt, getopts, Opt};
 
-static r_version: &'static str = "  Mirana v0.0.9";
+static r_version: &'static str = "  Mirana v0.1.0";
 static mut ncore: uint = 1;
 
 fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
@@ -127,12 +127,12 @@ fn main() {
     }
     //Load JSON configuration---------------------------------------------
     let cfg = & Path::new (
-        if nix  { "/etc/shades.conf" }
-        else    { "shades.conf" }
+        if nix  { "/etc/Shades.conf" }
+        else    { "Shades.conf" }
         );
     let appCfg = & Path::new (
-        if nix  { "/etc/mirana.conf" }
-        else    { "mirana.conf" }
+        if nix  { "/etc/App.conf" }
+        else    { "App.conf" }
         );
     let mut night = load_RepoList( cfg );
     let app = load_App( appCfg );
@@ -319,7 +319,7 @@ fn main() {
         save_RepoList( cfg, night, app.pretty);
         save_App( appCfg, app, app.pretty);
     }
-    if !nix {
+    if app.wait {
         println("Please, kill me ");    /* println because print FAILS here...    */
         do rustbuildbotdance {          /* even butterflies feels buggy now...    */
             while(true) { ; }           /* noone knows how to read_line in new IO */
