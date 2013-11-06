@@ -22,24 +22,24 @@ static mut ncore: uint = 1;
 
 fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
     println!("Usage: {} [options]", program);
-    println("");
-    println(" -h --help\tUsage");
-    println("");
-    println(" -l\t\tPretty print repositories in sync");
-    println(" -d --delete\tDelete repo from configuration");
-    println(" -a --add\tAdd repo to configuration");
-    println("");
-    println(" -e --edit\t\tEdit repo configuration");
-    println("");
-    println(" \t-a --add\tAdd something to repo configuration");
-    println(" \t-d --delete\tDelete something from repo configuration");
-    println("");
-    println(" -s --shade\tShade config");
-    println(" -r --remote\tSpecify remote");
-    println(" -u --upstream\tSpecify upstream repository");
-    println(" -m --master\tSpecify upstream master branch");
-    println(" -b --branch\tBranch of adding / editing repo or filtering type");
-    println(" -t --type\tType of adding / editing repo or filtering type");
+    println("
+        -h --help\tUsage
+         
+        -l\t\tPretty print repositories in sync
+        -d --delete\tDelete repo from configuration
+        -a --add\tAdd repo to configuration
+
+        -e --edit\t\tEdit repo configuration
+
+            -a --add\tAdd something to repo configuration
+            -d --delete\tDelete something from repo configuration
+
+        -s --shade\tShade config
+        -r --remote\tSpecify remote
+        -u --upstream\tSpecify upstream repository
+        -m --master\tSpecify upstream master branch
+        -b --branch\tBranch of adding / editing repo or filtering type
+        -t --type\tType of adding / editing repo or filtering type");
     if nix {
         println(" -g --gentoo\tSync Gentoo-x86");
     }
@@ -273,8 +273,9 @@ fn main() {
         println!("  total    {:?}", total);
         println!("_________________________________________________________________________");
     } else {
-        println("No config file found, consider providing one");
-        println("For now one is created just for example");
+        println("
+        No config file found, consider providing one
+        For now one is created just for example");
         save_Defaults(cfg, night, appCfg, app, nix);
     }
     if app.wait {
