@@ -7,7 +7,7 @@ pub fn gitPull(branch: &str) {
     println("_________________________________________________________________________");
     e("git", [&"checkout", branch]);
     e("git", [&"rebase", "--abort"]);
-    e("git", [&"pull", "origin", branch]);
+    e("git", [&"pull", "--rebase", "origin", branch]);
     println("_________________________________________________________________________");
 }
 

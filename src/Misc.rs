@@ -1,6 +1,6 @@
 use Moon::{VCS
     , git, git_merge, git_pull
-    , hg, hg_update
+    , hg, hg_pull
     , svn
     , cvs
     , Gentoo};
@@ -14,7 +14,7 @@ use Moon::{VCS
 pub fn toVCS(s: ~str) -> VCS {
     match s {
         ~"git" => git, ~"git_pull" => git_pull, ~"git_merge" => git_merge,
-        ~"hg"  => hg, ~"hg_update" => hg_update,
+        ~"hg"  => hg, ~"hg_pull" => hg_pull,
         ~"svn" => svn,
         ~"cvs" => cvs,
         ~"Gentoo" => Gentoo,

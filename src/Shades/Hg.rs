@@ -3,9 +3,9 @@ use Shell::e;
 ///<Summary>
 ///Just hg pull & update yet
 ///</Summary>
-pub fn hgUpdate() {
+pub fn hgPull(branch: &str) {
     println("_________________________________________________________________________");
-    e("hg", [&"pull"]);
+    e("hg", [&"pull", "--rebase", "--branch", branch]);
     e("hg", [&"update"]);
     println("_________________________________________________________________________");
 }

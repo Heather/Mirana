@@ -10,7 +10,11 @@ pub mod Misc;
 
 /* Json config is the only one yet I found in rust */
 pub mod Config;
-pub mod Shade;
+
+pub mod Shades;
+pub mod Stars;
+
+pub mod StarStorm;
 pub mod Core;
 
 /* Main */

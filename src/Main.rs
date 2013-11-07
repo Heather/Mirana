@@ -8,7 +8,11 @@ use Config      ::{ save_RepoList
                   , load_RepoList
                   , load_App
                   , add_Repo};
-use Shade::Gentoo_x86::{gentoo};
+use Shades::Gentoo_x86::{gentoo};
+// Stars
+use StarStorm::Star;
+use Stars::Git::Git;
+use Stars::Hg::Hg;
 // Internal:
 use std::os;
 use std::task;
@@ -24,6 +28,9 @@ fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
     println!("Usage: {} [options]", program);
     println("
         -h --help\tUsage
+         
+        pull\t pull changes in any vcs
+        pull\t push changes in any vcs
          
         -l\t\tPretty print repositories in sync
         -d --delete\tDelete repo from configuration
@@ -52,6 +59,13 @@ fn find_Repo(night: &[Night], shade: uint, pattern: &str) -> Option<uint> {
 fn getOption(matches: &Matches, opts: &[&str]) -> Option<~str> {
     opts.iter().filter_map(|opt| matches.opt_str(*opt)).next()
 }
+/*
+fn ifV<'a, T: Star + 'static>(rc : &str, star: &'a T) -> Option<&'a Star> {
+    if (Path::new( rc )).exists() {
+        Some(star as &'a Star)
+    } else { None }
+}
+*/
 #[main]
 fn main() {
     println!("_________________________________________________________________________");
@@ -76,6 +90,7 @@ fn main() {
     let program = args[0].as_slice();
     let opts = ~[
         optflag("h"), optflag("help"),
+        optflag("pull"), optflag("push"),
         optflag("l"),
         optopt("a"), optopt("add"),
         optopt("d"), optopt("delete"),
@@ -105,6 +120,19 @@ fn main() {
             println!("Path doesn't exist: {}", x86);
         } return;
     }
+    /* Stars */
+    /*
+    if      matches.opt_present("pull")
+        ||  matches.opt_present("push") {
+        let vcs =       ifV::<Git>  (".git", &Git)
+            .unwrap_or( ifV::<Hg>   (".hg", &Hg)
+            .expect("No vcs found in current directory") );
+
+        if          matches.opt_present("pull") { vcs.pull("master")
+        } else if   matches.opt_present("push") { println("not ready yet")
+        };
+    }
+    */
     //Load JSON configuration---------------------------------------------
     let cfg = & Path::new (
         if nix  { "/etc/Shades.conf" }
