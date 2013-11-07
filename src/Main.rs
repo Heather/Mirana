@@ -1,3 +1,17 @@
+/*
+        Stone word backfire with vengeance
+                Hopeless divine intervention
+                
+                            Leader, where's the peace you pursue
+    Can't let any more follow you
+            Teach to bleach the stains of your guilt
+        Envy of moral free lives built
+                        Live with the torment that they live through
+                        
+                        Your sins will only rest on you
+
+*/
+
 use Moon        ::{Night};
 use Shell       ::{e, exe};
 use Butterfly   ::{rustbuildbotdance};
