@@ -59,13 +59,11 @@ fn find_Repo(night: &[Night], shade: uint, pattern: &str) -> Option<uint> {
 fn getOption(matches: &Matches, opts: &[&str]) -> Option<~str> {
     opts.iter().filter_map(|opt| matches.opt_str(*opt)).next()
 }
-/*
 fn ifV<'a, T: Star + 'static>(rc : &str, star: &'a T) -> Option<&'a Star> {
     if (Path::new( rc )).exists() {
         Some(star as &'a Star)
     } else { None }
 }
-*/
 #[main]
 fn main() {
     println!("_________________________________________________________________________");
@@ -121,18 +119,20 @@ fn main() {
         } return;
     }
     /* Stars */
-    /*
     if      matches.opt_present("pull")
         ||  matches.opt_present("push") {
-        let vcs =       ifV::<Git>  (".git", &Git)
-            .unwrap_or( ifV::<Hg>   (".hg", &Hg)
+        
+        /* <------------------------------------ Rustc bug there
+        let vcs =       ifV(".git", &Git)
+            .unwrap_or( ifV(".hg", &Hg)
             .expect("No vcs found in current directory") );
+        */
+        let vcs = &Git;
 
         if          matches.opt_present("pull") { vcs.pull("master")
         } else if   matches.opt_present("push") { println("not ready yet")
         };
     }
-    */
     //Load JSON configuration---------------------------------------------
     let cfg = & Path::new (
         if nix  { "/etc/Shades.conf" }

@@ -73,8 +73,8 @@ pub fn load_App(p: &Path) -> POTM {
 ///Save Repo List
 ///</Summary>
 pub fn save_RepoList(p: &Path, night: ~[Night], pretty : bool) {
-    if pretty { save_PrettyJSON ::<Night>(p, night);
-    } else {    save_JSON       ::<Night>(p, night);    
+    if pretty { save_PrettyJSON(p, night);
+    } else {    save_JSON      (p, night);    
     }
 }
 
@@ -82,8 +82,8 @@ pub fn save_RepoList(p: &Path, night: ~[Night], pretty : bool) {
 ///Save App conf
 ///</Summary>
 pub fn save_App(p: &Path, potm: POTM, pretty : bool) {
-    if pretty { save_PrettyJSON ::<POTM>(p, ~[potm]);
-    } else {    save_JSON       ::<POTM>(p, ~[potm]);    
+    if pretty { save_PrettyJSON(p, ~[potm]);
+    } else {    save_JSON      (p, ~[potm]);    
     }
 }
 
