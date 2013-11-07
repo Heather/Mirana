@@ -130,7 +130,7 @@ fn main() {
         let vcs = &Git;
 
         if          matches.opt_present("pull") { vcs.pull("master")
-        } else if   matches.opt_present("push") { println("not ready yet")
+        } else if   matches.opt_present("push") { vcs.push("master")
         };
     }
     //Load JSON configuration---------------------------------------------

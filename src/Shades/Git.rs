@@ -12,6 +12,15 @@ pub fn gitPull(branch: &str) {
 }
 
 ///<Summary>
+///Just git push
+///</Summary>
+pub fn gitPush(branch: &str) {
+    println("_________________________________________________________________________");
+    e("git", [&"push","origin", branch]);
+    println("_________________________________________________________________________");
+}
+
+///<Summary>
 ///Merge forked commits on with upstream
 ///</Summary>
 pub fn gitMerge(branch: &str, master: &str, upstream: &str) {

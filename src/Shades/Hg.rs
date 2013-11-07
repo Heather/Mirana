@@ -11,6 +11,15 @@ pub fn hgPull(branch: &str) {
 }
 
 ///<Summary>
+///Just hg push
+///</Summary>
+pub fn hgPush() {
+    println("_________________________________________________________________________");
+    e("hg", [&"push"]);
+    println("_________________________________________________________________________");
+}
+
+///<Summary>
 ///Hg sync
 ///</Summary>
 pub fn hgSync(branch: &str, upstream: &str) {
