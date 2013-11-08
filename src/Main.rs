@@ -148,31 +148,23 @@ fn main() {
                 }
             }).next() {
             Some(vcs) => {
-                if  matches.opt_present("pull") {
-                    match vcs.pull_custom {
-                        Some(ref p_custom) => e(*p_custom, []),
-                        None => {
-                            match vcs.star {
-                                Some(vcs)   => match (toTrait(vcs)) {
-                                    Some(t) => t.pull("master"),
-                                    None    => print("NO trait for this vcs") },
-                                None        => print("No VCS provided")
+                let process = |action : &str, custom : &Option<~str>, withVCS: &fn(vcs : &Git)| {
+                    if  matches.opt_present(action) {
+                        match *custom {
+                            Some(ref p_custom) => e(*p_custom, []),
+                            None => {
+                                match vcs.star {
+                                    Some(vcs)   => match (toTrait(vcs)) {
+                                        Some(t) => withVCS(t),
+                                        None    => print("NO trait for this vcs") },
+                                    None        => print("No VCS provided")
+                                }
                             }
                         }
-                    };
-                } else if  matches.opt_present("push") {
-                    match vcs.push_custom {
-                        Some(ref p_custom) => e(*p_custom, []),
-                        None => {
-                            match vcs.star {
-                                Some(vcs)   => match (toTrait(vcs)) {
-                                    Some(t) => t.push("master"),
-                                    None    => print("NO trait for this vcs") },
-                                None        => print("No VCS provided")
-                            }
-                        }
-                    };
+                    }
                 };
+                do process("pull", &vcs.pull_custom) | v: &Git | { v.pull("master"); }
+                do process("push", &vcs.push_custom) | v: &Git | { v.push("master"); }
             }
             None => fail!("No vcs found in current directory")
         };
