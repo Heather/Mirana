@@ -22,7 +22,10 @@ pub fn hgPush() {
 ///<Summary>
 ///Hg sync
 ///</Summary>
-pub fn hgSync(branch: &str, upstream: &str) {
+pub fn hgSync(branch: &str, maybe_upstream: &Option<~str>) {
+
+    let upstream = maybe_upstream.as_ref().map(|s| s.as_slice()).unwrap_or("upstream");
+
     println("_________________________________________________________________________");
     e("hg", [&"pull", "--update", "--rebase", "--branch", branch, upstream]);
     e("hg", [&"push", branch, "--force"]);

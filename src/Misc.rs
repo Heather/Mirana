@@ -1,9 +1,13 @@
 use Moon::{VCS
-    , git, git_merge, git_pull
-    , hg, hg_pull
+    , git
+    , hg
     , svn
     , cvs
     , Gentoo};
+
+use StarStorm::Trait;
+use Stars::Git::Git;
+use Stars::Hg::Hg;
 
 ///<Summary>
 ///Convert to VCS
@@ -13,11 +17,24 @@ use Moon::{VCS
 ///</Summary>
 pub fn toVCS(s: ~str) -> VCS {
     match s {
-        ~"git" => git, ~"git_pull" => git_pull, ~"git_merge" => git_merge,
-        ~"hg"  => hg, ~"hg_pull" => hg_pull,
+        ~"git" => git,
+        ~"hg"  => hg,
         ~"svn" => svn,
         ~"cvs" => cvs,
         ~"Gentoo" => Gentoo,
-        _ => git
+        _ => git /* by default git, TODO: here should be option */
+    }
+}
+
+///<Summary>
+///Convert to Trait
+///
+/// The place for terrible RUST BUG
+///
+///</Summary>
+pub fn toTrait(vcs: VCS) -> Option<&Git> {
+    match vcs { git => Some( &Git )
+              //, hg  => Some( &Hg  as &Trait )
+              , _   => None
     }
 }

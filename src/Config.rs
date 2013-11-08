@@ -1,4 +1,7 @@
-use Moon::{Night, POTM, Remote, Repository, git, Gentoo};
+use Moon::{Night, POTM, Remote, Repository, Gentoo, Star
+           , git, hg
+           , pull, update};
+
 use Misc::toVCS;
 
 use std::rt::io;
@@ -66,6 +69,16 @@ pub fn load_App(p: &Path) -> POTM {
     if potm.len() > 0   { potm[0]
     } else  { POTM { pretty: true
                    , wait: false
+                   , stars: ~[
+                    Star{ detector: Some(~".git")
+                        , star:         Some (git)
+                        , pull_custom:  None
+                        , push_custom:  None  },
+                    Star{ detector: Some(~".hg")
+                        , star:         Some (hg)
+                        , pull_custom:  None
+                        , push_custom:  None  }
+                   ]
             }}
 }
 
@@ -105,10 +118,10 @@ pub fn add_Repo(repo: &str, t: Option<~str>, u: Option<~str>) -> Repository {
             Remote {
                 t: repoType,
                 branches: ~[~"master"],
-                m: ~"master",
-                upstream: upstream
-            }
-        ]
+                m: Some(~"master"),
+                upstream: Some(upstream)
+            }],
+        actions: ~[ pull ]
     }
 }
 
@@ -120,13 +133,14 @@ pub fn save_Defaults(pr: &Path, mut night: ~[Night],
     night.push( Night {
         shade: ~"default",
         repositories: ~[ Repository { /* Personal Rust update shade */
-            loc: ~"git@github.com:Heather/rust.git",
+            loc: ~"git@github.com:Heather/tyapa.git",
             remotes: ~[ Remote {
                     t: git, 
                     branches: ~[~"master"],
-                    m: ~"master",
-                    upstream: ~"git@github.com:mozilla/rust.git"
-                }]
+                    m: Some(~"master"),
+                    upstream: None
+                }],
+            actions: ~[ pull ]
             }]
         });
     if nix {
@@ -140,11 +154,12 @@ pub fn save_Defaults(pr: &Path, mut night: ~[Night],
                     remotes: ~[ Remote {
                             t: Gentoo, 
                             branches: ~[~"/home/gentoo-x86"],
-                            m: ~"", upstream: ~""
-                        }]
+                            m: None, upstream: None
+                        }],
+                    actions: ~[ update ]
                     }]
                 });
         }}
     save_RepoList( pr, night, app.pretty);
-    save_App( pa, app, app.pretty);
+    save_App( pa, app.clone(), app.pretty);
 }

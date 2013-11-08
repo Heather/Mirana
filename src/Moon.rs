@@ -1,21 +1,27 @@
+use StarStorm::Trait;
+
 #[deriving(Encodable, Decodable, Clone, Eq)]
-pub enum VCS {git, git_merge, git_pull
-             , hg, hg_pull
+pub enum VCS { git
+             , hg
              , svn
              , cvs
              , Gentoo
 }
 
+#[deriving(Encodable, Decodable, Clone, Eq)]
+pub enum Action { pull, merge, push, update }
+
 #[deriving(Encodable, Decodable, Clone)]
 pub struct Remote { t: VCS
-                  , upstream: ~str
-                  , m: ~str
                   , branches: ~[~str]
+                  , m:        Option<~str>
+                  , upstream: Option<~str>
 }
 
 #[deriving(Encodable, Decodable, Clone)]
 pub struct Repository { loc: ~str
                       , remotes: ~[Remote]
+                      , actions: ~[Action]
 }
 
 #[deriving(Encodable, Decodable, Clone)]
@@ -24,5 +30,12 @@ pub struct Night { shade: ~str
 }
 
 #[deriving(Encodable, Decodable, Clone)]
+pub struct Star { detector:     Option<~str>
+                , star:         Option<VCS>
+                , pull_custom:  Option<~str>
+                , push_custom:  Option<~str> }
+
+#[deriving(Encodable, Decodable, Clone)]
 pub struct POTM { pretty: bool
-                , wait: bool}
+                , wait: bool
+                , stars: ~[Star]}

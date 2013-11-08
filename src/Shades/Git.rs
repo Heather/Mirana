@@ -23,7 +23,11 @@ pub fn gitPush(branch: &str) {
 ///<Summary>
 ///Merge forked commits on with upstream
 ///</Summary>
-pub fn gitMerge(branch: &str, master: &str, upstream: &str) {
+pub fn gitMerge(branch: &str, maybe_master: &Option<~str>, maybe_upstream: &Option<~str>) {
+
+    let master   = maybe_master.as_ref().map    (|s| s.as_slice()).unwrap_or("master");
+    let upstream = maybe_upstream.as_ref().map  (|s| s.as_slice()).unwrap_or("upstream");
+
     let merge = format!("{}/{}", upstream, master);
     println("_________________________________________________________________________");
     e("git", [&"checkout", branch]);
@@ -38,7 +42,11 @@ pub fn gitMerge(branch: &str, master: &str, upstream: &str) {
 ///<Summary>
 ///Rebase forked commits on top of upstream
 ///</Summary>
-pub fn gitSync(branch: &str, master: &str, upstream: &str) {
+pub fn gitSync(branch: &str, maybe_master: &Option<~str>, maybe_upstream: &Option<~str>) {
+
+    let master   = maybe_master.as_ref().map    (|s| s.as_slice()).unwrap_or("master");
+    let upstream = maybe_upstream.as_ref().map  (|s| s.as_slice()).unwrap_or("upstream");
+
     println("_________________________________________________________________________");
     e("git", [&"checkout", branch]);
     e("git", [&"rebase", "--abort"]);

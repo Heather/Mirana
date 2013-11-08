@@ -1,9 +1,9 @@
-use StarStorm::Star;
+use StarStorm::Trait;
 use Shades::Hg::{hgPull, hgPush};
 
 pub struct Hg;
 
-impl Star for Hg {
+impl Trait for Hg {
     fn pull(&self, branch: &str) {
         hgPull(branch);
     }

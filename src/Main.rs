@@ -15,16 +15,16 @@
 use Moon        ::{Night};
 use Shell       ::{e, exe};
 use Butterfly   ::{rustbuildbotdance};
-use Misc        ::{toVCS};
+use Misc        ::{toVCS, toTrait};
 use Core        ::{sync};
 use Config      ::{ save_RepoList
                   , save_Defaults
                   , load_RepoList
                   , load_App
                   , add_Repo};
-use Shades::Gentoo_x86::{gentoo};
+use Shades::Gentoo::{gentoo};
 // Stars
-use StarStorm::Star;
+use StarStorm::Trait;
 use Stars::Git::Git;
 use Stars::Hg::Hg;
 // Internal:
@@ -73,11 +73,6 @@ fn find_Repo(night: &[Night], shade: uint, pattern: &str) -> Option<uint> {
 fn getOption(matches: &Matches, opts: &[&str]) -> Option<~str> {
     opts.iter().filter_map(|opt| matches.opt_str(*opt)).next()
 }
-fn ifV<'a, T: Star + 'static>(rc : &str, star: &'a T) -> Option<&'a Star> {
-    if (Path::new( rc )).exists() {
-        Some(star as &'a Star)
-    } else { None }
-}
 #[main]
 fn main() {
     println!("_________________________________________________________________________");
@@ -125,39 +120,63 @@ fn main() {
     if nix && ( matches.opt_present("g") || matches.opt_present("gentoo") ) {
         let x86 = "/home/gentoo-x86";
         let p86 = & Path::new( x86 );
-        if p86.exists() {
-            change_dir(p86);
-            unsafe { gentoo(x86, ncore); }
-        } else {
-            println!("Path doesn't exist: {}", x86);
+        if p86.exists() {   change_dir(p86);
+                            unsafe { gentoo(x86, ncore); }
+        } else { println!("Path doesn't exist: {}", x86);
         } return;
     }
-    /* Stars */
-    if      matches.opt_present("pull")
-        ||  matches.opt_present("push") {
-        
-        /* <------------------------------------ Rustc bug there
-        let vcs =       ifV(".git", &Git)
-            .unwrap_or( ifV(".hg", &Hg)
-            .expect("No vcs found in current directory") );
-        */
-        let vcs = &Git;
-
-        if          matches.opt_present("pull") { vcs.pull("master")
-        } else if   matches.opt_present("push") { vcs.push("master")
-        };
-    }
     //Load JSON configuration---------------------------------------------
-    let cfg = & Path::new (
-        if nix  { "/etc/Shades.conf" }
-        else    { "Shades.conf" }
+    let cfg = & Path::new (     if nix  { "/etc/Shades.conf" }
+                                else    { "Shades.conf" }
         );
-    let appCfg = & Path::new (
-        if nix  { "/etc/App.conf" }
-        else    { "App.conf" }
+    let appCfg = & Path::new (  if nix  { "/etc/App.conf" }
+                                else    { "App.conf" }
         );
     let mut night = load_RepoList( cfg );
     let app = load_App( appCfg );
+    /* Stars */
+    if      matches.opt_present("pull")
+        ||  matches.opt_present("push") {
+        match app.stars.iter().filter_map(
+            |sta| { match sta.detector {
+                    Some(ref detector) => {
+                        match (Path::new( detector.to_owned() )).exists() {
+                            true    => Some(sta),
+                            false   => None
+                        }
+                    }, None => None
+                }
+            }).next() {
+            Some(vcs) => {
+                if  matches.opt_present("pull") {
+                    match vcs.pull_custom {
+                        Some(ref p_custom) => e(*p_custom, []),
+                        None => {
+                            match vcs.star {
+                                Some(vcs)   => match (toTrait(vcs)) {
+                                    Some(t) => t.pull("master"),
+                                    None    => print("NO trait for this vcs") },
+                                None        => print("No VCS provided")
+                            }
+                        }
+                    };
+                } else if  matches.opt_present("push") {
+                    match vcs.push_custom {
+                        Some(ref p_custom) => e(*p_custom, []),
+                        None => {
+                            match vcs.star {
+                                Some(vcs)   => match (toTrait(vcs)) {
+                                    Some(t) => t.push("master"),
+                                    None    => print("NO trait for this vcs") },
+                                None        => print("No VCS provided")
+                            }
+                        }
+                    };
+                };
+            }
+            None => fail!("No vcs found in current directory")
+        };
+    }
     //--------------------------------------------------------------------
     let maybe_shade = getOption(&matches, ["s", "shade"]);
     let shade = if matches.opt_present("s") || matches.opt_present("shade") {
@@ -285,7 +304,8 @@ fn main() {
                 } else { Path::new( l ) }
             };
             //-------------------------- Real loc ----------------------------------
-            let loc= if rep.loc.starts_with("git@") {
+            let loc= if (  rep.loc.starts_with("git@")
+                        || rep.loc.starts_with("https://git")) {
                 do smartpath(rep.loc) | p: &str | {
                     e("git", [&"clone", rep.loc.as_slice(), p]);
                     }
@@ -319,7 +339,7 @@ fn main() {
         println("
         No config file found, consider providing one
         For now one is created just for example");
-        save_Defaults(cfg, night, appCfg, app, nix);
+        save_Defaults(cfg, night, appCfg, app.clone(), nix);
     }
     if app.wait {
         println("Please, kill me ");    /* println because print FAILS here...    */
