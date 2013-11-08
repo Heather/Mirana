@@ -1,17 +1,12 @@
-use Moon  ::{ Repository, VCS
-            , git
-            , hg
-            , svn
-            , cvs
-            , Gentoo};
+use Moon  ::{ Repository, Gentoo
+            , pull, push, rebase};
 
 // Modules:
 use Misc                ::{toVCS, toTrait};
-use Shades::Git         ::{gitSync, gitMerge, gitPull};
-use Shades::Hg          ::{hgSync, hgPull};
-use Shades::Svn         ::{svnUpdate};
-use Shades::Cvs         ::{cvsUpdate};
 use Shades::Gentoo      ::{gentooFullUpdate};
+
+// Stars
+use StarStorm::Trait;
 
 use std::os::change_dir;
 use extra::time;
@@ -31,17 +26,17 @@ pub fn sync(repo: Repository, location: Path, typeFilter: Option<~str>, ncore: u
             Gentoo => gentooFullUpdate(repo.loc, ncore),
             _ => {  for b in r.branches.iter() {
                         println!(" [{:s}]  branch: {:s}", nowt_str, *b);
-                        let vcs = toTrait(r.t);
-                        match r.t {
-                            git        => gitSync(*b, &r.m, &r.upstream),
-                            //git_merge  => gitMerge(*b, r.m, r.upstream),
-                            //git_pull   => gitPull(*b),
-                            // hg      =>
-                            hg         => hgSync(*b, &r.upstream),
-                            //hg_pull    => hgPull(*b),
-                            svn        => svnUpdate(),
-                            cvs        => cvsUpdate(),
-                            _          => fail!("Non existing sync case")
+                        match toTrait(r.t) {
+                            Some(vcs) => {
+                                for action in repo.actions.iter() {
+                                    match *action {
+                                        pull    => vcs.pull(*b),
+                                        push    => vcs.push(*b),
+                                        rebase  => vcs.rebase(*b, &r.m, &r.upstream),
+                                        _       => fail!("Non implemented yet")
+                                    }
+                                }
+                            }, None => fail!("Non trait implementation found")
                         }
                     }
                 }

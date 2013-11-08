@@ -1,5 +1,3 @@
-use StarStorm::Trait;
-
 #[deriving(Encodable, Decodable, Clone, Eq)]
 pub enum VCS { git
              , hg
@@ -9,7 +7,7 @@ pub enum VCS { git
 }
 
 #[deriving(Encodable, Decodable, Clone, Eq)]
-pub enum Action { pull, merge, push, update }
+pub enum Action { pull, merge, rebase, push, update }
 
 #[deriving(Encodable, Decodable, Clone)]
 pub struct Remote { t: VCS

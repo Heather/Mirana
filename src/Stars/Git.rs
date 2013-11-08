@@ -1,5 +1,5 @@
 use StarStorm::Trait;
-use Shades::Git::{gitPull, gitPush};
+use Shades::Git::{gitPull, gitPush, gitRebase};
 
 pub struct Git;
 
@@ -9,5 +9,8 @@ impl Trait for Git {
     }
     fn push(&self, branch: &str) {
         gitPush(branch);
+    }
+    fn rebase(&self, branch: &str, maybe_master: &Option<~str>, maybe_upstream: &Option<~str>) {
+        gitRebase(branch, maybe_master, maybe_upstream);
     }
 }

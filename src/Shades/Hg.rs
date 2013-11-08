@@ -22,7 +22,7 @@ pub fn hgPush() {
 ///<Summary>
 ///Hg sync
 ///</Summary>
-pub fn hgSync(branch: &str, maybe_upstream: &Option<~str>) {
+pub fn hgRebase(branch: &str, maybe_upstream: &Option<~str>) {
 
     let upstream = maybe_upstream.as_ref().map(|s| s.as_slice()).unwrap_or("upstream");
 

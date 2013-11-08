@@ -42,7 +42,7 @@ pub fn gitMerge(branch: &str, maybe_master: &Option<~str>, maybe_upstream: &Opti
 ///<Summary>
 ///Rebase forked commits on top of upstream
 ///</Summary>
-pub fn gitSync(branch: &str, maybe_master: &Option<~str>, maybe_upstream: &Option<~str>) {
+pub fn gitRebase(branch: &str, maybe_master: &Option<~str>, maybe_upstream: &Option<~str>) {
 
     let master   = maybe_master.as_ref().map    (|s| s.as_slice()).unwrap_or("master");
     let upstream = maybe_upstream.as_ref().map  (|s| s.as_slice()).unwrap_or("upstream");
