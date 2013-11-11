@@ -148,8 +148,8 @@ fn main() {
                             }
                         }
                     };
-                    do process(C[1], &vcs.pull_custom) | v: &Git | { v.pull("master"); }
-                    do process(C[2], &vcs.push_custom) | v: &Git | { v.push("master"); }
+                    do process(C[0], &vcs.pull_custom) | v: &Git | { v.pull("master"); }
+                    do process(C[1], &vcs.push_custom) | v: &Git | { v.push("master"); }
                 }
                 None => fail!("No vcs found in current directory")
             };
