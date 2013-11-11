@@ -64,11 +64,12 @@ pub fn load_RepoList(p: &Path) -> ~[Night] {
 ///<Summary>
 ///Load App.conf
 ///</Summary>
-pub fn load_App(p: &Path) -> POTM {
+pub fn load_App(p: &Path, nix : bool) -> POTM {
     let potm = load_JSON::<POTM>(p);
     if potm.len() > 0   { potm[0]
     } else  { POTM { pretty: true
-                   , wait: false
+                   , wait: if nix { false }
+                           else   { true  }
                    , stars: ~[
                     Star{ detector: Some(~".git")
                         , star:         Some (git)
@@ -79,7 +80,8 @@ pub fn load_App(p: &Path) -> POTM {
                         , pull_custom:  None
                         , push_custom:  None  }
                    ]
-            }}
+            }
+        }
 }
 
 ///<Summary>
@@ -126,6 +128,30 @@ pub fn add_Repo(repo: &str, t: Option<~str>, x: Option<~str>, u: Option<~str>) -
                 upstream: Some(upstream)
             }],
         actions: ~[ exec ]
+    }
+}
+
+///<Summary>
+///Add Remote to Repository
+///</Summary>
+pub fn add_Remote(t: Option<~str>, b: Option<~str>, u: Option<~str>) -> Remote {
+    let repoType = match t {
+        Some(at) => toVCS(at),
+        None => git
+    };
+    let branch = match b {
+        Some(b) => b,
+        None => ~"master"
+    };
+    let upstream = match u {
+        Some(up) => up,
+        None => ~"upstream"
+    };
+    Remote {
+        t: repoType,
+        branches: ~[branch],
+        m: Some(~"master"),
+        upstream: Some(upstream)
     }
 }
 

@@ -12,7 +12,7 @@
 
 */
 
-use Moon        ::{Night};
+use Moon        ::{Night, Repository, Remote, VCS};
 use Shell       ::{e, exe};
 use Butterfly   ::{rustbuildbotdance};
 use Misc        ::{toVCS, toTrait};
@@ -21,12 +21,13 @@ use Config      ::{ save_RepoList
                   , save_Defaults
                   , load_RepoList
                   , load_App
-                  , add_Repo};
+                  , add_Repo
+                  , add_Remote};
 use Shades::Gentoo::{gentoo};
 // Stars
 use StarStorm::Trait;
 use Stars::Git::Git;
-use Stars::Hg::Hg;
+/* use Stars::Hg::Hg; */
 // Internal:
 use std::os;
 use std::task;
@@ -35,7 +36,7 @@ use std::os::change_dir;
 // ExtrA:
 use extra::getopts::{optflag, optopt, getopts, Opt, Matches};
 
-static r_version: &'static str = "  Mirana v0.1.3";
+static r_version: &'static str = "  Mirana v0.1.4";
 static mut ncore: uint = 1;
 
 fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
@@ -73,6 +74,16 @@ fn find_Repo(night: &[Night], shade: uint, pattern: &str) -> Option<uint> {
     night[shade]    .repositories
                     .iter()
                     .position ( |r| r.loc.contains( pattern ) )
+}
+fn find_Remote(repository: &Repository, tp: VCS) -> Option<uint> {
+    repository      .remotes
+                    .iter()
+                    .position ( |r| r.t == tp )
+}
+fn find_Branch(remote: &Remote, pattern: &str) -> Option<uint> {
+    remote          .branches
+                    .iter()
+                    .position ( |b| b.contains( pattern ) )
 }
 fn getOption(matches: &Matches, opts: &[&str]) -> Option<~str> {
     opts.iter().filter_map(|opt| matches.opt_str(*opt)).next()
@@ -115,7 +126,7 @@ fn main() {
                                 else    { "App.conf" }
         );
     let mut night = load_RepoList( cfg );
-    let app = load_App( appCfg );
+    let app = load_App( appCfg, nix );
     /* CLI */
     if args.len() > 1 {
         let x = args[1].as_slice();
@@ -152,8 +163,7 @@ fn main() {
                     do process(C[1], &vcs.push_custom) | v: &Git | { v.push("master"); }
                 }
                 None => fail!("No vcs found in current directory")
-            };
-            return;
+            };  return;
         }
     }
     if nix {
@@ -216,11 +226,43 @@ fn main() {
                     if shade == -1 {
                         fail!("Error: there is no such shade: {}", maybe_shade.unwrap());
                     } else {
-                        let repo = find_Repo(night, shade, *e);
-                        match maybe_remote {
-                            Some(r) => {
-                            }, None => {
-                            }
+                        match find_Repo(night, shade, *e) {
+                            Some(repo) => {
+                                match maybe_remote {
+                                    Some(r) => {
+                                        let remoteByType = toVCS(r.clone());
+                                        match find_Remote(&night[shade].repositories[repo], remoteByType) {
+                                            Some(remote)    => {
+                                                println!("{:?} remote already exists", remoteByType);
+                                                if maybe_branch.is_some() {
+                                                    let b = maybe_branch.unwrap();
+                                                    night[shade].repositories[repo].remotes[remote].branches.push(
+                                                        b.clone());
+                                                    save_RepoList( cfg, night, app.pretty );
+                                                    println!("{} added", b);
+                                                }
+                                            }, None         => {
+                                                night[shade].repositories[repo].remotes.push(
+                                                    add_Remote(maybe_type, maybe_branch, matches.opt_str("u")));
+                                                save_RepoList( cfg, night, app.pretty );
+                                                println!("{} added", r);
+                                            }
+                                        };
+                                    }, None => {
+                                        match maybe_branch {
+                                            Some(b) => {
+                                                if night[shade].repositories[repo].remotes.len() > 0 {
+                                                    night[shade].repositories[repo].remotes[0].branches.push(
+                                                        b.clone());
+                                                    save_RepoList( cfg, night, app.pretty );
+                                                    println!("{} added to first remote", b);
+                                                } else { fail!("There are no remotes to add branch, add remote first") }
+                                            }, None => { fail!("For now you can only add remote or branch")
+                                            }
+                                        }
+                                    }
+                                }
+                            }, None => fail!("No repository found: {}", *e)
                         };
                     }
                 },  None => {
@@ -238,7 +280,7 @@ fn main() {
                                 night[shade].repositories.push(
                                     add_Repo(a, maybe_type, maybe_exec, matches.opt_str("u")));
                                 save_RepoList( cfg, night, app.pretty );
-                                println!("{:?} added", a);
+                                println!("{} added", a);
                             }
                         }, None => fail!("No add argument provided")
                     };
@@ -251,22 +293,59 @@ fn main() {
         if matches.opt_present("d") || matches.opt_present("delete") {
             match maybe_edit {
                 Some(ref e) => {
-                    let repo = find_Repo(night, shade, *e);
-                    match maybe_remote {
-                        Some(r) => {
-                        }, None => {
-                        }
+                    match find_Repo(night, shade, *e) {
+                        Some(repo) => {
+                            match maybe_remote {
+                                Some(r) => {
+                                    let remoteByType = toVCS(r.clone());
+                                    match find_Remote(&night[shade].repositories[repo], remoteByType) {
+                                        Some(remote) => {
+                                            if maybe_branch.is_some() {
+                                                let b = maybe_branch.unwrap();
+                                                let ifBranch = find_Branch(
+                                                    &night[shade].repositories[repo].remotes[remote], b);
+                                                if ifBranch.is_some() {
+                                                    night[shade].repositories[repo].remotes[remote].branches.remove(
+                                                        ifBranch.unwrap());
+                                                    println!("{} removed", b);
+                                                }
+                                                save_RepoList( cfg, night, app.pretty );
+                                            } else {
+                                                night[shade].repositories[repo].remotes.remove(remote);
+                                                save_RepoList( cfg, night, app.pretty );
+                                                println!("{:?} removed", remoteByType);
+                                            }
+                                        }, None => { }
+                                    };
+                                }, None => {
+                                    match maybe_branch {
+                                        Some(b) => {
+                                            if night[shade].repositories[repo].remotes.len() > 0 {
+                                                let ifBranch = find_Branch(
+                                                    &night[shade].repositories[repo].remotes[0], b);
+                                                if ifBranch.is_some() {
+                                                    night[shade].repositories[repo].remotes[0].branches.remove(
+                                                        ifBranch.unwrap());
+                                                    println!("{} removed", b);
+                                                }
+                                            } else { fail!("There are no remotes to delete branch on") }
+                                        }, None => { fail!("For now you can only delete remote or branch")
+                                        }
+                                    }
+                                }
+                            }
+                        }, None => fail!("No repository found: {}", *e)
                     };
                 },  None => {
                     match getOption(&matches, ["d", "delete"]) {
                         Some(d) => {
                             match find_Repo(night, shade, d) {
                                 Some(ind) => {
-                                    println!("{:?} removed", night[shade].repositories[ind].loc);
+                                    println!("{} removed", night[shade].repositories[ind].loc);
                                     night[shade].repositories.remove( ind );
                                     save_RepoList( cfg, night, app.pretty );
                                 },
-                                None => fail!("{:s} not found", d)
+                                None => fail!("{} not found", d)
                             }
                         }, None => fail!("No add argument provided")
                     };
