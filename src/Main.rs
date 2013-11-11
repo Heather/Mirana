@@ -35,7 +35,7 @@ use std::os::change_dir;
 // ExtrA:
 use extra::getopts::{optflag, optopt, getopts, Opt, Matches};
 
-static r_version: &'static str = "  Mirana v0.1.2";
+static r_version: &'static str = "  Mirana v0.1.3";
 static mut ncore: uint = 1;
 
 fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
@@ -46,7 +46,7 @@ fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
         -j --jobs
 
         pull\t pull changes in any vcs
-        pull\t push changes in any vcs
+        pusg\t push changes in any vcs
 
         -l --list\tPretty print repositories in sync
         -d --delete\tDelete repo from configuration
@@ -67,6 +67,7 @@ fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
     if nix {
         println(" -g --gentoo\tSync Gentoo-x86");
     }
+    println("_________________________________________________________________________");
 }
 fn find_Repo(night: &[Night], shade: uint, pattern: &str) -> Option<uint> {
     night[shade]    .repositories
@@ -78,14 +79,13 @@ fn getOption(matches: &Matches, opts: &[&str]) -> Option<~str> {
 }
 #[main]
 fn main() {
-    println!("_________________________________________________________________________");
+    println("_________________________________________________________________________");
     print!(" {:s} ", r_version);
     let args = os::args();
     let program = args[0].as_slice();
     let opts = ~[
         optflag("h"), optflag("help"),
         optopt("j"), optopt("jobs"),
-        optflag("pull"), optflag("push"),
         optflag("l"), optflag("list"),
         optopt("a"), optopt("add"),
         optopt("d"), optopt("delete"),
@@ -104,6 +104,58 @@ fn main() {
         Err(f) => { fail!(f.to_err_msg()) }
     };
     let nix = !cfg!(target_os = "win32");
+    if matches.opt_present("h") || matches.opt_present("help") {
+        print_usage(program, opts, nix); return;
+    }
+    //Load JSON configuration---------------------------------------------
+    let cfg = & Path::new (     if nix  { "/etc/Shades.conf" }
+                                else    { "Shades.conf" }
+        );
+    let appCfg = & Path::new (  if nix  { "/etc/App.conf" }
+                                else    { "App.conf" }
+        );
+    let mut night = load_RepoList( cfg );
+    let app = load_App( appCfg );
+    /* CLI */
+    if args.len() > 1 {
+        let x = args[1].as_slice();
+        let C = ["pull", "push"];
+        if  C.iter().any(
+            |c| *c == x) {
+            match app.stars.iter().filter_map(
+                |sta| { match sta.detector {
+                        Some(ref detector) => {
+                            match (Path::new( detector.to_owned() )).exists() {
+                                true    => Some(sta),
+                                false   => None
+                            }
+                        }, None => None
+                    }
+                }).next() {
+                Some(vcs) => {
+                    let process = |action : &str, custom : &Option<~str>, withVCS: &fn(vcs : &Git)| {
+                        if  x.as_slice() == action {
+                            match *custom {
+                                Some(ref p_custom) => e(*p_custom, []),
+                                None => {
+                                    match vcs.star {
+                                        Some(vcs)   => match (toTrait(vcs)) {
+                                            Some(t) => withVCS(t),
+                                            None    => print("NO trait for this vcs") },
+                                        None        => print("No VCS provided")
+                                    }
+                                }
+                            }
+                        }
+                    };
+                    do process(C[1], &vcs.pull_custom) | v: &Git | { v.pull("master"); }
+                    do process(C[2], &vcs.push_custom) | v: &Git | { v.push("master"); }
+                }
+                None => fail!("No vcs found in current directory")
+            };
+            return;
+        }
+    }
     if nix {
         print (", POSIX");
         let maybe_jobs = getOption(&matches, ["j", "jobs"]);
@@ -132,9 +184,6 @@ fn main() {
         }
     } else { println (", Windows"); };
     println("_________________________________________________________________________");
-    if matches.opt_present("h") || matches.opt_present("help") {
-        print_usage(program, opts, nix); return;
-    }
     if nix && ( matches.opt_present("g") || matches.opt_present("gentoo") ) {
         let x86 = "/home/gentoo-x86";
         let p86 = & Path::new( x86 );
@@ -142,50 +191,6 @@ fn main() {
                             unsafe { gentoo(x86, ncore); }
         } else { println!("Path doesn't exist: {}", x86);
         } return;
-    }
-    //Load JSON configuration---------------------------------------------
-    let cfg = & Path::new (     if nix  { "/etc/Shades.conf" }
-                                else    { "Shades.conf" }
-        );
-    let appCfg = & Path::new (  if nix  { "/etc/App.conf" }
-                                else    { "App.conf" }
-        );
-    let mut night = load_RepoList( cfg );
-    let app = load_App( appCfg );
-    /* Stars */
-    if      matches.opt_present("pull")
-        ||  matches.opt_present("push") {
-        match app.stars.iter().filter_map(
-            |sta| { match sta.detector {
-                    Some(ref detector) => {
-                        match (Path::new( detector.to_owned() )).exists() {
-                            true    => Some(sta),
-                            false   => None
-                        }
-                    }, None => None
-                }
-            }).next() {
-            Some(vcs) => {
-                let process = |action : &str, custom : &Option<~str>, withVCS: &fn(vcs : &Git)| {
-                    if  matches.opt_present(action) {
-                        match *custom {
-                            Some(ref p_custom) => e(*p_custom, []),
-                            None => {
-                                match vcs.star {
-                                    Some(vcs)   => match (toTrait(vcs)) {
-                                        Some(t) => withVCS(t),
-                                        None    => print("NO trait for this vcs") },
-                                    None        => print("No VCS provided")
-                                }
-                            }
-                        }
-                    }
-                };
-                do process("pull", &vcs.pull_custom) | v: &Git | { v.pull("master"); }
-                do process("push", &vcs.push_custom) | v: &Git | { v.push("master"); }
-            }
-            None => fail!("No vcs found in current directory")
-        };
     }
     //--------------------------------------------------------------------
     let maybe_shade = getOption(&matches, ["s", "shade"]);
