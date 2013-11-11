@@ -50,13 +50,13 @@ fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
         pusg\t push changes in any vcs
 
         -l --list\tPretty print repositories in sync
-        -d --delete\tDelete repo from configuration
-        -a --add\tAdd repo to configuration
+        --delete\t\tDelete repo from configuration
+        --add\t\tAdd repo to configuration
 
         -e --edit\t\tEdit repo configuration
 
-            -a --add\tAdd something to repo configuration
-            -d --delete\tDelete something from repo configuration
+            -a\t\tAdd something to repo configuration
+            -d\t\tDelete something from repo configuration
 
         -s --shade\tShade config
         -r --remote\tSpecify remote
@@ -98,8 +98,8 @@ fn main() {
         optflag("h"), optflag("help"),
         optopt("j"), optopt("jobs"),
         optflag("l"), optflag("list"),
-        optopt("a"), optopt("add"),
-        optopt("d"), optopt("delete"),
+        optopt("add"), optflag("a"),
+        optopt("delete"), optflag("d"),
         optopt("e"), optopt("edit"),
         optopt("s"), optopt("shade"),
         optopt("r"), optopt("remote"),
@@ -266,7 +266,7 @@ fn main() {
                         };
                     }
                 },  None => {
-                    match getOption(&matches, ["a", "add"]) {
+                    match getOption(&matches, ["add"]) {
                         Some(a) => {
                             if shade == -1 {
                                 night.push( Night {
@@ -337,7 +337,7 @@ fn main() {
                         }, None => fail!("No repository found: {}", *e)
                     };
                 },  None => {
-                    match getOption(&matches, ["d", "delete"]) {
+                    match getOption(&matches, ["delete"]) {
                         Some(d) => {
                             match find_Repo(night, shade, d) {
                                 Some(ind) => {
