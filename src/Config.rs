@@ -1,8 +1,8 @@
 use Moon::{Night, POTM, Remote, Repository, Gentoo, Star
            , git, hg
-           , pull, update};
+           , pull, rebase, update};
 
-use Misc::toVCS;
+use Misc::{toVCS, toAction};
 
 use std::rt::io;
 use std::rt::io::File;
@@ -103,10 +103,14 @@ pub fn save_App(p: &Path, potm: POTM, pretty : bool) {
 ///<Summary>
 ///Add repository to RepoList
 ///</Summary>
-pub fn add_Repo(repo: &str, t: Option<~str>, u: Option<~str>) -> Repository {
+pub fn add_Repo(repo: &str, t: Option<~str>, x: Option<~str>, u: Option<~str>) -> Repository {
     let repoType = match t {
         Some(at) => toVCS(at),
         None => git
+    };
+    let exec = match x {
+        Some(ex) => toAction(ex),
+        None => rebase
     };
     let upstream = match u {
         Some(up) => up,
@@ -121,7 +125,7 @@ pub fn add_Repo(repo: &str, t: Option<~str>, u: Option<~str>) -> Repository {
                 m: Some(~"master"),
                 upstream: Some(upstream)
             }],
-        actions: ~[ pull ]
+        actions: ~[ exec ]
     }
 }
 

@@ -1,9 +1,10 @@
-use Moon::{VCS
+use Moon::{VCS, Action
     , git
     , hg
     , svn
     , cvs
-    , Gentoo};
+    , Gentoo
+    , pull, push, update, rebase, merge};
 
 use StarStorm::Trait;
 use Stars::Git::Git;
@@ -22,7 +23,24 @@ pub fn toVCS(s: ~str) -> VCS {
         ~"svn" => svn,
         ~"cvs" => cvs,
         ~"Gentoo" => Gentoo,
-        _ => git /* by default git, TODO: here should be option */
+        _ => git
+    }
+}
+
+///<Summary>
+///Convert to Action
+///
+/// rebase as default
+///
+///</Summary>
+pub fn toAction(s: ~str) -> Action {
+    match s {
+        ~"pull"     => pull,
+        ~"push"     => push,
+        ~"update"   => update,
+        ~"rebase"   => rebase,
+        ~"merge"    => merge,
+        _ => rebase
     }
 }
 

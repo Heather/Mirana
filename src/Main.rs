@@ -35,18 +35,20 @@ use std::os::change_dir;
 // ExtrA:
 use extra::getopts::{optflag, optopt, getopts, Opt, Matches};
 
-static r_version: &'static str = "  Mirana v0.1.1";
+static r_version: &'static str = "  Mirana v0.1.2";
 static mut ncore: uint = 1;
 
 fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
     println!("Usage: {} [options]", program);
     println("
         -h --help\tUsage
-         
+
+        -j --jobs
+
         pull\t pull changes in any vcs
         pull\t push changes in any vcs
-         
-        -l\t\tPretty print repositories in sync
+
+        -l --list\tPretty print repositories in sync
         -d --delete\tDelete repo from configuration
         -a --add\tAdd repo to configuration
 
@@ -60,6 +62,7 @@ fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
         -u --upstream\tSpecify upstream repository
         -m --master\tSpecify upstream master branch
         -b --branch\tBranch of adding / editing repo or filtering type
+        -x --exec\tActual action for repository (pull, push, rebase)
         -t --type\tType of adding / editing repo or filtering type");
     if nix {
         println(" -g --gentoo\tSync Gentoo-x86");
@@ -77,28 +80,13 @@ fn getOption(matches: &Matches, opts: &[&str]) -> Option<~str> {
 fn main() {
     println!("_________________________________________________________________________");
     print!(" {:s} ", r_version);
-    let nix = !cfg!(target_os = "win32");
-    if nix {
-        print (", POSIX");
-        match do task::try {
-            let nproc = exe("nproc", []);
-            match from_str::<uint> (nproc.trim()) {
-                Some(0) => 1,
-                Some(n) => n + 1,
-                None => 1
-            }
-        } {  Ok(n)  => {  println!(", {:u} Core", n); unsafe { ncore = n; }
-          }, Err(e) => {  println!(" -> can't get cores count: {:?}", e);
-          }
-        }
-    } else { println (", Windows"); };
-    println("_________________________________________________________________________");
     let args = os::args();
     let program = args[0].as_slice();
     let opts = ~[
         optflag("h"), optflag("help"),
+        optopt("j"), optopt("jobs"),
         optflag("pull"), optflag("push"),
-        optflag("l"),
+        optflag("l"), optflag("list"),
         optopt("a"), optopt("add"),
         optopt("d"), optopt("delete"),
         optopt("e"), optopt("edit"),
@@ -107,6 +95,7 @@ fn main() {
         optopt("u"), optopt("upstream"),
         optopt("m"), optopt("master"),
         optopt("b"), optopt("branch"),
+        optopt("x"), optopt("exec"),
         optopt("t"), optopt("type"),
         optflag("g"), optflag("gentoo")
     ];
@@ -114,6 +103,35 @@ fn main() {
         Ok(m) => { m }
         Err(f) => { fail!(f.to_err_msg()) }
     };
+    let nix = !cfg!(target_os = "win32");
+    if nix {
+        print (", POSIX");
+        let maybe_jobs = getOption(&matches, ["j", "jobs"]);
+        match maybe_jobs {
+            Some(j) => {
+                let jcore = match from_str::<uint> (j.trim()) {
+                                Some(0) => 1,
+                                Some(n) => n,
+                                None => 1
+                };
+                println!(", {} Core", jcore);
+                unsafe { ncore = jcore; }
+            },  None    => {
+                match do task::try {
+                    let nproc = exe("nproc", []);
+                    match from_str::<uint> (nproc.trim()) {
+                        Some(0) => 1,
+                        Some(n) => n + 1,
+                        None => 1
+                    }
+                } {  Ok(n)  => {  println!(", {:u} Core", n); unsafe { ncore = n; }
+                  }, Err(e) => {  println!(" -> can't get cores count: {:?}", e);
+                  }
+                }
+            }
+        }
+    } else { println (", Windows"); };
+    println("_________________________________________________________________________");
     if matches.opt_present("h") || matches.opt_present("help") {
         print_usage(program, opts, nix); return;
     }
@@ -184,6 +202,7 @@ fn main() {
     if ( cfg.exists() ) {
         let maybe_type      = matches.opt_str("t");
         let maybe_edit      = getOption(&matches, ["e", "edit"]);
+        let maybe_exec      = getOption(&matches, ["x", "exec"]);
         let maybe_remote    = getOption(&matches, ["r", "remote"]);
         let maybe_branch    = getOption(&matches, ["b", "branch"]);
         if matches.opt_present("a") || matches.opt_present("add") {
@@ -206,13 +225,13 @@ fn main() {
                                 night.push( Night {
                                     shade: maybe_shade.unwrap(),
                                     repositories: ~[ 
-                                        add_Repo(a, maybe_type, matches.opt_str("u"))
+                                        add_Repo(a, maybe_type, maybe_exec, matches.opt_str("u"))
                                         ]
                                     });
                                 save_RepoList( cfg, night, app.pretty );
                             } else {
                                 night[shade].repositories.push(
-                                    add_Repo(a, maybe_type, matches.opt_str("u")));
+                                    add_Repo(a, maybe_type, maybe_exec, matches.opt_str("u")));
                                 save_RepoList( cfg, night, app.pretty );
                                 println!("{:?} added", a);
                             }
@@ -249,24 +268,29 @@ fn main() {
                 }
             }; return;
         }
-        if matches.opt_present("l") {
+        if matches.opt_present("l") || matches.opt_present("list") {
             if ( cfg.exists() ) {
                 for rep in night[shade].repositories.iter() {
+                    println!(">-- Repo: {:s}", rep.loc);
                     for rem in rep.remotes.iter().filter(
                         |&r| match maybe_type {
                             Some(ref rt) => r.t == toVCS(rt.to_owned()),
                             None => true
                                 }) {
-                        println!(">-- repo: {:s}", rep.loc);
-                        println!(" *  type: {:?}", rem.t);
-                        println!(" *  upstream: {} {}", rem.upstream, rem.m);
-                        print   (" *  branches:");
+                        println!(" *  Type: {:?}", rem.t);
+                        println!(" *  Upstream: {} {}", rem.upstream, rem.m);
+                        print   (" *  Branches:");
                         for b in rem.branches.iter() {
                             print!(" {:s}", *b);
                         }
                         println("");
-                        println("_________________________________________________________________________");
                     }
+                    print   (">-- Actions:");
+                    for x in rep.actions.iter() {
+                        print!(" {:?}", *x);
+                    }
+                    println("");
+                    println("_________________________________________________________________________");
                 }
             } return;
         }
