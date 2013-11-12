@@ -36,7 +36,7 @@ use std::os::change_dir;
 // ExtrA:
 use extra::getopts::{optflag, optopt, getopts, Opt, Matches};
 
-static r_version: &'static str = "  Mirana v0.1.4";
+static r_version: &'static str = "  Mirana v0.1.5";
 static mut ncore: uint = 1;
 
 fn print_usage(program: &str, _opts: &[Opt], nix: bool) {

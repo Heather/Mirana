@@ -1,14 +1,15 @@
 @echo off
+::setlocal
 rustc --version
-cd src
+cd src/Mirana
 
-rustc Mirana.rs -O -o ../Mirana.exe
+rustc main.rs -O -o ../../Mirana.exe
 
-:: trying to understand compilation process -------
-:: rustc Mirana.rs -O --emit-llvm -o ../Mirana.bc
-:: llc Mirana.bc -O3 -o mirana.s
-:: gcc mirana.s -O3 -o mirana.exe
-:: ------------------------------------------------
+:: <--------------- rustpkg is buggy
+::mkdir .tmp
+::set TMPDIR=.tmp
+::rustpkg build Mirana
 
 ::handle error messages
+::endlocal
 pause

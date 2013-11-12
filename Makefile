@@ -4,15 +4,15 @@
 
 RUSTC=rustc
 RCFLAGS=-O
-SRCDIR=src
-SRC=Mirana.rs
+SRCDIR=src/Mirana
+SRC=main.rs
 INSTALL   ?= install
 MKDIR     ?= $(INSTALL) -d
 BINDIR    ?= $(PREFIX)/bin
 DESTDIR   ?=
 
 r:	$(SRCDIR)
-	cd $^ && $(RUSTC) -o ../Mirana $(SRC) ${RCFLAGS}
+	cd $^ && $(RUSTC) -o ../../Mirana $(SRC) ${RCFLAGS}
 
 .PHONY: clean rebuild
 

@@ -1,3 +1,6 @@
+/.tmp
+/.rust
+/build
 /*.exe
 /*.conf
 /*~

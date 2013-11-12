@@ -1,3 +1,11 @@
+#[link(name = "Mirana",
+       vers = "0.1.5",
+       author = "Heather Cynede",
+       url = "https://github.com/Heather/Mirana")];
+
+#[comment = "Mirana VCS sync"];
+#[license = "LGPL2"];
+
 #[feature(managed_boxes)];
 #[crate_type = "bin"];
 extern mod extra;
@@ -18,4 +26,4 @@ pub mod StarStorm;
 pub mod Core;
 
 /* Main */
-pub mod Main;
+pub mod Mirana;
