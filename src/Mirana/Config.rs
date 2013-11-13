@@ -4,8 +4,8 @@ use Moon::{Night, POTM, Remote, Repository, Gentoo, Star
 
 use Misc::{toVCS, toAction};
 
-use std::rt::io;
-use std::rt::io::File;
+use std::io;
+use std::io::File;
 use std::path::Path;
 
 use extra::json;

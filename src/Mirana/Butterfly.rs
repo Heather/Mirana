@@ -1,5 +1,5 @@
 use std::task;
-use std::rt::io::timer::sleep;
+use std::io::timer::sleep;
 
 ///<Summary>
 ///Core how to Fly function
