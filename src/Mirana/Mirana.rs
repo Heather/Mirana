@@ -46,6 +46,8 @@ fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
 
         -j --jobs
 
+        init\t Creates default shade based on folders around
+        
         pull\t pull changes in any vcs
         pusg\t push changes in any vcs
 
@@ -125,12 +127,12 @@ fn main() {
     let appCfg = & Path::new (  if nix  { "/etc/App.conf" }
                                 else    { "App.conf" }
         );
-    let mut night = load_RepoList( cfg );
-    let app = load_App( appCfg, nix );
+    let app         = load_App( appCfg, nix );
+    let mut night   = load_RepoList( cfg );
     /* CLI */
     if args.len() > 1 {
         let x = args[1].as_slice();
-        let C = ["pull", "push"];
+        let C = ["pull", "push", "init"];
         if  C.iter().any(
             |c| *c == x) {
             match app.stars.iter().filter_map(
@@ -144,23 +146,26 @@ fn main() {
                     }
                 }).next() {
                 Some(vcs) => {
-                    let process = |action : &str, custom : &Option<~str>, withVCS: &fn(vcs : &Git)| {
-                        if  x.as_slice() == action {
-                            match *custom {
-                                Some(ref p_custom) => e(*p_custom, []),
-                                None => {
-                                    match vcs.star {
-                                        Some(vcs)   => match (toTrait(vcs)) {
-                                            Some(t) => withVCS(t),
-                                            None    => print("NO trait for this vcs") },
-                                        None        => print("No VCS provided")
-                                    }
+                    let process = |custom : &Option<~str>, withVCS: &fn(vcs : &Git)| {
+                        match *custom {
+                            Some(ref p_custom) => e(*p_custom, []),
+                            None => {
+                                match vcs.star {
+                                    Some(vcs)   => match (toTrait(vcs)) {
+                                        Some(t) => withVCS(t),
+                                        None    => print("NO trait for this vcs") },
+                                    None        => print("No VCS provided")
                                 }
                             }
                         }
                     };
-                    do process(C[0], &vcs.pull_custom) | v: &Git | { v.pull("master"); }
-                    do process(C[1], &vcs.push_custom) | v: &Git | { v.push("master"); }
+                    match x {
+                        "pull"  => do process(&vcs.pull_custom) | v: &Git | { v.pull("master"); },
+                        "push"  => do process(&vcs.push_custom) | v: &Git | { v.push("master"); },
+                        "init"  => {
+                                   fail!("Init is not implemented yet")
+                        }, _    => fail!("CLI Impossible case")
+                    }
                 }
                 None => fail!("No vcs found in current directory")
             };  return;
