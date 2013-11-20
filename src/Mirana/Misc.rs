@@ -10,8 +10,8 @@ use Moon::{VcsFlavor, Action
 // Uncomment when Rust bug will be fixed: 
 //
 use StarStorm::Vcs;
-use Stars::Git::Git;
-use Stars::Hg::Hg;
+use VcsImpl::Git::Git;
+use VcsImpl::Hg::Hg;
 
 ///<Summary>
 ///Convert to VcsFlavor

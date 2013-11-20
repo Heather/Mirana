@@ -20,7 +20,7 @@ pub mod Misc;
 pub mod Config;
 
 pub mod Shades;
-pub mod Stars;
+pub mod VcsImpl;
 
 pub mod StarStorm;
 pub mod Core;
