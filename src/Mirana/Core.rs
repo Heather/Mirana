@@ -6,7 +6,7 @@ use Misc                ::{toVCS, toTrait};
 use Shades::Gentoo      ::{gentooFullUpdate};
 
 // Stars
-use StarStorm::Trait;
+use StarStorm::Vcs;
 
 use std::os::change_dir;
 use extra::time;

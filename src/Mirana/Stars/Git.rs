@@ -1,9 +1,9 @@
-use StarStorm::Trait;
+use StarStorm::Vcs;
 use Shades::Git::{gitPull, gitPush, gitRebase};
 
 pub struct Git;
 
-impl Trait for Git {
+impl Vcs for Git {
     fn pull(&self, branch: &str) {
         gitPull(branch);
     }

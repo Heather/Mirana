@@ -9,7 +9,7 @@ use Moon::{VcsFlavor, Action
 
 // Uncomment when Rust bug will be fixed: 
 //
-use StarStorm::Trait;
+use StarStorm::Vcs;
 use Stars::Git::Git;
 use Stars::Hg::Hg;
 
@@ -48,11 +48,11 @@ pub fn toAction(s: ~str) -> Action {
 }
 
 ///<Summary>
-///Convert to Trait
+///Convert to VcsImpl
 ///</Summary>
-pub fn toTrait(vcs: VcsFlavor) -> Option<~Trait> {
-    match vcs { git => Some( ~Git as ~Trait )
-              , hg  => Some( ~Hg  as ~Trait )
+pub fn toTrait(vcs: VcsFlavor) -> Option<&'static Vcs> {
+    match vcs { git => Some( &Git as &'static Vcs )
+              , hg  => Some( &Hg  as &'static Vcs )
               , _   => None
     }
 }

@@ -25,7 +25,7 @@ use Config      ::{ save_RepoList
                   , add_Remote};
 use Shades::Gentoo::{gentoo};
 // Stars
-use StarStorm::Trait;
+use StarStorm::Vcs;
 // Internal:
 use std::os;
 use std::task;
@@ -144,7 +144,7 @@ fn main() {
                     }
                 }).next() {
                 Some(vcs) => {
-                    let process = |custom : &Option<~str>, withVCS: &fn(vcs : ~Trait)| {
+                    let process = |custom : &Option<~str>, withVCS: &fn(vcs : &'static Vcs)| {
                         match *custom {
                             Some(ref p_custom) => e(*p_custom, []),
                             None => {
@@ -158,8 +158,8 @@ fn main() {
                         }
                     };
                     match x {
-                        "pull"  => do process(&vcs.pull_custom) | v: ~Trait | { v.pull("master"); },
-                        "push"  => do process(&vcs.push_custom) | v: ~Trait | { v.push("master"); },
+                        "pull"  => do process(&vcs.pull_custom) | v: &'static Vcs | { v.pull("master"); },
+                        "push"  => do process(&vcs.push_custom) | v: &'static Vcs | { v.push("master"); },
                         "init"  => {
                                    fail!("Init is not implemented yet")
                         }, _    => fail!("CLI Impossible case")
