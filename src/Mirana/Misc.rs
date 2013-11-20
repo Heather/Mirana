@@ -9,9 +9,9 @@ use Moon::{VCS, Action
 
 // Uncomment when Rust bug will be fixed: 
 //
-// use StarStorm::Trait;
+use StarStorm::Trait;
 use Stars::Git::Git;
-// use Stars::Hg::Hg;
+use Stars::Hg::Hg;
 
 ///<Summary>
 ///Convert to VCS
@@ -49,13 +49,10 @@ pub fn toAction(s: ~str) -> Action {
 
 ///<Summary>
 ///Convert to Trait
-///
-/// The place for terrible RUST BUG
-///
 ///</Summary>
-pub fn toTrait(vcs: VCS) -> Option<&Git> {
-    match vcs { git => Some( &Git )
-              //, hg  => Some( &Hg  as &Trait )
+pub fn toTrait(vcs: VCS) -> Option<~Trait> {
+    match vcs { git => Some( ~Git as ~Trait )
+              , hg  => Some( ~Hg  as ~Trait )
               , _   => None
     }
 }

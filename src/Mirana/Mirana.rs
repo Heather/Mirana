@@ -26,8 +26,6 @@ use Config      ::{ save_RepoList
 use Shades::Gentoo::{gentoo};
 // Stars
 use StarStorm::Trait;
-use Stars::Git::Git;
-/* use Stars::Hg::Hg; */
 // Internal:
 use std::os;
 use std::task;
@@ -36,7 +34,7 @@ use std::os::change_dir;
 // ExtrA:
 use extra::getopts::{optflag, optopt, getopts, Opt, Matches};
 
-static r_version: &'static str = "  Mirana v0.1.5";
+static r_version: &'static str = "  Mirana v0.1.6";
 static mut ncore: uint = 1;
 
 fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
@@ -146,7 +144,7 @@ fn main() {
                     }
                 }).next() {
                 Some(vcs) => {
-                    let process = |custom : &Option<~str>, withVCS: &fn(vcs : &Git)| {
+                    let process = |custom : &Option<~str>, withVCS: &fn(vcs : ~Trait)| {
                         match *custom {
                             Some(ref p_custom) => e(*p_custom, []),
                             None => {
@@ -159,9 +157,9 @@ fn main() {
                             }
                         }
                     };
-                    match x {
-                        "pull"  => do process(&vcs.pull_custom) | v: &Git | { v.pull("master"); },
-                        "push"  => do process(&vcs.push_custom) | v: &Git | { v.push("master"); },
+                    match x { /* It's only temporary &Git <- toTrait fails [ Rust BUG ] */
+                        "pull"  => do process(&vcs.pull_custom) | v: ~Trait | { v.pull("master"); },
+                        "push"  => do process(&vcs.push_custom) | v: ~Trait | { v.push("master"); },
                         "init"  => {
                                    fail!("Init is not implemented yet")
                         }, _    => fail!("CLI Impossible case")
