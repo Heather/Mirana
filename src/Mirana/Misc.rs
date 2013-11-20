@@ -1,4 +1,4 @@
-use Moon::{VCS, Action
+use Moon::{VcsFlavor, Action
     , git
     , hg
     , svn
@@ -14,12 +14,12 @@ use Stars::Git::Git;
 use Stars::Hg::Hg;
 
 ///<Summary>
-///Convert to VCS
+///Convert to VcsFlavor
 ///
 /// git as default
 ///
 ///</Summary>
-pub fn toVCS(s: ~str) -> VCS {
+pub fn toVCS(s: ~str) -> VcsFlavor {
     match s {
         ~"git" => git,
         ~"hg"  => hg,
@@ -50,7 +50,7 @@ pub fn toAction(s: ~str) -> Action {
 ///<Summary>
 ///Convert to Trait
 ///</Summary>
-pub fn toTrait(vcs: VCS) -> Option<~Trait> {
+pub fn toTrait(vcs: VcsFlavor) -> Option<~Trait> {
     match vcs { git => Some( ~Git as ~Trait )
               , hg  => Some( ~Hg  as ~Trait )
               , _   => None

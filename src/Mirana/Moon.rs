@@ -1,16 +1,16 @@
 #[deriving(Encodable, Decodable, Clone, Eq)]
-pub enum VCS { git
-             , hg
-             , svn
-             , cvs
-             , Gentoo
+pub enum VcsFlavor { git
+                     , hg
+                     , svn
+                     , cvs
+                     , Gentoo
 }
 
 #[deriving(Encodable, Decodable, Clone, Eq)]
 pub enum Action { pull, merge, rebase, push, update }
 
 #[deriving(Encodable, Decodable, Clone)]
-pub struct Remote { t: VCS
+pub struct Remote { t: VcsFlavor
                   , branches: ~[~str]
                   , m:        Option<~str>
                   , upstream: Option<~str>
@@ -29,7 +29,7 @@ pub struct Night { shade: ~str
 
 #[deriving(Encodable, Decodable, Clone)]
 pub struct Star { detector:     Option<~str>
-                , star:         Option<VCS>
+                , star:         Option<VcsFlavor>
                 , pull_custom:  Option<~str>
                 , push_custom:  Option<~str> }
 

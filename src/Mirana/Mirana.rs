@@ -12,7 +12,7 @@
 
 */
 
-use Moon        ::{Night, Repository, Remote, VCS};
+use Moon        ::{Night, Repository, Remote, VcsFlavor};
 use Shell       ::{e, exe};
 use Butterfly   ::{rustbuildbotdance};
 use Misc        ::{toVCS, toTrait};
@@ -75,7 +75,7 @@ fn find_Repo(night: &[Night], shade: uint, pattern: &str) -> Option<uint> {
                     .iter()
                     .position ( |r| r.loc.contains( pattern ) )
 }
-fn find_Remote(repository: &Repository, tp: VCS) -> Option<uint> {
+fn find_Remote(repository: &Repository, tp: VcsFlavor) -> Option<uint> {
     repository      .remotes
                     .iter()
                     .position ( |r| r.t == tp )
@@ -157,7 +157,7 @@ fn main() {
                             }
                         }
                     };
-                    match x { /* It's only temporary &Git <- toTrait fails [ Rust BUG ] */
+                    match x {
                         "pull"  => do process(&vcs.pull_custom) | v: ~Trait | { v.pull("master"); },
                         "push"  => do process(&vcs.push_custom) | v: ~Trait | { v.push("master"); },
                         "init"  => {
