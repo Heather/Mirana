@@ -1,4 +1,4 @@
-use Model::{ Sync, App, Remote, Repository, Gentoo, VcsCfg
+use Model::{ Sync, App, Remote, Repository, Gentoo, VcsCfg, Custom
            , git, hg
            , pull, rebase, update};
 
@@ -73,13 +73,18 @@ pub fn load_App(p: &Path, nix : bool) -> App {
                    , vcs: ~[
                         VcsCfg { detector: Some(~".git")
                                , vcs:      Some (git)
-                               , custom:   ~[] },
+                               , custom:   ~[] 
+                            },
                         VcsCfg { detector: Some(~".hg")
                               , vcs:        Some (hg)
-                              , custom:    ~[]  }
-                   ]
+                              , custom:    ~[
+                                Custom { action: pull
+                                       , cmd: ~"hg pull --update" }
+                                ]  
+                            }
+                       ]
+                    }
             }
-        }
 }
 
 ///<Summary>
