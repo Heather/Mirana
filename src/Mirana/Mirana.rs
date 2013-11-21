@@ -12,9 +12,10 @@
 
 */
 
-use Model       ::{Sync, Repository, Remote, VcsFlavor, Custom};
+use Model       ::{Sync, Repository, Remote, VcsFlavor, Custom
+                  , Action, pull, push};
 use Shell       ::{e, exe};
-use Wrappers    ::{rustbuildbotdance};
+use Wrappers    ::{rustbuildbotdance, fancy};
 use Misc        ::{toVCS, toTrait};
 use Core        ::{runSync};
 use Config      ::{ save_RepoList
@@ -144,21 +145,24 @@ fn main() {
                     }
                 }).next() {
                 Some(cfg) => {
-                    let process = |custom : &~[Custom], withVCS: &fn(vcs : &'static Vcs)| {
-                        if (*custom).len() > 0 {
-                            fail!("Custom process is not ready yet");
-                        } else {
-                            match cfg.vcs {
-                                Some(vcs)   => match (toTrait(vcs)) {
-                                    Some(t) => withVCS(t),
-                                    None    => print("NO trait for this vcs") },
-                                None        => print("No VCS provided")
+                    let process = |action: Action, custom : &~[Custom], withVCS: &fn(vcs : &'static Vcs)| {
+                        match (*custom).iter().filter_map(|ref c| 
+                            if c.action == action { Some( c.cmd.to_owned() ) }
+                            else { None }).next() {
+                            Some(cmd) => do fancy { e(cmd, []) },
+                            None => {
+                                match cfg.vcs {
+                                    Some(vcs)   => match (toTrait(vcs)) {
+                                        Some(t) => withVCS(t),
+                                        None    => print("NO trait for this vcs") },
+                                    None        => print("No VCS provided")
+                                }
                             }
                         }
                     };
                     match x {
-                        "pull"  => do process(&cfg.custom) | v: &'static Vcs | { v.pull("master"); },
-                        "push"  => do process(&cfg.custom) | v: &'static Vcs | { v.push("master"); },
+                        "pull"  => do process(pull, &cfg.custom) | v: &'static Vcs | { v.pull("master"); },
+                        "push"  => do process(push, &cfg.custom) | v: &'static Vcs | { v.push("master"); },
                         "init"  => {
                                    fail!("Init is not implemented yet")
                         }, _    => fail!("CLI Impossible case")
