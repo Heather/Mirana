@@ -46,3 +46,14 @@ pub fn rustbuildbotdance<U>(f: &fn() -> U) -> U {
         ,"(>^.^<)"];
     fly(animation, 7, 2, f)
 }
+
+///<Summary>
+///Simple lines surround
+///</Summary>
+#[inline]
+pub fn fancy<U>(f: &fn() -> U) -> U {
+    println("_________________________________________________________________________");
+    let ret = f();
+    println("_________________________________________________________________________");
+    ret
+}

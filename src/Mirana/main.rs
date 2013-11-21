@@ -11,18 +11,18 @@
 extern mod extra;
 
 /* Base modules */
-pub mod Moon;
+pub mod Model;
 pub mod Shell;
-pub mod Butterfly;
+pub mod Wrappers;
 pub mod Misc;
 
 /* Json config is the only one yet I found in rust */
 pub mod Config;
 
-pub mod Shades;
+pub mod VcsCmd;
 pub mod VcsImpl;
 
-pub mod StarStorm;
+pub mod Traits;
 pub mod Core;
 
 /* Main */

@@ -1,4 +1,4 @@
-use Moon::{Night, POTM, Remote, Repository, Gentoo, Star
+use Model::{Night, POTM, Remote, Repository, Gentoo, Star
            , git, hg
            , pull, rebase, update};
 

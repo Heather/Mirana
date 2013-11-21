@@ -12,9 +12,9 @@
 
 */
 
-use Moon        ::{Night, Repository, Remote, VcsFlavor};
+use Model       ::{Night, Repository, Remote, VcsFlavor};
 use Shell       ::{e, exe};
-use Butterfly   ::{rustbuildbotdance};
+use Wrappers    ::{rustbuildbotdance};
 use Misc        ::{toVCS, toTrait};
 use Core        ::{sync};
 use Config      ::{ save_RepoList
@@ -23,9 +23,9 @@ use Config      ::{ save_RepoList
                   , load_App
                   , add_Repo
                   , add_Remote};
-use Shades::Gentoo::{gentoo};
+use VcsCmd::Gentoo::{gentoo};
 // Stars
-use StarStorm::Vcs;
+use Traits::Vcs;
 // Internal:
 use std::os;
 use std::task;

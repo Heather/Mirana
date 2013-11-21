@@ -1,5 +1,5 @@
-use StarStorm::Vcs;
-use Shades::Hg::{hgPull, hgPush, hgRebase};
+use Traits::Vcs;
+use VcsCmd::Hg::{hgPull, hgPush, hgRebase};
 
 pub struct Hg;
 

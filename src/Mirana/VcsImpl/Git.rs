@@ -1,5 +1,5 @@
-use StarStorm::Vcs;
-use Shades::Git::{gitPull, gitPush, gitRebase};
+use Traits::Vcs;
+use VcsCmd::Git::{gitPull, gitPush, gitRebase};
 
 pub struct Git;
 

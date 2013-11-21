@@ -1,12 +1,12 @@
-use Moon  ::{ Repository, Gentoo
+use Model  ::{ Repository, Gentoo
             , pull, push, rebase};
 
 // Modules:
 use Misc                ::{toVCS, toTrait};
-use Shades::Gentoo      ::{gentooFullUpdate};
+use VcsCmd::Gentoo      ::{gentooFullUpdate};
 
 // Stars
-use StarStorm::Vcs;
+use Traits::Vcs;
 
 use std::os::change_dir;
 use extra::time;

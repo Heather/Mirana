@@ -1,4 +1,4 @@
-use Moon::{VcsFlavor, Action
+use Model::{VcsFlavor, Action
     , git
     , hg
     , svn
@@ -9,7 +9,7 @@ use Moon::{VcsFlavor, Action
 
 // Uncomment when Rust bug will be fixed: 
 //
-use StarStorm::Vcs;
+use Traits::Vcs;
 use VcsImpl::Git::Git;
 use VcsImpl::Hg::Hg;
 

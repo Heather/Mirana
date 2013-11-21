@@ -1,5 +1,5 @@
 use Shell::{e, exec};
-use Butterfly::butterfly;
+use Wrappers::{butterfly, fancy};
 
 use std::os::{change_dir};
 
@@ -51,27 +51,31 @@ pub fn gentooUpdate(ncores: uint, keep: bool) {
         if keep { "--keep-going"
         } else { ""
         };
-    println("_________________________________________________________________________");
-    e("emerge", 
-      [&"-vuDN"
-       ,"@world"
-       ,"--with-bdeps=y"
-       ,"--complete-graph"
-       ,ifkeep.as_slice()
-       ,jobs.as_slice()]);
-    println("_________________________________________________________________________");
+    do fancy {
+        e("emerge", 
+          [&"-vuDN"
+           ,"@world"
+           ,"--with-bdeps=y"
+           ,"--complete-graph"
+           ,ifkeep.as_slice()
+           ,jobs.as_slice()]);
+    }
 }
 
 ///<Summary>
 ///emerge --sync
 ///</Summary>
 pub fn emerge_sync() {
-    exec("emerge", [&"--sync"]);
+    do fancy {
+        exec("emerge", [&"--sync"]);
+    }
 }
 
 ///<Summary>
 ///eix-update
 ///</Summary>
 pub fn eix_update() {
-    e("eix-update", []);
+    do fancy {
+        e("eix-update", []);
+    }
 }
