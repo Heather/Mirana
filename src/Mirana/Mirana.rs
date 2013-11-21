@@ -119,8 +119,8 @@ fn main() {
         print_usage(program, opts, nix); return;
     }
     //Load JSON configuration---------------------------------------------
-    let cfg = & Path::new (     if nix  { "/etc/Shades.conf" }
-                                else    { "Shades.conf" }
+    let cfg = & Path::new (     if nix  { "/etc/Sync.conf" }
+                                else    { "Sync.conf" }
         );
     let appCfg = & Path::new (  if nix  { "/etc/App.conf" }
                                 else    { "App.conf" }
