@@ -1,17 +1,3 @@
-/*
-        Stone word backfire with vengeance
-                Hopeless divine intervention
-                
-                            Leader, where's the peace you pursue
-    Can't let any more follow you
-            Teach to bleach the stains of your guilt
-        Envy of moral free lives built
-                        Live with the torment that they live through
-                        
-                        Your sins will only rest on you
-
-*/
-
 use Model       ::{Sync, Repository, Remote, VcsFlavor, Custom
                   , Action, pull, push};
 use Shell       ::{e, exe};
@@ -68,6 +54,20 @@ fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
         -t --type\tType of adding / editing repo or filtering type");
     if nix {
         println(" -g --gentoo\tSync Gentoo-x86");
+    } else {
+        println("
+        Stone word backfire with vengeance
+                Hopeless divine intervention
+                
+                            Leader, where's the peace you pursue
+    Can't let any more follow you
+            Teach to bleach the stains of your guilt
+        Envy of moral free lives built
+                        Live with the torment that they live through
+                        
+                        Your sins will only rest on you
+
+        ");
     }
     println("_________________________________________________________________________");
 }
