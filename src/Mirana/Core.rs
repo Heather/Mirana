@@ -11,7 +11,7 @@ use Traits::Vcs;
 use std::os::change_dir;
 use extra::time;
 
-pub fn sync(repo: Repository, location: Path, typeFilter: Option<~str>, ncore: uint) {
+pub fn runSync(repo: Repository, location: Path, typeFilter: Option<~str>, ncore: uint) {
     let loc = &location;
     let nowt = time::now_utc();
     let nowt_str = nowt.rfc3339();
@@ -32,7 +32,9 @@ pub fn sync(repo: Repository, location: Path, typeFilter: Option<~str>, ncore: u
                                     match *action {
                                         pull    => vcs.pull(*b),
                                         push    => vcs.push(*b),
-                                        rebase  => vcs.rebase(*b, &r.m, &r.upstream),
+                                        rebase  => vcs.rebase(*b
+                                                            , &r.master
+                                                            , &r.upstream),
                                         _       => fail!("Non implemented yet")
                                     }
                                 }

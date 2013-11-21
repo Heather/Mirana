@@ -12,11 +12,11 @@
 
 */
 
-use Model       ::{Night, Repository, Remote, VcsFlavor};
+use Model       ::{Sync, Repository, Remote, VcsFlavor, Custom};
 use Shell       ::{e, exe};
 use Wrappers    ::{rustbuildbotdance};
 use Misc        ::{toVCS, toTrait};
-use Core        ::{sync};
+use Core        ::{runSync};
 use Config      ::{ save_RepoList
                   , save_Defaults
                   , load_RepoList
@@ -58,7 +58,7 @@ fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
             -a\t\tAdd something to repo configuration
             -d\t\tDelete something from repo configuration
 
-        -s --shade\tShade config
+        -s --sync\tSync config
         -r --remote\tSpecify remote
         -u --upstream\tSpecify upstream repository
         -m --master\tSpecify upstream master branch
@@ -70,8 +70,8 @@ fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
     }
     println("_________________________________________________________________________");
 }
-fn find_Repo(night: &[Night], shade: uint, pattern: &str) -> Option<uint> {
-    night[shade]    .repositories
+fn find_Repo(Sync: &[Sync], shade: uint, pattern: &str) -> Option<uint> {
+    Sync[shade]    .repositories
                     .iter()
                     .position ( |r| r.loc.contains( pattern ) )
 }
@@ -101,7 +101,7 @@ fn main() {
         optopt("add"), optflag("a"),
         optopt("delete"), optflag("d"),
         optopt("e"), optopt("edit"),
-        optopt("s"), optopt("shade"),
+        optopt("s"), optopt("sync"),
         optopt("r"), optopt("remote"),
         optopt("u"), optopt("upstream"),
         optopt("m"), optopt("master"),
@@ -126,40 +126,39 @@ fn main() {
                                 else    { "App.conf" }
         );
     let app         = load_App( appCfg, nix );
-    let mut night   = load_RepoList( cfg );
+    let mut Sync   = load_RepoList( cfg );
     /* CLI */
     if args.len() > 1 {
         let x = args[1].as_slice();
         let C = ["pull", "push", "init"];
         if  C.iter().any(
             |c| *c == x) {
-            match app.stars.iter().filter_map(
-                |sta| { match sta.detector {
+            match app.vcs.iter().filter_map( |config| 
+                { match config.detector {
                         Some(ref detector) => {
                             match (Path::new( detector.to_owned() )).exists() {
-                                true    => Some(sta),
+                                true    => Some(config),
                                 false   => None
                             }
                         }, None => None
                     }
                 }).next() {
-                Some(vcs) => {
-                    let process = |custom : &Option<~str>, withVCS: &fn(vcs : &'static Vcs)| {
-                        match *custom {
-                            Some(ref p_custom) => e(*p_custom, []),
-                            None => {
-                                match vcs.star {
-                                    Some(vcs)   => match (toTrait(vcs)) {
-                                        Some(t) => withVCS(t),
-                                        None    => print("NO trait for this vcs") },
-                                    None        => print("No VCS provided")
-                                }
+                Some(cfg) => {
+                    let process = |custom : &~[Custom], withVCS: &fn(vcs : &'static Vcs)| {
+                        if (*custom).len() > 0 {
+                            fail!("Custom process is not ready yet");
+                        } else {
+                            match cfg.vcs {
+                                Some(vcs)   => match (toTrait(vcs)) {
+                                    Some(t) => withVCS(t),
+                                    None    => print("NO trait for this vcs") },
+                                None        => print("No VCS provided")
                             }
                         }
                     };
                     match x {
-                        "pull"  => do process(&vcs.pull_custom) | v: &'static Vcs | { v.pull("master"); },
-                        "push"  => do process(&vcs.push_custom) | v: &'static Vcs | { v.push("master"); },
+                        "pull"  => do process(&cfg.custom) | v: &'static Vcs | { v.pull("master"); },
+                        "push"  => do process(&cfg.custom) | v: &'static Vcs | { v.push("master"); },
                         "init"  => {
                                    fail!("Init is not implemented yet")
                         }, _    => fail!("CLI Impossible case")
@@ -206,11 +205,11 @@ fn main() {
         } return;
     }
     //--------------------------------------------------------------------
-    let maybe_shade = getOption(&matches, ["s", "shade"]);
-    let shade = if matches.opt_present("s") || matches.opt_present("shade") {
-        match maybe_shade {
+    let maybe_sync = getOption(&matches, ["s", "sync"]);
+    let sync = if matches.opt_present("s") || matches.opt_present("sync") {
+        match maybe_sync {
             Some(ref ss) => {
-                match night.iter().position( |shd| shd.shade == *ss ) {
+                match Sync.iter().position( |shd| shd.sync == *ss ) {
                     Some(ps)    => ps,
                     None        => -1
                 }
@@ -226,38 +225,38 @@ fn main() {
         if matches.opt_present("a") || matches.opt_present("add") {
             match maybe_edit {
                 Some(ref e) => {
-                    if shade == -1 {
-                        fail!("Error: there is no such shade: {}", maybe_shade.unwrap());
+                    if sync == -1 {
+                        fail!("Error: there is no such sync: {}", maybe_sync.unwrap());
                     } else {
-                        match find_Repo(night, shade, *e) {
+                        match find_Repo(Sync, sync, *e) {
                             Some(repo) => {
                                 match maybe_remote {
                                     Some(r) => {
                                         let remoteByType = toVCS(r.clone());
-                                        match find_Remote(&night[shade].repositories[repo], remoteByType) {
+                                        match find_Remote(&Sync[sync].repositories[repo], remoteByType) {
                                             Some(remote)    => {
                                                 println!("{:?} remote already exists", remoteByType);
                                                 if maybe_branch.is_some() {
                                                     let b = maybe_branch.unwrap();
-                                                    night[shade].repositories[repo].remotes[remote].branches.push(
+                                                    Sync[sync].repositories[repo].remotes[remote].branches.push(
                                                         b.clone());
-                                                    save_RepoList( cfg, night, app.pretty );
+                                                    save_RepoList( cfg, Sync, app.pretty );
                                                     println!("{} added", b);
                                                 }
                                             }, None         => {
-                                                night[shade].repositories[repo].remotes.push(
+                                                Sync[sync].repositories[repo].remotes.push(
                                                     add_Remote(maybe_type, maybe_branch, matches.opt_str("u")));
-                                                save_RepoList( cfg, night, app.pretty );
+                                                save_RepoList( cfg, Sync, app.pretty );
                                                 println!("{} added", r);
                                             }
                                         };
                                     }, None => {
                                         match maybe_branch {
                                             Some(b) => {
-                                                if night[shade].repositories[repo].remotes.len() > 0 {
-                                                    night[shade].repositories[repo].remotes[0].branches.push(
+                                                if Sync[sync].repositories[repo].remotes.len() > 0 {
+                                                    Sync[sync].repositories[repo].remotes[0].branches.push(
                                                         b.clone());
-                                                    save_RepoList( cfg, night, app.pretty );
+                                                    save_RepoList( cfg, Sync, app.pretty );
                                                     println!("{} added to first remote", b);
                                                 } else { fail!("There are no remotes to add branch, add remote first") }
                                             }, None => { fail!("For now you can only add remote or branch")
@@ -271,18 +270,18 @@ fn main() {
                 },  None => {
                     match getOption(&matches, ["add"]) {
                         Some(a) => {
-                            if shade == -1 {
-                                night.push( Night {
-                                    shade: maybe_shade.unwrap(),
+                            if sync == -1 {
+                                Sync.push( Sync {
+                                    sync: maybe_sync.unwrap(),
                                     repositories: ~[ 
                                         add_Repo(a, maybe_type, maybe_exec, matches.opt_str("u"))
                                         ]
                                     });
-                                save_RepoList( cfg, night, app.pretty );
+                                save_RepoList( cfg, Sync, app.pretty );
                             } else {
-                                night[shade].repositories.push(
+                                Sync[sync].repositories.push(
                                     add_Repo(a, maybe_type, maybe_exec, matches.opt_str("u")));
-                                save_RepoList( cfg, night, app.pretty );
+                                save_RepoList( cfg, Sync, app.pretty );
                                 println!("{} added", a);
                             }
                         }, None => fail!("No add argument provided")
@@ -290,32 +289,32 @@ fn main() {
                 }
             }; return;
         }
-        if shade == -1 {
-            fail!("Error: there is no such shade: {}", maybe_shade.unwrap());
+        if sync == -1 {
+            fail!("Error: there is no such sync: {}", maybe_sync.unwrap());
         }
         if matches.opt_present("d") || matches.opt_present("delete") {
             match maybe_edit {
                 Some(ref e) => {
-                    match find_Repo(night, shade, *e) {
+                    match find_Repo(Sync, sync, *e) {
                         Some(repo) => {
                             match maybe_remote {
                                 Some(r) => {
                                     let remoteByType = toVCS(r.clone());
-                                    match find_Remote(&night[shade].repositories[repo], remoteByType) {
+                                    match find_Remote(&Sync[sync].repositories[repo], remoteByType) {
                                         Some(remote) => {
                                             if maybe_branch.is_some() {
                                                 let b = maybe_branch.unwrap();
                                                 let ifBranch = find_Branch(
-                                                    &night[shade].repositories[repo].remotes[remote], b);
+                                                    &Sync[sync].repositories[repo].remotes[remote], b);
                                                 if ifBranch.is_some() {
-                                                    night[shade].repositories[repo].remotes[remote].branches.remove(
+                                                    Sync[sync].repositories[repo].remotes[remote].branches.remove(
                                                         ifBranch.unwrap());
                                                     println!("{} removed", b);
                                                 }
-                                                save_RepoList( cfg, night, app.pretty );
+                                                save_RepoList( cfg, Sync, app.pretty );
                                             } else {
-                                                night[shade].repositories[repo].remotes.remove(remote);
-                                                save_RepoList( cfg, night, app.pretty );
+                                                Sync[sync].repositories[repo].remotes.remove(remote);
+                                                save_RepoList( cfg, Sync, app.pretty );
                                                 println!("{:?} removed", remoteByType);
                                             }
                                         }, None => { }
@@ -323,11 +322,11 @@ fn main() {
                                 }, None => {
                                     match maybe_branch {
                                         Some(b) => {
-                                            if night[shade].repositories[repo].remotes.len() > 0 {
+                                            if Sync[sync].repositories[repo].remotes.len() > 0 {
                                                 let ifBranch = find_Branch(
-                                                    &night[shade].repositories[repo].remotes[0], b);
+                                                    &Sync[sync].repositories[repo].remotes[0], b);
                                                 if ifBranch.is_some() {
-                                                    night[shade].repositories[repo].remotes[0].branches.remove(
+                                                    Sync[sync].repositories[repo].remotes[0].branches.remove(
                                                         ifBranch.unwrap());
                                                     println!("{} removed", b);
                                                 }
@@ -342,11 +341,11 @@ fn main() {
                 },  None => {
                     match getOption(&matches, ["delete"]) {
                         Some(d) => {
-                            match find_Repo(night, shade, d) {
+                            match find_Repo(Sync, sync, d) {
                                 Some(ind) => {
-                                    println!("{} removed", night[shade].repositories[ind].loc);
-                                    night[shade].repositories.remove( ind );
-                                    save_RepoList( cfg, night, app.pretty );
+                                    println!("{} removed", Sync[sync].repositories[ind].loc);
+                                    Sync[sync].repositories.remove( ind );
+                                    save_RepoList( cfg, Sync, app.pretty );
                                 },
                                 None => fail!("{} not found", d)
                             }
@@ -357,7 +356,7 @@ fn main() {
         }
         if matches.opt_present("l") || matches.opt_present("list") {
             if ( cfg.exists() ) {
-                for rep in night[shade].repositories.iter() {
+                for rep in Sync[sync].repositories.iter() {
                     println!(">-- Repo: {:s}", rep.loc);
                     for rem in rep.remotes.iter().filter(
                         |&r| match maybe_type {
@@ -365,7 +364,7 @@ fn main() {
                             None => true
                                 }) {
                         println!(" *  Type: {:?}", rem.t);
-                        println!(" *  Upstream: {} {}", rem.upstream, rem.m);
+                        println!(" *  Upstream: {} {}", rem.upstream, rem.master);
                         print   (" *  Branches:");
                         for b in rem.branches.iter() {
                             print!(" {:s}", *b);
@@ -384,7 +383,7 @@ fn main() {
         let mut total = 0;
         let mut success = 0;
         let mut failed = 0;
-        for rep in night[shade].repositories.iter() {
+        for rep in Sync[sync].repositories.iter() {
             println!(" *  repo: {}", rep.loc);
             //----------------------- Smart path ----------------------------------
             let smartpath = |l : &str, cloneThing: &fn(p : &str)| -> Path {
@@ -423,7 +422,7 @@ fn main() {
             let atclone = Cell::new( maybe_type.clone() );
             //---------------------------- sync -----------------------------------
             match do task::try { unsafe {
-                sync(rclone.take(), lclone.take(), atclone.take(), ncore);
+                runSync(rclone.take(), lclone.take(), atclone.take(), ncore);
                 }
             } { Ok(_) => { success += 1; },
                 Err(e) => {
@@ -442,7 +441,7 @@ fn main() {
         println("
         No config file found, consider providing one
         For now one is created just for example");
-        save_Defaults(cfg, night, appCfg, app.clone(), nix);
+        save_Defaults(cfg, Sync, appCfg, app.clone(), nix);
     }
     if app.wait {
         println("Please, kill me ");    /* println because print FAILS here...    */

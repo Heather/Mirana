@@ -1,4 +1,4 @@
-use Model::{Night, POTM, Remote, Repository, Gentoo, Star
+use Model::{ Sync, App, Remote, Repository, Gentoo, VcsCfg
            , git, hg
            , pull, rebase, update};
 
@@ -57,28 +57,26 @@ fn save_JSON<T: Encodable<json::Encoder>>(p: &Path, toEncode: ~[T]) {
 ///<Summary>
 ///Load Repositories
 ///</Summary>
-pub fn load_RepoList(p: &Path) -> ~[Night] {
-    load_JSON::<Night>(p)
+pub fn load_RepoList(p: &Path) -> ~[Sync] {
+    load_JSON::<Sync>(p)
 }
 
 ///<Summary>
 ///Load App.conf
 ///</Summary>
-pub fn load_App(p: &Path, nix : bool) -> POTM {
-    let potm = load_JSON::<POTM>(p);
-    if potm.len() > 0   { potm[0]
-    } else  { POTM { pretty: true
+pub fn load_App(p: &Path, nix : bool) -> App {
+    let App = load_JSON::<App>(p);
+    if App.len() > 0   { App[0]
+    } else  { App { pretty: true
                    , wait: if nix { false }
                            else   { true  }
-                   , stars: ~[
-                    Star{ detector: Some(~".git")
-                        , star:         Some (git)
-                        , pull_custom:  None
-                        , push_custom:  None  },
-                    Star{ detector: Some(~".hg")
-                        , star:         Some (hg)
-                        , pull_custom:  None
-                        , push_custom:  None  }
+                   , vcs: ~[
+                        VcsCfg { detector: Some(~".git")
+                               , vcs:      Some (git)
+                               , custom:   ~[] },
+                        VcsCfg { detector: Some(~".hg")
+                              , vcs:        Some (hg)
+                              , custom:    ~[]  }
                    ]
             }
         }
@@ -87,18 +85,18 @@ pub fn load_App(p: &Path, nix : bool) -> POTM {
 ///<Summary>
 ///Save Repo List
 ///</Summary>
-pub fn save_RepoList(p: &Path, night: ~[Night], pretty : bool) {
-    if pretty { save_PrettyJSON(p, night);
-    } else {    save_JSON      (p, night);    
+pub fn save_RepoList(p: &Path, Sync: ~[Sync], pretty : bool) {
+    if pretty { save_PrettyJSON(p, Sync);
+    } else {    save_JSON      (p, Sync);    
     }
 }
 
 ///<Summary>
 ///Save App conf
 ///</Summary>
-pub fn save_App(p: &Path, potm: POTM, pretty : bool) {
-    if pretty { save_PrettyJSON(p, ~[potm]);
-    } else {    save_JSON      (p, ~[potm]);    
+pub fn save_App(p: &Path, App: App, pretty : bool) {
+    if pretty { save_PrettyJSON(p, ~[App]);
+    } else {    save_JSON      (p, ~[App]);    
     }
 }
 
@@ -124,7 +122,7 @@ pub fn add_Repo(repo: &str, t: Option<~str>, x: Option<~str>, u: Option<~str>) -
             Remote {
                 t: repoType,
                 branches: ~[~"master"],
-                m: Some(~"master"),
+                master: Some(~"master"),
                 upstream: Some(upstream)
             }],
         actions: ~[ exec ]
@@ -150,7 +148,7 @@ pub fn add_Remote(t: Option<~str>, b: Option<~str>, u: Option<~str>) -> Remote {
     Remote {
         t: repoType,
         branches: ~[branch],
-        m: Some(~"master"),
+        master: Some(~"master"),
         upstream: Some(upstream)
     }
 }
@@ -158,16 +156,16 @@ pub fn add_Remote(t: Option<~str>, b: Option<~str>, u: Option<~str>) -> Remote {
 ///<Summary>
 ///Load & Save default configuration
 ///</Summary>
-pub fn save_Defaults(pr: &Path, mut night: ~[Night],
-                     pa: &Path, app: POTM, nix: bool)  {
-    night.push( Night {
-        shade: ~"default",
-        repositories: ~[ Repository { /* Personal Rust update shade */
+pub fn save_Defaults(pr: &Path, mut Sync: ~[Sync],
+                     pa: &Path, app: App, nix: bool)  {
+    Sync.push( Sync {
+        sync: ~"default",
+        repositories: ~[ Repository { /* Personal Rust update sync */
             loc: ~"git@github.com:Heather/tyapa.git",
             remotes: ~[ Remote {
                     t: git, 
                     branches: ~[~"master"],
-                    m: Some(~"master"),
+                    master: Some(~"master"),
                     upstream: None
                 }],
             actions: ~[ pull ]
@@ -177,19 +175,19 @@ pub fn save_Defaults(pr: &Path, mut night: ~[Night],
         let portage = ~"/usr/portage";
         let portagePath = & Path::new( portage.clone() );
         if portagePath.exists() {
-            night.push( Night { /* Gentoo update shade */
-                shade: ~"Gentoo",
+            Sync.push( Sync { /* Gentoo update sync */
+                sync: ~"Gentoo",
                 repositories: ~[ Repository { 
                     loc: portage,
                     remotes: ~[ Remote {
                             t: Gentoo, 
                             branches: ~[~"/home/gentoo-x86"],
-                            m: None, upstream: None
+                            master: None, upstream: None
                         }],
                     actions: ~[ update ]
                     }]
                 });
         }}
-    save_RepoList( pr, night, app.pretty);
+    save_RepoList( pr, Sync, app.pretty);
     save_App( pa, app.clone(), app.pretty);
 }
