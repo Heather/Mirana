@@ -37,7 +37,7 @@ fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
         pusg\t push changes in any vcs
 
         -l --list\tPretty print repositories in sync
-        --delete\t\tDelete repo from configuration
+        --delete\tDelete repo from configuration
         --add\t\tAdd repo to configuration
 
         -e --edit\t\tEdit repo configuration
