@@ -17,7 +17,7 @@ use Traits::Vcs;
 use std::os;
 use std::task;
 use std::cell::Cell;
-use std::os::change_dir;
+use std::os::{change_dir, self_exe_path};
 // ExtrA:
 use extra::getopts::{optflag, optopt, getopts, Opt, Matches};
 
@@ -426,19 +426,29 @@ fn main() {
                     }
             } else { Path::new( rep.loc.as_slice() ) };
             //---------------------------- CELL -----------------------------------
+            let apclone = Cell::new( app.clone() );
             let rclone  = Cell::new( rep.clone() );
             let lclone  = Cell::new( loc );
             let atclone = Cell::new( maybe_type.clone() );
             //---------------------------- sync -----------------------------------
             match do task::try { unsafe {
-                runSync(rclone.take(), lclone.take(), atclone.take(), ncore);
+                if (&lclone).take().exists() {
+                    change_dir(&lclone.take());
+                    runSync( apclone.take()
+                           , rclone.take()
+                           , atclone.take()
+                           , ncore);
+                } else {
+                    println!(" -> {:s} does not exist", rclone.take().loc);
                 }
+            }
             } { Ok(_) => { success += 1; },
                 Err(e) => {
                     println!("  * failed: {:?}", e);
                     failed += 1; 
                 }
             } total += 1;
+            change_dir(&self_exe_path().unwrap());
         }
         print("_________________________________________________________________________");
         println!("
