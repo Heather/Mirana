@@ -35,6 +35,7 @@ fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
         
         pull\t pull changes in any vcs
         pusg\t push changes in any vcs
+        make\t build project
 
         -l --list\tPretty print repositories in sync
         -d\t\tDelete repo from configuration
@@ -96,11 +97,14 @@ fn main() {
     let args = os::args();
     let program = args[0].as_slice();
     let opts = ~[
-        optflag("h"), optflag("help"),
-        optopt("j"), optopt("jobs"),
-        optflag("l"), optflag("list"),
-        optflag("add"), optopt("a"),
-        optflag("delete"), optopt("d"),
+        optflag("h"),   optflag("help"),
+        optopt("j"),    optopt("jobs"),
+
+        optflag("l"),   optflag("list"),
+
+        optflag("add"),     optopt("a"),
+        optflag("delete"),  optopt("d"),
+
         optopt("e"), optopt("edit"),
         optopt("s"), optopt("sync"),
         optopt("r"), optopt("remote"),

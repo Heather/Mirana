@@ -130,7 +130,8 @@ pub fn add_Repo(repo: &str, t: Option<~str>, x: Option<~str>, u: Option<~str>) -
                 master: Some(~"master"),
                 upstream: Some(upstream)
             }],
-        actions: ~[ exec ]
+        actions: ~[ exec ],
+        make: None
     }
 }
 
@@ -173,7 +174,8 @@ pub fn save_Defaults(pr: &Path, mut Sync: ~[Sync],
                     master: Some(~"master"),
                     upstream: None
                 }],
-            actions: ~[ pull ]
+            actions: ~[ pull ],
+            make: None
             }]
         });
     if nix {
@@ -189,7 +191,8 @@ pub fn save_Defaults(pr: &Path, mut Sync: ~[Sync],
                             branches: ~[~"/home/gentoo-x86"],
                             master: None, upstream: None
                         }],
-                    actions: ~[ update ]
+                    actions: ~[ update ],
+                    make: None
                     }]
                 });
         }}
