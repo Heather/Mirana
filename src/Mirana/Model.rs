@@ -49,7 +49,7 @@ pub struct VcsCfg { detector:     Option<~str>
 #[deriving(Encodable, Decodable, Clone)]
 pub struct MakeCfg { cfg:          ~str
                    , detector:     ~str
-                   , cmd:          ~str
+                   , cmd:          ~[~str]
 }
 
 #[deriving(Encodable, Decodable, Clone)]

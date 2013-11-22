@@ -67,7 +67,8 @@ pub fn load_RepoList(p: &Path) -> ~[Sync] {
 pub fn load_App(p: &Path, nix : bool) -> App {
     let App = load_JSON::<App>(p);
     if App.len() > 0   { App[0]
-    } else  { App { pretty: true
+    } else  { 
+            App {    pretty: true
                    , wait: if nix { false }
                            else   { true  }
                    , vcs: ~[
@@ -82,15 +83,26 @@ pub fn load_App(p: &Path, nix : bool) -> App {
                                        , cmd: ~"hg pull --update" }
                                 ]  
                             }
-                       ]
+                    ]
                    , make: ~[
                         MakeCfg { cfg: ~"make"
                                 , detector: ~"Makefile"
-                                , cmd: ~"make"
+                                , cmd: ~[~"make"]
+                        },
+                        if nix {
+                            MakeCfg { cfg: ~"build.sh"
+                                    , detector: ~"build.sh."
+                                    , cmd: ~[~"build.sh"]
+                                    }
+                        } else {
+                            MakeCfg { cfg: ~"build.bat"
+                                    , detector: ~"build.bat."
+                                    , cmd: ~[~"build.bat"]
+                                    }
                         }
-                       ]
-                    }
+                    ]
             }
+    }
 }
 
 ///<Summary>

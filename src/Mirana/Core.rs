@@ -20,8 +20,10 @@ fn make(app: &App, mk: ~str) {
         Some(ref cfg) => {
             let detectorPath = & Path::new( (*cfg).detector.to_owned() );
             if detectorPath.exists() { 
-                do fancy {
-                    e((*cfg).cmd, []);
+                do fancy { 
+                    for c in (*cfg).cmd.iter() {
+                        e(c.as_slice(), []);
+                    }
                 }
             } else { println!("no {:s} found", (*cfg).detector);
             }
