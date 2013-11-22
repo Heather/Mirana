@@ -27,7 +27,7 @@ pub struct Remote { t: VcsFlavor
 pub struct Repository { loc: ~str
                       , remotes: ~[Remote]
                       , actions: ~[Action]
-                      , make:    Option<MakeCfg>
+                      , make:    Option<~str>
 }
 
 #[deriving(Encodable, Decodable, Clone)]
@@ -47,13 +47,14 @@ pub struct VcsCfg { detector:     Option<~str>
 }
 
 #[deriving(Encodable, Decodable, Clone)]
-pub struct MakeCfg { detector:     Option<~str>
-                   , make:         Option<MakeFlavor>
-                   , custom:       ~[Custom]
+pub struct MakeCfg { cfg:          ~str
+                   , detector:     ~str
+                   , cmd:          ~str
 }
 
 #[deriving(Encodable, Decodable, Clone)]
 pub struct App  { pretty: bool
                 , wait: bool
                 , vcs: ~[VcsCfg]
+                , make: ~[MakeCfg]
 }

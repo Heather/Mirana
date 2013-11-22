@@ -1,4 +1,4 @@
-use Model  ::{ Repository, Gentoo
+use Model  ::{ Repository, Gentoo, MakeCfg
             , pull, push, rebase};
 
 // Modules:
@@ -10,6 +10,10 @@ use Traits::Vcs;
 
 use std::os::{change_dir, self_exe_path};
 use extra::time;
+
+fn make(mk: ~str) {
+    ;
+}
 
 pub fn runSync(repo: Repository, location: Path, typeFilter: Option<~str>, ncore: uint) {
     let loc = &location;
@@ -39,6 +43,10 @@ pub fn runSync(repo: Repository, location: Path, typeFilter: Option<~str>, ncore
                                     }
                                 }
                             }, None => fail!("Non trait implementation found")
+                        }
+                        match repo.make {
+                            Some(ref mk) => { make(mk.to_owned());
+                            }, None => println(" [No make]")
                         }
                     }
                 }

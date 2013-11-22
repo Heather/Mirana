@@ -1,4 +1,4 @@
-use Model::{ Sync, App, Remote, Repository, Gentoo, VcsCfg, Custom
+use Model::{ Sync, App, Remote, Repository, Gentoo, VcsCfg, MakeCfg, Custom
            , git, hg
            , pull, rebase, update};
 
@@ -82,6 +82,12 @@ pub fn load_App(p: &Path, nix : bool) -> App {
                                        , cmd: ~"hg pull --update" }
                                 ]  
                             }
+                       ]
+                   , make: ~[
+                        MakeCfg { cfg: ~"make"
+                                , detector: ~"Makefile"
+                                , cmd: ~"make"
+                        }
                        ]
                     }
             }

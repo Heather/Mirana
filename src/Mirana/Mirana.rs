@@ -167,6 +167,7 @@ fn main() {
                     match x {
                         "pull"  => do process(pull, &cfg.custom) | v: &'static Vcs | { v.pull("master"); },
                         "push"  => do process(push, &cfg.custom) | v: &'static Vcs | { v.push("master"); },
+                        "make"  => fail!("Mirana make is not implemented yet here"),
                         "init"  => {
                                    fail!("Init is not implemented yet")
                         }, _    => fail!("CLI Impossible case")
