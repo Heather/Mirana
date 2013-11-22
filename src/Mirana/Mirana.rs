@@ -37,13 +37,13 @@ fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
         pusg\t push changes in any vcs
 
         -l --list\tPretty print repositories in sync
-        --delete\tDelete repo from configuration
-        --add\t\tAdd repo to configuration
+        -d\t\tDelete repo from configuration
+        -a\t\tAdd repo to configuration
 
         -e --edit\t\tEdit repo configuration
 
-            -a\t\tAdd something to repo configuration
-            -d\t\tDelete something from repo configuration
+            --add\tAdd something to repo configuration
+            --delete\tDelete something from repo configuration
 
         -s --sync\tSync config
         -r --remote\tSpecify remote
@@ -272,7 +272,7 @@ fn main() {
                         };
                     }
                 },  None => {
-                    match getOption(&matches, ["add"]) {
+                    match getOption(&matches, ["a"]) {
                         Some(a) => {
                             if sync == -1 {
                                 Sync.push( Sync {
@@ -343,7 +343,7 @@ fn main() {
                         }, None => fail!("No repository found: {}", *e)
                     };
                 },  None => {
-                    match getOption(&matches, ["delete"]) {
+                    match getOption(&matches, ["d"]) {
                         Some(d) => {
                             match find_Repo(Sync, sync, d) {
                                 Some(ind) => {
