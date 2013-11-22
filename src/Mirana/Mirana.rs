@@ -21,7 +21,7 @@ use std::os::{change_dir, self_exe_path};
 // ExtrA:
 use extra::getopts::{optflag, optopt, getopts, Opt, Matches};
 
-static r_version: &'static str = "  Mirana v0.1.6";
+static r_version: &'static str = "  Mirana v0.1.7";
 static mut ncore: uint = 1;
 
 fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
@@ -432,14 +432,15 @@ fn main() {
             let atclone = Cell::new( maybe_type.clone() );
             //---------------------------- sync -----------------------------------
             match do task::try { unsafe {
-                if (&lclone).take().exists() {
-                    change_dir(&lclone.take());
-                    runSync( apclone.take()
-                           , rclone.take()
-                           , atclone.take()
+                let loc = & lclone.take();
+                let rep = rclone.take();
+                if loc.exists() {
+                    change_dir(loc);
+                    runSync(      apclone.take()
+                           , rep, atclone.take()
                            , ncore);
                 } else {
-                    println!(" -> {:s} does not exist", rclone.take().loc);
+                    println!(" -> {:s} does not exist", rep.loc);
                 }
             }
             } { Ok(_) => { success += 1; },
@@ -459,7 +460,8 @@ fn main() {
     } else {
         println("
         No config file found, consider providing one
-        For now one is created just for example");
+        For now one is created just for example
+        ");
         save_Defaults(cfg, Sync, appCfg, app.clone(), nix);
     }
     if app.wait {

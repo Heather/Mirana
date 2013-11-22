@@ -4,7 +4,9 @@ use Model  ::{ App, Repository, Gentoo
 // Modules:
 use Misc                ::{toVCS, toTrait};
 use VcsCmd::Gentoo      ::{gentooFullUpdate};
+
 use Shell               ::{e};
+use Wrappers            ::{fancy};
 
 // Stars
 use Traits::Vcs;
@@ -17,7 +19,10 @@ fn make(app: &App, mk: ~str) {
         ).next() {
         Some(ref cfg) => {
             let detectorPath = & Path::new( (*cfg).detector.to_owned() );
-            if detectorPath.exists() { e((*cfg).detector, []);
+            if detectorPath.exists() { 
+                do fancy {
+                    e((*cfg).cmd, []);
+                }
             } else { println!("no {:s} found", (*cfg).detector);
             }
         }, None => { fail!("Non make implementation found") }

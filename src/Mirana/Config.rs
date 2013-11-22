@@ -172,17 +172,29 @@ pub fn save_Defaults(pr: &Path, mut Sync: ~[Sync],
                      pa: &Path, app: App, nix: bool)  {
     Sync.push( Sync {
         sync: ~"default",
-        repositories: ~[ Repository { /* Personal Rust update sync */
-            loc: ~"git@github.com:Heather/tyapa.git",
-            remotes: ~[ Remote {
-                    t: git, 
-                    branches: ~[~"master"],
-                    master: Some(~"master"),
-                    upstream: None
-                }],
-            actions: ~[ pull ],
-            make: None
-            }]
+        repositories: ~[ 
+            Repository { /* TYAPA */
+                loc: ~"git@github.com:Heather/tyapa.git",
+                remotes: ~[ Remote {
+                        t: git, 
+                        branches: ~[~"master"],
+                        master: Some(~"master"),
+                        upstream: None
+                    }],
+                actions: ~[ pull ],
+                make: None
+                },
+            Repository { /* self... */
+                loc: ~".",
+                remotes: ~[ Remote {
+                        t: git, 
+                        branches: ~[~"master"],
+                        master: None, upstream: None
+                    }],
+                actions: ~[],
+                make: Some(~"make")
+                }
+            ]
         });
     if nix {
         let portage = ~"/usr/portage";
