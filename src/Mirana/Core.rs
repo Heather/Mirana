@@ -8,7 +8,7 @@ use VcsCmd::Gentoo      ::{gentooFullUpdate};
 // Stars
 use Traits::Vcs;
 
-use std::os::change_dir;
+use std::os::{change_dir, self_exe_path};
 use extra::time;
 
 pub fn runSync(repo: Repository, location: Path, typeFilter: Option<~str>, ncore: uint) {
@@ -44,5 +44,8 @@ pub fn runSync(repo: Repository, location: Path, typeFilter: Option<~str>, ncore
                 }
             }
         }
+        change_dir(&self_exe_path().unwrap());
+    } else {
+        println!(" -> {:s} does not exist", repo.loc);
     }
 }
