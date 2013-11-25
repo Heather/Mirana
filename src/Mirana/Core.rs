@@ -1,4 +1,4 @@
-use Model  ::{ App, Repository, Gentoo
+use Model  ::{ App, Repository, Gentoo, MakeCfg
             , pull, push, rebase};
 
 // Modules:
@@ -12,22 +12,31 @@ use Wrappers            ::{fancy};
 use Traits::Vcs;
 use extra::{time};
 
-fn make(app: &App, mk: ~str) {
+fn make(cfg: &MakeCfg) {
+    let detectorPath = & Path::new( cfg.detector.to_owned() );
+    if detectorPath.exists() { 
+        do fancy { 
+            for c in cfg.cmd.iter() {
+                e(c.as_slice(), []);
+            }
+        }
+    } else { println!("no {:s} found", cfg.detector);
+    }
+}
+
+pub fn make_single(app: &App, mk: ~str) {
     match (*app).make.iter().filter_map( |mkCfg| 
         if mkCfg.cfg == mk { Some(mkCfg) }
         else { None }
         ).next() {
-        Some(ref cfg) => {
-            let detectorPath = & Path::new( (*cfg).detector.to_owned() );
-            if detectorPath.exists() { 
-                do fancy { 
-                    for c in (*cfg).cmd.iter() {
-                        e(c.as_slice(), []);
-                    }
-                }
-            } else { println!("no {:s} found", (*cfg).detector);
-            }
-        }, None => { fail!("Non make implementation found") }
+            Some(ref cfg) => make(*cfg),
+            None => fail!("Non make implementation found")
+    };
+}
+
+pub fn make_any(app: &App) {
+    for cfg in (*app).make.iter() {
+        make(cfg);
     }
 }
 
@@ -58,7 +67,7 @@ pub fn runSync(app: App, repo: Repository, typeFilter: Option<~str>, ncore: uint
                         }, None => fail!("Non trait implementation found")
                     }
                     match repo.make {
-                        Some(ref mk) => { make(&app, mk.to_owned());
+                        Some(ref mk) => { make_single(&app, mk.to_owned());
                         }, None => println(" [No make]")
                     }
                 }

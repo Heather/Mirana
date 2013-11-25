@@ -3,7 +3,7 @@ use Model       ::{Sync, Repository, Remote, VcsFlavor, Custom
 use Shell       ::{e, exe};
 use Wrappers    ::{rustbuildbotdance, fancy};
 use Misc        ::{toVCS, toTrait};
-use Core        ::{runSync};
+use Core        ::{runSync, make_any};
 use Config      ::{ save_RepoList
                   , save_Defaults
                   , load_RepoList
@@ -167,7 +167,7 @@ fn main() {
                     match x {
                         "pull"  => do process(pull, &cfg.custom) | v: &'static Vcs | { v.pull("master"); },
                         "push"  => do process(push, &cfg.custom) | v: &'static Vcs | { v.push("master"); },
-                        "make"  => fail!("Mirana make is not implemented yet here"),
+                        "make"  => make_any(&app),
                         "init"  => {
                                    fail!("Init is not implemented yet")
                         }, _    => fail!("CLI Impossible case")
