@@ -15,6 +15,8 @@ use VcsCmd::Gentoo::{gentoo};
 use Traits::Vcs;
 // Internal:
 use std::os;
+use std::libc::S_IRWXU;
+use std::io::fs::mkdir;
 use std::task;
 use std::cell::Cell;
 use std::os::{change_dir, self_exe_path, getenv};
@@ -125,12 +127,16 @@ fn main() {
     }
     //Load JSON configuration---------------------------------------------
     let (ref cfg, ref appCfg) = {
-        let prefix = Path::new( getenv("HOME").unwrap_or(~"") );
-            if nix { (  prefix.join( ".Sync.conf" ),
-                        prefix.join( ".Mirana.conf" )
+            if nix {
+                let prefix = Path::new( getenv("XDG_CONFIG_HOME").unwrap_or(~"") ).join("Mirana");
+                if !prefix.exists() { mkdir(&prefix, S_IRWXU as u32); }
+                (   prefix.join( ".sync.conf" ),
+                    prefix.join( ".mirana.conf" )
                 )
-            } else { (  prefix.join( "Sync.conf" ),
-                        prefix.join( "Mirana.conf" )
+            } else { 
+                let prefix = Path::new( getenv("HOME").unwrap_or(~"") );
+                (   prefix.join( "sync.conf" ),
+                    prefix.join( "mirana.conf" )
                 )
             }
         };
