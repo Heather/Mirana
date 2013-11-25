@@ -17,7 +17,7 @@ use Traits::Vcs;
 use std::os;
 use std::task;
 use std::cell::Cell;
-use std::os::{change_dir, self_exe_path};
+use std::os::{change_dir, self_exe_path, getenv};
 // ExtrA:
 use extra::getopts::{optflag, optopt, getopts, Opt, Matches};
 
@@ -124,13 +124,17 @@ fn main() {
         print_usage(program, opts, nix); return;
     }
     //Load JSON configuration---------------------------------------------
-    let cfg = & Path::new (     if nix  { "/etc/Sync.conf" }
-                                else    { "Sync.conf" }
-        );
-    let appCfg = & Path::new (  if nix  { "/etc/App.conf" }
-                                else    { "App.conf" }
-        );
-    let app         = load_App( appCfg, nix );
+    let (ref cfg, ref appCfg) = if nix  {
+            (   Path::new ( "~/.Sync.conf" ) ,
+                Path::new ( "~/.Mirana.conf" )
+            )
+        } else {
+            let prefix = Path::new( getenv("HOME").unwrap_or(~"") );
+            (   prefix.join( "/.Sync.conf" ),
+                prefix.join( "/.Mirana.conf" )
+            )
+        };
+    let app        = load_App( appCfg, nix );
     let mut Sync   = load_RepoList( cfg );
     /* CLI */
     if args.len() > 1 {
