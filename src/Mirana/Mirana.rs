@@ -124,15 +124,15 @@ fn main() {
         print_usage(program, opts, nix); return;
     }
     //Load JSON configuration---------------------------------------------
-    let (ref cfg, ref appCfg) = if nix  {
-            (   Path::new ( "~/.Sync.conf" ) ,
-                Path::new ( "~/.Mirana.conf" )
-            )
-        } else {
-            let prefix = Path::new( getenv("HOME").unwrap_or(~"") );
-            (   prefix.join( "/.Sync.conf" ),
-                prefix.join( "/.Mirana.conf" )
-            )
+    let (ref cfg, ref appCfg) = {
+        let prefix = Path::new( getenv("HOME").unwrap_or(~"") );
+            if nix { (  prefix.join( ".Sync.conf" ),
+                        prefix.join( ".Mirana.conf" )
+                )
+            } else { (  prefix.join( "Sync.conf" ),
+                        prefix.join( "Mirana.conf" )
+                )
+            }
         };
     let app        = load_App( appCfg, nix );
     let mut Sync   = load_RepoList( cfg );
