@@ -195,16 +195,6 @@ pub fn save_Defaults(pr: &Path, mut Sync: ~[Sync],
                     }],
                 actions: ~[ pull ],
                 make: None
-                },
-            Repository { /* self... */
-                loc: ~".",
-                remotes: ~[ Remote {
-                        t: git, 
-                        branches: ~[~"master"],
-                        master: None, upstream: None
-                    }],
-                actions: ~[],
-                make: Some(~"make")
                 }
             ]
         });
@@ -225,7 +215,21 @@ pub fn save_Defaults(pr: &Path, mut Sync: ~[Sync],
                     make: None
                     }]
                 });
-        }}
+        }
+    } else {
+        Sync[0].repositories.push(
+            Repository { /* self... */
+                loc: ~".",
+                remotes: ~[ Remote {
+                        t: git, 
+                        branches: ~[~"master"],
+                        master: None, upstream: None
+                    }],
+                actions: ~[],
+                make: Some(~"make")
+                }
+            );
+    }
     save_RepoList( pr, Sync, app.pretty);
     save_App( pa, app.clone(), app.pretty);
 }
