@@ -135,7 +135,7 @@ fn main() {
     /* CLI */
     if args.len() > 1 {
         let x = args[1].as_slice();
-        let C = ["pull", "push", "init"];
+        let C = ["pull", "push", "init", "make"];
         if  C.iter().any(
             |c| *c == x) {
             match app.vcs.iter().filter_map( |config| 
