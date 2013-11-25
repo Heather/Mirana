@@ -168,7 +168,7 @@ fn main() {
                     match x {
                         "pull"  => do process(pull, &cfg.custom) | v: &'static Vcs | { v.pull("master"); },
                         "push"  => do process(push, &cfg.custom) | v: &'static Vcs | { v.push("master"); },
-                        "make"  => make_any(&app),
+                        "make"  => do fancy { make_any(&app) },
                         "init"  => {
                                    fail!("Init is not implemented yet")
                         }, _    => fail!("CLI Impossible case")
