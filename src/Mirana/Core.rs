@@ -36,6 +36,7 @@ pub fn make_single(app: &App, mk: ~str) {
 
 pub fn make_any(app: &App) {
     for cfg in (*app).make.iter() {
+        println!(" -> trying {:?}", cfg.cfg)
         make(cfg);
     }
 }

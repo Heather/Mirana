@@ -21,7 +21,7 @@ use std::os::{change_dir, self_exe_path};
 // ExtrA:
 use extra::getopts::{optflag, optopt, getopts, Opt, Matches};
 
-static r_version: &'static str = "  Mirana v0.1.7";
+static r_version: &'static str = "  Mirana v0.1.8";
 static mut ncore: uint = 1;
 
 fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
@@ -138,6 +138,7 @@ fn main() {
         let C = ["pull", "push", "init", "make"];
         if  C.iter().any(
             |c| *c == x) {
+            println("");
             match app.vcs.iter().filter_map( |config| 
                 { match config.detector {
                         Some(ref detector) => {
