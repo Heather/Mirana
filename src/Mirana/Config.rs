@@ -217,18 +217,22 @@ pub fn save_Defaults(pr: &Path, mut Sync: ~[Sync],
                 });
         }
     } else {
-        Sync[0].repositories.push(
-            Repository { /* self... */
-                loc: ~".",
-                remotes: ~[ Remote {
-                        t: git, 
-                        branches: ~[~"master"],
-                        master: None, upstream: None
-                    }],
-                actions: ~[],
-                make: Some(~"make")
-                }
-            );
+        let bb = ~"build.bat";
+        let bbPath = & Path::new( bb.clone() );
+        if bbPath.exists() {
+            Sync[0].repositories.push(
+                Repository { /* self... */
+                    loc: ~".",
+                    remotes: ~[ Remote {
+                            t: git, 
+                            branches: ~[~"master"],
+                            master: None, upstream: None
+                        }],
+                    actions: ~[],
+                    make: Some(~"build.bat")
+                    }
+                );
+        }
     }
     save_RepoList( pr, Sync, app.pretty);
     save_App( pa, app.clone(), app.pretty);
