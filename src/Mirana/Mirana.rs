@@ -160,11 +160,11 @@ fn main() {
                     }
                 }).next() {
                 Some(cfg) => {
-                    let process = |action: Action, custom : &~[Custom], withVCS: &fn(vcs : &'static Vcs)| {
+                    let process = |action: Action, custom : &~[Custom], withVCS: |vcs : &'static Vcs|| {
                         match (*custom).iter().filter_map(|ref c| 
                             if c.action == action { Some( c.cmd.to_owned() ) }
                             else { None }).next() {
-                            Some(cmd) => do fancy { e(cmd, []) },
+                            Some(cmd) => fancy(||{ e(cmd, []) }),
                             None => {
                                 match cfg.vcs {
                                     Some(vcs)   => match (toTrait(vcs)) {
@@ -176,9 +176,9 @@ fn main() {
                         }
                     };
                     match x {
-                        "pull"  => do process(pull, &cfg.custom) | v: &'static Vcs | { v.pull("master"); },
-                        "push"  => do process(push, &cfg.custom) | v: &'static Vcs | { v.push("master"); },
-                        "make"  => do fancy { make_any(&app) },
+                        "pull"  => process(pull, &cfg.custom,( | v: &'static Vcs | { v.pull("master"); })),
+                        "push"  => process(push, &cfg.custom,( | v: &'static Vcs | { v.push("master"); })),
+                        "make"  => fancy(||{ make_any(&app) }),
                         "init"  => {
                                    fail!("Init is not implemented yet")
                         }, _    => fail!("CLI Impossible case")
@@ -407,11 +407,11 @@ fn main() {
         for rep in Sync[sync].repositories.iter() {
             println!(" *  repo: {}", rep.loc);
             //----------------------- Smart path ----------------------------------
-            let smartpath = |l : &str, cloneThing: &fn(p : &str)| -> Path {
-                let ssps: ~[&str] = l.split_iter('/').collect();
+            let smartpath = |l : &str, cloneThing: |p : &str|| -> Path {
+                let ssps: ~[&str] = l.split('/').collect();
                 if ssps.len() > 1 {
                     let ssp = ssps[1];
-                    let ps: ~[&str] = ssp.split_iter('.').collect();
+                    let ps: ~[&str] = ssp.split('.').collect();
                     if ssps.len() > 0 {
                         let project = ps[0];
                         let p = match nix {
@@ -429,13 +429,13 @@ fn main() {
             //-------------------------- Real loc ----------------------------------
             let loc= if (  rep.loc.starts_with("git@")
                         || rep.loc.starts_with("https://git")) {
-                do smartpath(rep.loc) | p: &str | {
+                smartpath(rep.loc, | p: &str | {
                     e("git", [&"clone", rep.loc.as_slice(), p]);
-                    }
+                    })
             } else if rep.loc.starts_with("hg@") {
-                do smartpath(rep.loc) | p: &str | {
+                smartpath(rep.loc, | p: &str | {
                     e("hg", [&"clone", rep.loc.as_slice(), p]);
-                    }
+                    })
             } else { Path::new( rep.loc.as_slice() ) };
             //---------------------------- CELL -----------------------------------
             let apclone = Cell::new( app.clone() );
@@ -478,7 +478,8 @@ fn main() {
     }
     if app.wait {
         println("Please, kill me ");    /* println because print FAILS here...    */
-        do rustbuildbotdance {          /* even butterflies feels buggy now...    */
+        rustbuildbotdance(||{          /* even butterflies feels buggy now...    */
             while(true) { ; }           /* noone knows how to read_line in new IO */
-        }}
+        });
+    }
 }

@@ -5,7 +5,7 @@ use Wrappers::fancy;
 ///Cvs update
 ///</Summary>
 pub fn cvsUpdate() {
-    do fancy {
+    fancy(||{
         e("cvs", [&"update"]);
-    }
+    });
 }

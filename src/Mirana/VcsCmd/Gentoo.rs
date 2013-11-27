@@ -1,4 +1,4 @@
-use Shell::{e, exec};
+use Shell::{e, exec, exy};
 use Wrappers::{butterfly, fancy};
 
 use std::os::{change_dir};
@@ -28,17 +28,19 @@ pub fn gentoo(loc: &str, ncores: uint) {
     let jobs = format!("--jobs={:u}", ncores);
     println("_________________________________________________________________________");
     print("# pulling gentoo-x86 " );
-    do butterfly { e("cvs", [&"update"]); }
+    butterfly(||{
+        exy("cvs", [&"update"]);
+    });
     println("");
     print("#regen cache for ::gentoo-x86 " );
     let repo = (format!("--portdir={}", loc));
-    do butterfly { 
-        e ("egencache", 
+    butterfly(||{ 
+        exy ("egencache", 
               [&"--update"
                ,"--repo=gentoo"
                ,repo.as_slice()
                ,jobs.as_slice()]);
-    }
+    });
     println("_________________________________________________________________________");
 }
 
@@ -51,7 +53,7 @@ pub fn gentooUpdate(ncores: uint, keep: bool) {
         if keep { "--keep-going"
         } else { ""
         };
-    do fancy {
+    fancy(||{
         e("emerge", 
           [&"-vuDN"
            ,"@world"
@@ -59,23 +61,23 @@ pub fn gentooUpdate(ncores: uint, keep: bool) {
            ,"--complete-graph"
            ,ifkeep.as_slice()
            ,jobs.as_slice()]);
-    }
+    });
 }
 
 ///<Summary>
 ///emerge --sync
 ///</Summary>
 pub fn emerge_sync() {
-    do fancy {
+    fancy(||{
         exec("emerge", [&"--sync"]);
-    }
+    });
 }
 
 ///<Summary>
 ///eix-update
 ///</Summary>
 pub fn eix_update() {
-    do fancy {
+    fancy(||{
         e("eix-update", []);
-    }
+    });
 }

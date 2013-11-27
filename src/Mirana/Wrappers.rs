@@ -5,7 +5,7 @@ use std::io::timer::sleep;
 ///Core how to Fly function
 ///</Summary>
 #[inline]
-fn fly<U>(animation: &[&str], symbols: int, delay: u64, f: &fn() -> U) -> U {
+fn fly<U>(animation: &[&str], symbols: int, delay: u64, f: || -> U) -> U {
     let howtofly = animation.map(|x|x.to_owned());
     let (port, chan) = stream();
     do task::spawn_sched(task::SingleThreaded) {
@@ -29,7 +29,7 @@ fn fly<U>(animation: &[&str], symbols: int, delay: u64, f: &fn() -> U) -> U {
 ///<Summary>
 ///Simple butterfly
 ///</Summary>
-pub fn butterfly<U>(f: &fn() -> U) -> U {
+pub fn butterfly<U>(f: || -> U) -> U {
     let animation = [&"|","/","-","\\"];
     fly(animation, 1, 1, f)
 }
@@ -37,7 +37,7 @@ pub fn butterfly<U>(f: &fn() -> U) -> U {
 ///<Summary>
 ///Stupid butterfly
 ///</Summary>
-pub fn rustbuildbotdance<U>(f: &fn() -> U) -> U {
+pub fn rustbuildbotdance<U>(f: || -> U) -> U {
     let animation = [
         &"<(^.^<)"
         ,"<(^.^)>"
@@ -51,7 +51,7 @@ pub fn rustbuildbotdance<U>(f: &fn() -> U) -> U {
 ///Simple lines surround
 ///</Summary>
 #[inline]
-pub fn fancy<U>(f: &fn() -> U) -> U {
+pub fn fancy<U>(f: || -> U) -> U {
     println("_________________________________________________________________________");
     let ret = f();
     println("_________________________________________________________________________");

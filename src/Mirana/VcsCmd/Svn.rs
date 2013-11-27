@@ -5,7 +5,7 @@ use Wrappers::fancy;
 ///Svn update
 ///</Summary>
 pub fn svnUpdate() {
-    do fancy {
+    fancy(||{
         e("svn", [&"update"]);
-    }
+    });
 }
