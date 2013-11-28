@@ -233,7 +233,7 @@ pub fn save_Defaults(pr: &Path, mut Sync: ~[Sync],
                             master: None, upstream: None
                         }],
                     actions: ~[],
-                    make: Some(~"build.bat")
+                    make: None /* Some(~"build.bat") */
                     }
                 );
         }

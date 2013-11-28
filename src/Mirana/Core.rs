@@ -15,7 +15,7 @@ use extra::{time};
 fn make(cfg: &MakeCfg) {
     let detectorPath = & Path::new( cfg.detector.to_owned() );
     if detectorPath.exists() { 
-        fancy(||{ 
+        fancy(||{
             for c in cfg.cmd.iter() {
                 e(c.as_slice(), []);
             }

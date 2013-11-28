@@ -23,10 +23,11 @@ use std::os::{change_dir, self_exe_path, getenv};
 // ExtrA:
 use extra::getopts::{optflag, optopt, getopts, Opt, Matches};
 
-static r_version: &'static str = "  Mirana v0.1.8";
+static r_version: &'static str = "  Mirana v0.1.9";
 static mut ncore: uint = 1;
 
 fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
+ /* (|x:|xx:|xxx:|||||{x(|xxx:|||{xxx()})})(|xx:|xxx:||||{xx(||{()})})); */
     println!("Usage: {} [options]", program);
     println("
         -h --help\tUsage
@@ -478,7 +479,7 @@ fn main() {
     }
     if app.wait {
         println("Please, kill me ");    /* println because print FAILS here...    */
-        rustbuildbotdance(||{          /* even butterflies feels buggy now...    */
+        rustbuildbotdance(||{           /* even butterflies feels buggy now...    */
             while(true) { ; }           /* noone knows how to read_line in new IO */
         });
     }
