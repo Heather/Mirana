@@ -129,13 +129,13 @@ fn main() {
     //Load JSON configuration---------------------------------------------
     let (ref cfg, ref appCfg) = {
             if nix {
-                let prefix = Path::new( getenv("XDG_CONFIG_HOME").unwrap_or(~"") ).join("Mirana");
+                let prefix = Path::init( getenv("XDG_CONFIG_HOME").unwrap_or(~"") ).join("Mirana");
                 if !prefix.exists() { mkdir(&prefix, S_IRWXU as u32); }
                 (   prefix.join( ".sync.conf" ),
                     prefix.join( ".mirana.conf" )
                 )
             } else { 
-                let prefix = Path::new( getenv("HOME").unwrap_or(~"") );
+                let prefix = Path::init( getenv("HOME").unwrap_or(~"") );
                 (   prefix.join( "sync.conf" ),
                     prefix.join( "mirana.conf" )
                 )
@@ -153,7 +153,7 @@ fn main() {
             match app.vcs.iter().filter_map( |config| 
                 { match config.detector {
                         Some(ref detector) => {
-                            match (Path::new( detector.to_owned() )).exists() {
+                            match (Path::init( detector.to_owned() )).exists() {
                                 true    => Some(config),
                                 false   => None
                             }
@@ -219,7 +219,7 @@ fn main() {
     println("_________________________________________________________________________");
     if nix && ( matches.opt_present("g") || matches.opt_present("gentoo") ) {
         let x86 = "/home/gentoo-x86";
-        let p86 = & Path::new( x86 );
+        let p86 = & Path::init( x86 );
         if p86.exists() {   change_dir(p86);
                             unsafe { gentoo(x86, ncore); }
         } else { println!("Path doesn't exist: {}", x86);
@@ -419,13 +419,13 @@ fn main() {
                             false   => format!("../{}", project),
                             true    => format!("/home/{}", project)
                         };
-                        if ! (&Path::new( p.as_slice() )).exists() {
+                        if ! (&Path::init( p.as_slice() )).exists() {
                             println!(" * > clone into : {:s}", p);
                             cloneThing(p);
                         }
-                        Path::new( p )
-                    } else { Path::new( l ) }
-                } else { Path::new( l ) }
+                        Path::init( p )
+                    } else { Path::init( l ) }
+                } else { Path::init( l ) }
             };
             //-------------------------- Real loc ----------------------------------
             let loc= if (  rep.loc.starts_with("git@")
@@ -437,7 +437,7 @@ fn main() {
                 smartpath(rep.loc, | p: &str | {
                     e("hg", [&"clone", rep.loc.as_slice(), p]);
                     })
-            } else { Path::new( rep.loc.as_slice() ) };
+            } else { Path::init( rep.loc.as_slice() ) };
             //---------------------------- CELL -----------------------------------
             let apclone = Cell::new( app.clone() );
             let rclone  = Cell::new( rep.clone() );

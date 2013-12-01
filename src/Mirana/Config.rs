@@ -23,7 +23,7 @@ fn load_JSON<T: Decodable<json::Decoder>>(p: &Path) -> ~[T] {
             Some(f) => {
                 let reader  = @mut f as @mut io::Reader;
                 let res     = json::from_reader(reader).expect("JSON is broken");
-                Decodable::decode(&mut json::Decoder(res))
+                Decodable::decode(&mut json::Decoder::init(res))
             }, None => ~[]
         }
     } else { ~[] }
@@ -32,11 +32,11 @@ fn load_JSON<T: Decodable<json::Decoder>>(p: &Path) -> ~[T] {
 ///<Summary>
 ///Save JSON with custom PrettyEncoder
 ///</Summary>
-fn save_PrettyJSON<T: Encodable<json::PrettyEncoder>>(p: &Path, toEncode: ~[T]) {
+fn save_PrettyJSON<'a, T: Encodable<json::PrettyEncoder<'a>>>(p: &Path, toEncode: ~[T]) {
     match File::create(p) {
         Some(f) => {
             toEncode.encode(
-                &mut json::PrettyEncoder(
+                &mut json::PrettyEncoder::init(
                     @mut f as @mut io::Writer));
         }, None => fail!("failed to save json")
     };
@@ -45,11 +45,11 @@ fn save_PrettyJSON<T: Encodable<json::PrettyEncoder>>(p: &Path, toEncode: ~[T]) 
 ///<Summary>
 ///Save JSON with custom PrettyEncoder
 ///</Summary>
-fn save_JSON<T: Encodable<json::Encoder>>(p: &Path, toEncode: ~[T]) {
+fn save_JSON<'a, T: Encodable<json::Encoder<'a>>>(p: &Path, toEncode: ~[T]) {
     match File::create(p) {
         Some(f) => {
             toEncode.encode(
-                &mut json::Encoder(
+                &mut json::Encoder::init(
                     @mut f as @mut io::Writer));
         }, None => fail!("failed to save json")
     };
@@ -201,7 +201,7 @@ pub fn save_Defaults(pr: &Path, mut Sync: ~[Sync],
         });
     if nix {
         let portage = ~"/usr/portage";
-        let portagePath = & Path::new( portage.clone() );
+        let portagePath = & Path::init( portage.clone() );
         if portagePath.exists() {
             Sync.push( Sync { /* Gentoo update sync */
                 sync: ~"Gentoo",
@@ -219,7 +219,7 @@ pub fn save_Defaults(pr: &Path, mut Sync: ~[Sync],
         }
     } else {
         let bb = ~"build.bat";
-        let bbPath = & Path::new( bb.clone() );
+        let bbPath = & Path::init( bb.clone() );
         if bbPath.exists() {
             Sync[0].repositories.push(
                 Repository { /* self... */

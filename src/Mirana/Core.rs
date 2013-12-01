@@ -13,7 +13,7 @@ use Traits::Vcs;
 use extra::{time};
 
 fn make(cfg: &MakeCfg) {
-    let detectorPath = & Path::new( cfg.detector.to_owned() );
+    let detectorPath = & Path::init( cfg.detector.to_owned() );
     if detectorPath.exists() { 
         fancy(||{
             for c in cfg.cmd.iter() {
