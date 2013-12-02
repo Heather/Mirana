@@ -161,7 +161,7 @@ fn main() {
                     }
                 }).next() {
                 Some(cfg) => {
-                    let process = |action: Action, custom : &~[Custom], withVCS: |vcs : &'static Vcs|| 
+                    let process = |action: Action, custom : &~[Custom], withVCS: |vcs : &'static Vcs, a : &[&str]|| 
                     {   match (*custom).iter().filter_map(|ref c| 
                             if c.action == action { Some( c.cmd.to_owned() ) }
                             else { None }).next() {
@@ -169,7 +169,7 @@ fn main() {
                             None => {
                                 match cfg.vcs {
                                     Some(vcs)   => match (toTrait(vcs)) {
-                                        Some(t) => withVCS(t),
+                                        Some(t) => withVCS(t, args.iter().map(|a| a.as_slice()).to_owned_vec()),
                                         None    => print("NO trait for this vcs") },
                                     None        => print("No VCS provided")
                                 }
@@ -177,8 +177,8 @@ fn main() {
                         }
                     };
                     match x {
-                        "pull"  => process(pull, &cfg.custom,( | v: &'static Vcs | { v.pull("master"); })),
-                        "push"  => process(push, &cfg.custom,( | v: &'static Vcs | { v.push("master"); })),
+                        "pull"  => process(pull, &cfg.custom,( | v: &'static Vcs, a : &[&str] | { v.pull(a); })),
+                        "push"  => process(push, &cfg.custom,( | v: &'static Vcs, a : &[&str] | { v.push(a); })),
                         _       => fail!("CLI Impossible case")
                     }
                 }, None => fail!("No vcs found in current directory")

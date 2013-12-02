@@ -76,8 +76,8 @@ pub fn runSync(app: App, repo: Repository, typeFilter: Option<~str>, ncore: uint
                         Some(vcs) => {
                             for action in repo.actions.iter() {
                                 match *action {
-                                    pull    => vcs.pull(*b),
-                                    push    => vcs.push(*b),
+                                    pull    => vcs.pull_branch(*b),
+                                    push    => vcs.pull_branch(*b),
                                     rebase  => vcs.rebase(*b
                                                         , &r.master
                                                         , &r.upstream),
