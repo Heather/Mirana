@@ -2,6 +2,13 @@ use Shell::e;
 use Wrappers::fancy;
 
 ///<Summary>
+///Display branches and stuff
+///</Summary>
+pub fn hgList() {
+    e("hg", [&"branch"]);
+}
+
+///<Summary>
 ///Just hg pull & update yet
 ///</Summary>
 pub fn hgPull(branch: &str) {

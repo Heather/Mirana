@@ -1,9 +1,12 @@
 use Traits::Vcs;
-use VcsCmd::Hg::{hgPull, hgPush, hgRebase};
+use VcsCmd::Hg::{hgPull, hgPush, hgRebase, hgList};
 
 pub struct Hg;
 
 impl Vcs for Hg {
+    fn list(&self) {
+        hgList();
+    }
     fn pull(&self, branch: &str) {
         hgPull(branch);
     }

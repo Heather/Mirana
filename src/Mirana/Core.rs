@@ -12,6 +12,25 @@ use Wrappers            ::{fancy};
 use Traits::Vcs;
 use extra::{time};
 
+pub fn check(app: &App) {
+    for config in (*app).vcs.iter() {
+        match config.detector {
+            Some(ref detector) => {
+                let od = detector.to_owned();
+                if (Path::init( od.as_slice() )).exists() {
+                    println!(" -> {:s} >>>", od);
+                    match config.vcs {
+                        Some(vcs)       => match (toTrait(vcs)) {
+                            Some(vcs)   => vcs.list(),
+                            None        => println("NO trait for this vcs :(") },
+                        None            => println("No VCS Flavor for this config :(")
+                    }
+                }
+            }, None => ()
+        }
+    }
+}
+
 fn make(cfg: &MakeCfg) {
     let detectorPath = & Path::init( cfg.detector.to_owned() );
     if detectorPath.exists() { 

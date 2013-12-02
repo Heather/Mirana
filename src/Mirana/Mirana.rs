@@ -3,7 +3,7 @@ use Model       ::{Sync, Repository, Remote, VcsFlavor, Custom
 use Shell       ::{e, exe};
 use Wrappers    ::{rustbuildbotdance, fancy};
 use Misc        ::{toVCS, toTrait};
-use Core        ::{runSync, make_any};
+use Core        ::{runSync, make_any, check};
 use Config      ::{ save_RepoList
                   , save_Defaults
                   , load_RepoList
@@ -23,7 +23,7 @@ use std::os::{change_dir, self_exe_path, getenv};
 // ExtrA:
 use extra::getopts::{optflag, optopt, getopts, Opt, Matches};
 
-static r_version: &'static str = "  Mirana v0.2.0";
+static r_version: &'static str = "  Mirana v0.2.1";
 static mut ncore: uint = 1;
 
 fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
@@ -145,11 +145,11 @@ fn main() {
     let mut Sync   = load_RepoList( cfg );
     /* CLI */
     if args.len() > 1 {
+        println("");
         let x = args[1].as_slice();
         let C = ["pull", "push"];
         if  C.iter().any(
             |c| *c == x) {
-            println("");
             match app.vcs.iter().filter_map( |config| 
                 { match config.detector {
                         Some(ref detector) => {
@@ -186,8 +186,9 @@ fn main() {
         } else {
             match x {
                 "make"  => fancy(||{ make_any(&app) }),
-                "init"  => fail!("Init is not implemented yet"),
-                _       => fail!("Mirana what?")
+                "check" => fancy(||{ check(&app) }),
+                "init"  => println!("Init is not implemented yet"),
+                _       => println!("Mirana what?")
             }
         }
         return;

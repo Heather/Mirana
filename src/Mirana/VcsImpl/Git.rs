@@ -1,9 +1,12 @@
 use Traits::Vcs;
-use VcsCmd::Git::{gitPull, gitPush, gitRebase};
+use VcsCmd::Git::{gitPull, gitPush, gitRebase, gitList};
 
 pub struct Git;
 
 impl Vcs for Git {
+    fn list(&self) {
+        gitList();
+    }
     fn pull(&self, branch: &str) {
         gitPull(branch);
     }

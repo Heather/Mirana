@@ -2,6 +2,13 @@ use Shell::e;
 use Wrappers::fancy;
 
 ///<Summary>
+///Display branches and stuff
+///</Summary>
+pub fn gitList() {
+    e("git", [&"branch"]);
+}
+
+///<Summary>
 ///Just git pull
 ///</Summary>
 pub fn gitPull(branch: &str) {
