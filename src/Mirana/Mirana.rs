@@ -23,7 +23,7 @@ use std::os::{change_dir, self_exe_path, getenv};
 // ExtrA:
 use extra::getopts::{optflag, optopt, getopts, Opt, Matches};
 
-static r_version: &'static str = "  Mirana v0.1.9";
+static r_version: &'static str = "  Mirana v0.2.0";
 static mut ncore: uint = 1;
 
 fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
@@ -146,7 +146,7 @@ fn main() {
     /* CLI */
     if args.len() > 1 {
         let x = args[1].as_slice();
-        let C = ["pull", "push", "init", "make"];
+        let C = ["pull", "push"];
         if  C.iter().any(
             |c| *c == x) {
             println("");
@@ -161,8 +161,8 @@ fn main() {
                     }
                 }).next() {
                 Some(cfg) => {
-                    let process = |action: Action, custom : &~[Custom], withVCS: |vcs : &'static Vcs|| {
-                        match (*custom).iter().filter_map(|ref c| 
+                    let process = |action: Action, custom : &~[Custom], withVCS: |vcs : &'static Vcs|| 
+                    {   match (*custom).iter().filter_map(|ref c| 
                             if c.action == action { Some( c.cmd.to_owned() ) }
                             else { None }).next() {
                             Some(cmd) => fancy(||{ e(cmd, []) }),
@@ -179,15 +179,18 @@ fn main() {
                     match x {
                         "pull"  => process(pull, &cfg.custom,( | v: &'static Vcs | { v.pull("master"); })),
                         "push"  => process(push, &cfg.custom,( | v: &'static Vcs | { v.push("master"); })),
-                        "make"  => fancy(||{ make_any(&app) }),
-                        "init"  => {
-                                   fail!("Init is not implemented yet")
-                        }, _    => fail!("CLI Impossible case")
+                        _       => fail!("CLI Impossible case")
                     }
+                }, None => fail!("No vcs found in current directory")
                 }
-                None => fail!("No vcs found in current directory")
-            };  return;
+        } else {
+            match x {
+                "make"  => fancy(||{ make_any(&app) }),
+                "init"  => fail!("Init is not implemented yet"),
+                _       => fail!("Mirana what?")
+            }
         }
+        return;
     }
     if nix {
         print (", POSIX");
