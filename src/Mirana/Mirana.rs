@@ -23,7 +23,7 @@ use std::os::{change_dir, self_exe_path, getenv};
 // ExtrA:
 use extra::getopts::{optflag, optopt, getopts, Opt, Matches};
 
-static r_version: &'static str = "  Mirana v0.2.1";
+static r_version: &'static str = "  Mirana v0.2.2";
 static mut ncore: uint = 1;
 
 fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
@@ -189,11 +189,10 @@ fn main() {
                     "make"  => make_any(&app),
                     "check" => check(&app),
                     "init"  => println!("Init is not implemented yet"),
-                    _       => println!("Mirana what?")
+                    _       => () /* well, go next */
                 }
             });
         }
-        return;
     }
     if nix {
         print (", POSIX");
@@ -422,8 +421,10 @@ fn main() {
                     if ssps.len() > 0 {
                         let project = ps[0];
                         let p = match nix {
-                            false   => format!("../{}", project),
-                            true    => format!("/home/{}", project)
+                            false   => {
+                                let prefix = getenv("HOME").unwrap_or(~"");
+                                format!("{}/{}", prefix, project)
+                            }, true => format!("/home/{}", project)
                         };
                         if ! (&Path::init( p.as_slice() )).exists() {
                             println!(" * > clone into : {:s}", p);

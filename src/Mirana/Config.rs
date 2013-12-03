@@ -4,7 +4,6 @@ use Model::{ Sync, App, Remote, Repository, Gentoo, VcsCfg, MakeCfg, Custom
 
 use Misc::{toVCS, toAction};
 
-use std::os::{self_exe_path};
 use std::io;
 use std::io::File;
 use std::path::Path;
@@ -216,26 +215,6 @@ pub fn save_Defaults(pr: &Path, mut Sync: ~[Sync],
                     make: None
                     }]
                 });
-        }
-    } else {
-        let bb = ~"build.bat";
-        let bbPath = & Path::init( bb.clone() );
-        if bbPath.exists() {
-            Sync[0].repositories.push(
-                Repository { /* self... */
-                    loc: self_exe_path()
-                            .map(|p| p.as_str()
-                            .map(|s| s.to_owned()))
-                            .unwrap().unwrap(),
-                    remotes: ~[ Remote {
-                            t: git, 
-                            branches: ~[~"master"],
-                            master: None, upstream: None
-                        }],
-                    actions: ~[],
-                    make: None /* Some(~"build.bat") */
-                    }
-                );
         }
     }
     save_RepoList( pr, Sync, app.pretty);
