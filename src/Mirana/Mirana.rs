@@ -415,10 +415,11 @@ fn main() {
             //----------------------- Smart path ----------------------------------
             let smartpath = |l : &str, cloneThing: |p : &str|| -> Path {
                 let ssps: ~[&str] = l.split('/').collect();
-                if ssps.len() > 1 {
-                    let ssp = ssps[1];
+                let sspslen = ssps.len();
+                if sspslen > 1 {
+                    let ssp = ssps[sspslen - 1];
                     let ps: ~[&str] = ssp.split('.').collect();
-                    if ssps.len() > 0 {
+                    if ps.len() > 0 {
                         let project = ps[0];
                         let p = match nix {
                             false   => {
