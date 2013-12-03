@@ -145,11 +145,11 @@ fn main() {
     let mut Sync   = load_RepoList( cfg );
     /* CLI */
     if args.len() > 1 {
-        println("");
         let x = args[1].as_slice();
         let C = ["pull", "push"];
         if  C.iter().any(
             |c| *c == x) {
+            println("");
             match app.vcs.iter().filter_map( |config| 
                 { match config.detector {
                         Some(ref detector) => {
@@ -185,8 +185,8 @@ fn main() {
                 }
         } else {
             match x {
-                "make"  => { fancy(||{make_any(&app);}); return; },
-                "check" => { fancy(||{check(&app); }); return; },
+                "make"  => { println(""); fancy(||{make_any(&app);}); return; },
+                "check" => { println(""); fancy(||{check(&app); });   return; },
                 "init"  => println!("Init is not implemented yet"),
                 _       => () /* well, go next */
             }
