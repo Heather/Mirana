@@ -184,14 +184,12 @@ fn main() {
                 }, None => fail!("No vcs found in current directory")
                 }
         } else {
-            fancy(||{
-                match x {
-                    "make"  => make_any(&app),
-                    "check" => check(&app),
-                    "init"  => println!("Init is not implemented yet"),
-                    _       => () /* well, go next */
-                }
-            });
+            match x {
+                "make"  => { fancy(||{make_any(&app);}); return; },
+                "check" => { fancy(||{check(&app); }); return; },
+                "init"  => println!("Init is not implemented yet"),
+                _       => () /* well, go next */
+            }
         }
     }
     if nix {
