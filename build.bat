@@ -7,7 +7,11 @@ mkdir bin
 
 ::compile
 cd src/Mirana
-rustc main.rs -O -o ../../bin/Mirana.exe
+
+:: Release ->
+::rustc main.rs -O -o ../../bin/Mirana.exe
+:: Debig ->
+rustc main.rs -Z debug-info -o ../../bin/Mirana.exe
 
 ::wait / handle errors
 pause

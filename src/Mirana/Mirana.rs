@@ -135,7 +135,7 @@ fn main() {
                     prefix.join( ".mirana.conf" )
                 )
             } else { 
-                let prefix = Path::init( getenv("HOME").unwrap_or(~"") );
+                let prefix = Path::init(~"./"); //Path::init( getenv("HOME").unwrap_or(~"./") );
                 (   prefix.join( "sync.conf" ),
                     prefix.join( "mirana.conf" )
                 )
