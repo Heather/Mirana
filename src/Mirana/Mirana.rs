@@ -265,11 +265,9 @@ fn main() {
                     }
                 }, None => fail!("No add argument provided")
             } return;
-        }
-        if sync == -1 {
+        } else if sync == -1 {
             fail!("Error: there is no such sync: {}", maybe_sync.unwrap());
-        }
-        if matches.opt_present("d") {
+        } else if matches.opt_present("d") {
             match getOption(&matches, ["d"]) {
                 Some(d) => {
                     match find_Repo(Sync, sync, d) {
@@ -282,8 +280,7 @@ fn main() {
                     }
                 }, None => fail!("No add argument provided")
             } return;
-        }
-        if matches.opt_present("l") || matches.opt_present("list") {
+        } else if matches.opt_present("l") || matches.opt_present("list") {
             if ( cfg.exists() ) {
                 for rep in Sync[sync].repositories.iter() {
                     println!(">-- Repo: {:s}", rep.loc);
@@ -309,8 +306,7 @@ fn main() {
                     println("_________________________________________________________________________");
                 }
             } return;
-        }
-        if matches.opt_present("e") || matches.opt_present("edit") {
+        } else if matches.opt_present("e") || matches.opt_present("edit") {
             match maybe_edit {  Some(ref e) => {
                 if sync == -1 { fail!("Error: there is no such sync: {}", maybe_sync.unwrap());
                 } else { match find_Repo(Sync, sync, *e) { Some(repo) => {
