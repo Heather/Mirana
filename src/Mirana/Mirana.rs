@@ -23,7 +23,7 @@ use std::os::{change_dir, self_exe_path, getenv};
 // ExtrA:
 use extra::getopts::{optflag, optopt, getopts, Opt, Matches};
 
-static r_version: &'static str = "  Mirana v0.2.2";
+static r_version: &'static str = "  Mirana v0.2.3";
 static mut ncore: uint = 1;
 
 fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
@@ -246,137 +246,42 @@ fn main() {
         let maybe_exec      = getOption(&matches, ["x", "exec"]);
         let maybe_remote    = getOption(&matches, ["r", "remote"]);
         let maybe_branch    = getOption(&matches, ["b", "branch"]);
-        if matches.opt_present("a") || matches.opt_present("add") {
-            match maybe_edit {
-                Some(ref e) => {
+        if matches.opt_present("a") {
+            match getOption(&matches, ["a"]) {
+                Some(a) => {
                     if sync == -1 {
-                        fail!("Error: there is no such sync: {}", maybe_sync.unwrap());
+                        Sync.push( Sync {
+                            sync: maybe_sync.unwrap(),
+                            repositories: ~[ 
+                                add_Repo(a, maybe_type, maybe_exec, matches.opt_str("u"))
+                                ]
+                            });
+                        save_RepoList( cfg, Sync, app.pretty );
                     } else {
-                        match find_Repo(Sync, sync, *e) {
-                            Some(repo) => {
-                                match maybe_remote {
-                                    Some(r) => {
-                                        let remoteByType = toVCS(r.clone());
-                                        match find_Remote(&Sync[sync].repositories[repo], remoteByType) {
-                                            Some(remote)    => {
-                                                println!("{:?} remote already exists", remoteByType);
-                                                if maybe_branch.is_some() {
-                                                    let b = maybe_branch.unwrap();
-                                                    Sync[sync].repositories[repo].remotes[remote].branches.push(
-                                                        b.clone());
-                                                    save_RepoList( cfg, Sync, app.pretty );
-                                                    println!("{} added", b);
-                                                }
-                                            }, None         => {
-                                                Sync[sync].repositories[repo].remotes.push(
-                                                    add_Remote(maybe_type, maybe_branch, matches.opt_str("u")));
-                                                save_RepoList( cfg, Sync, app.pretty );
-                                                println!("{} added", r);
-                                            }
-                                        };
-                                    }, None => {
-                                        match maybe_branch {
-                                            Some(b) => {
-                                                if Sync[sync].repositories[repo].remotes.len() > 0 {
-                                                    Sync[sync].repositories[repo].remotes[0].branches.push(
-                                                        b.clone());
-                                                    save_RepoList( cfg, Sync, app.pretty );
-                                                    println!("{} added to first remote", b);
-                                                } else { fail!("There are no remotes to add branch, add remote first") }
-                                            }, None => { fail!("For now you can only add remote or branch")
-                                            }
-                                        }
-                                    }
-                                }
-                            }, None => fail!("No repository found: {}", *e)
-                        };
+                        Sync[sync].repositories.push(
+                            add_Repo(a, maybe_type, maybe_exec, matches.opt_str("u")));
+                        save_RepoList( cfg, Sync, app.pretty );
+                        println!("{} added", a);
                     }
-                },  None => {
-                    match getOption(&matches, ["a"]) {
-                        Some(a) => {
-                            if sync == -1 {
-                                Sync.push( Sync {
-                                    sync: maybe_sync.unwrap(),
-                                    repositories: ~[ 
-                                        add_Repo(a, maybe_type, maybe_exec, matches.opt_str("u"))
-                                        ]
-                                    });
-                                save_RepoList( cfg, Sync, app.pretty );
-                            } else {
-                                Sync[sync].repositories.push(
-                                    add_Repo(a, maybe_type, maybe_exec, matches.opt_str("u")));
-                                save_RepoList( cfg, Sync, app.pretty );
-                                println!("{} added", a);
-                            }
-                        }, None => fail!("No add argument provided")
-                    };
-                }
-            }; return;
+                }, None => fail!("No add argument provided")
+            } return;
         }
         if sync == -1 {
             fail!("Error: there is no such sync: {}", maybe_sync.unwrap());
         }
-        if matches.opt_present("d") || matches.opt_present("delete") {
-            match maybe_edit {
-                Some(ref e) => {
-                    match find_Repo(Sync, sync, *e) {
-                        Some(repo) => {
-                            match maybe_remote {
-                                Some(r) => {
-                                    let remoteByType = toVCS(r.clone());
-                                    match find_Remote(&Sync[sync].repositories[repo], remoteByType) {
-                                        Some(remote) => {
-                                            if maybe_branch.is_some() {
-                                                let b = maybe_branch.unwrap();
-                                                let ifBranch = find_Branch(
-                                                    &Sync[sync].repositories[repo].remotes[remote], b);
-                                                if ifBranch.is_some() {
-                                                    Sync[sync].repositories[repo].remotes[remote].branches.remove(
-                                                        ifBranch.unwrap());
-                                                    println!("{} removed", b);
-                                                }
-                                                save_RepoList( cfg, Sync, app.pretty );
-                                            } else {
-                                                Sync[sync].repositories[repo].remotes.remove(remote);
-                                                save_RepoList( cfg, Sync, app.pretty );
-                                                println!("{:?} removed", remoteByType);
-                                            }
-                                        }, None => { }
-                                    };
-                                }, None => {
-                                    match maybe_branch {
-                                        Some(b) => {
-                                            if Sync[sync].repositories[repo].remotes.len() > 0 {
-                                                let ifBranch = find_Branch(
-                                                    &Sync[sync].repositories[repo].remotes[0], b);
-                                                if ifBranch.is_some() {
-                                                    Sync[sync].repositories[repo].remotes[0].branches.remove(
-                                                        ifBranch.unwrap());
-                                                    println!("{} removed", b);
-                                                }
-                                            } else { fail!("There are no remotes to delete branch on") }
-                                        }, None => { fail!("For now you can only delete remote or branch")
-                                        }
-                                    }
-                                }
-                            }
-                        }, None => fail!("No repository found: {}", *e)
-                    };
-                },  None => {
-                    match getOption(&matches, ["d"]) {
-                        Some(d) => {
-                            match find_Repo(Sync, sync, d) {
-                                Some(ind) => {
-                                    println!("{} removed", Sync[sync].repositories[ind].loc);
-                                    Sync[sync].repositories.remove( ind );
-                                    save_RepoList( cfg, Sync, app.pretty );
-                                },
-                                None => fail!("{} not found", d)
-                            }
-                        }, None => fail!("No add argument provided")
-                    };
-                }
-            }; return;
+        if matches.opt_present("d") {
+            match getOption(&matches, ["d"]) {
+                Some(d) => {
+                    match find_Repo(Sync, sync, d) {
+                        Some(ind) => {
+                            println!("{} removed", Sync[sync].repositories[ind].loc);
+                            Sync[sync].repositories.remove( ind );
+                            save_RepoList( cfg, Sync, app.pretty );
+                        },
+                        None => fail!("{} not found", d)
+                    }
+                }, None => fail!("No add argument provided")
+            } return;
         }
         if matches.opt_present("l") || matches.opt_present("list") {
             if ( cfg.exists() ) {
@@ -403,6 +308,76 @@ fn main() {
                     println!(">-- Make: {:?}", rep.make);
                     println("_________________________________________________________________________");
                 }
+            } return;
+        }
+        if matches.opt_present("e") || matches.opt_present("edit") {
+            match maybe_edit {  Some(ref e) => {
+                if sync == -1 { fail!("Error: there is no such sync: {}", maybe_sync.unwrap());
+                } else { match find_Repo(Sync, sync, *e) { Some(repo) => {
+                     match maybe_remote {
+                        Some(r) => {
+                            let remoteByType = toVCS(r.clone());
+                            match find_Remote(&Sync[sync].repositories[repo], remoteByType) {
+                                Some(remote)    => {
+                                    println!("{:?} remote already exists", remoteByType);
+                                    if maybe_branch.is_some() {
+                                        let b = maybe_branch.unwrap();
+                                        if matches.opt_present("add") {
+                                            Sync[sync].repositories[repo].remotes[remote].branches.push(
+                                                b.clone());
+                                            save_RepoList( cfg, Sync, app.pretty );
+                                            println!("{} added", b);
+                                        } else if matches.opt_present("delete") {
+                                            let ifBranch = find_Branch(
+                                                &Sync[sync].repositories[repo].remotes[remote], b);
+                                            if ifBranch.is_some() {
+                                                Sync[sync].repositories[repo].remotes[remote].branches.remove(
+                                                    ifBranch.unwrap());
+                                                println!("{} removed", b);
+                                            }
+                                            save_RepoList( cfg, Sync, app.pretty );
+                                        }
+                                    } else {
+                                        if matches.opt_present("delete") {
+                                            Sync[sync].repositories[repo].remotes.remove(remote);
+                                            save_RepoList( cfg, Sync.clone(), app.pretty );
+                                            println!("{:?} removed", remoteByType);
+                                        }
+                                    }
+                                }, None => {
+                                    if matches.opt_present("add") {
+                                        Sync[sync].repositories[repo].remotes.push(
+                                            add_Remote(maybe_type, maybe_branch, matches.opt_str("u")));
+                                        save_RepoList( cfg, Sync, app.pretty );
+                                        println!("{} added", r);
+                                    }
+                                }
+                            };
+                        }, None => {
+                            match maybe_branch {
+                                Some(b) => {
+                                    if Sync[sync].repositories[repo].remotes.len() > 0 {
+                                        if matches.opt_present("add") {
+                                            Sync[sync].repositories[repo].remotes[0].branches.push(
+                                                b.clone());
+                                            save_RepoList( cfg, Sync, app.pretty );
+                                            println!("{} added to first remote", b);
+                                        } else if matches.opt_present("delete") {
+                                            let ifBranch = find_Branch(
+                                                &Sync[sync].repositories[repo].remotes[0], b);
+                                            if ifBranch.is_some() {
+                                                Sync[sync].repositories[repo].remotes[0].branches.remove(
+                                                    ifBranch.unwrap());
+                                                println!("{} removed", b);
+                                            }
+                                        }
+                                    } else { fail!("There are no such remotes") }
+                                }, None => { fail!("For now you can only add remote or branch")
+                                }
+                            }
+                        }
+                    }}, None => fail!("No repository found: {}", *e)
+                }}},    None => ()
             } return;
         }
         let mut total = 0;
