@@ -9,9 +9,9 @@ mkdir bin
 cd src/Mirana
 
 :: Release ->
-::rustc main.rs -O -o ../../bin/Mirana.exe
+rustc main.rs -O -o ../../bin/Mirana.exe
 :: Debig ->
-rustc main.rs -Z debug-info -o ../../bin/Mirana.exe
+::rustc main.rs -Z debug-info -o ../../bin/Mirana.exe
 
 ::wait / handle errors
 pause

@@ -8,7 +8,7 @@ use std::io::timer::sleep;
 fn fly<U>(animation: &[&str], symbols: int, delay: u64, f: || -> U) -> U {
     let howtofly = animation.map(|x|x.to_owned());
     let (port, chan) = stream();
-    do task::spawn_sched(task::SingleThreaded) {
+    do task::spawn { /* _sched(task::SingleThreaded) */
         let mut prefix = ~"";
         for _ in range (0, symbols) {
             print(" ");

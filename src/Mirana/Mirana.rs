@@ -390,12 +390,8 @@ fn main() {
                     let ps: ~[&str] = ssp.split('.').collect();
                     if ps.len() > 0 {
                         let project = ps[0];
-                        let p = match nix {
-                            false   => {
-                                let prefix = getenv("HOME").unwrap_or(~"");
-                                format!("{}/{}", prefix, project)
-                            }, true => format!("/home/{}", project)
-                        };
+                        let prefix = getenv("HOME").unwrap_or(~"./");
+                        let p = format!("{}/{}", prefix, project);
                         if ! (&Path::init( p.as_slice() )).exists() {
                             println!(" * > clone into : {:s}", p);
                             cloneThing(p);
