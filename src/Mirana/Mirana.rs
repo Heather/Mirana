@@ -129,7 +129,10 @@ fn main() {
     //Load JSON configuration---------------------------------------------
     let (ref cfg, ref appCfg) = {
             if nix {
-                let prefix = Path::init( getenv("XDG_CONFIG_HOME").unwrap_or(~"") ).join("Mirana");
+                let prefix = Path::init( 
+                    getenv("XDG_CONFIG_HOME")
+                    .unwrap_or(getenv("HOME")
+                    .unwrap_or(~"./"))).join("Mirana");
                 if !prefix.exists() { mkdir(&prefix, S_IRWXU as u32); }
                 (   prefix.join( ".sync.conf" ),
                     prefix.join( ".mirana.conf" )
