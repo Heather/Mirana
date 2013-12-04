@@ -20,7 +20,8 @@ fn load_JSON<T: Decodable<json::Decoder>>(p: &Path) -> ~[T] {
         let filereader = File::open(p);
         match filereader {
             Some(f) => {
-                let reader  = @mut f as @mut io::Reader;
+                let mut f2 = f;
+                let reader  = &mut f2 as &mut io::Reader;
                 let res     = json::from_reader(reader).expect("JSON is broken");
                 Decodable::decode(&mut json::Decoder::init(res))
             }, None => ~[]
@@ -34,9 +35,10 @@ fn load_JSON<T: Decodable<json::Decoder>>(p: &Path) -> ~[T] {
 fn save_PrettyJSON<'a, T: Encodable<json::PrettyEncoder<'a>>>(p: &Path, toEncode: ~[T]) {
     match File::create(p) {
         Some(f) => {
-            toEncode.encode(
-                &mut json::PrettyEncoder::init(
-                    @mut f as @mut io::Writer));
+            let mut f2 = f;
+            let a = &mut json::PrettyEncoder::init(
+                &mut f2 as &mut io::Writer);
+            toEncode.encode(a);
         }, None => fail!("failed to save json")
     };
 }
@@ -47,9 +49,10 @@ fn save_PrettyJSON<'a, T: Encodable<json::PrettyEncoder<'a>>>(p: &Path, toEncode
 fn save_JSON<'a, T: Encodable<json::Encoder<'a>>>(p: &Path, toEncode: ~[T]) {
     match File::create(p) {
         Some(f) => {
+            let mut f2 = f;
             toEncode.encode(
                 &mut json::Encoder::init(
-                    @mut f as @mut io::Writer));
+                    &mut f2 as &mut io::Writer));
         }, None => fail!("failed to save json")
     };
 }

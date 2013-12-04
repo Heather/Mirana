@@ -6,7 +6,6 @@
 #[comment = "Mirana VCS sync"];
 #[license = "LGPL2"];
 
-#[feature(managed_boxes)];
 #[crate_type = "bin"];
 extern mod extra;
 
