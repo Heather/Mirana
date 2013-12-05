@@ -19,7 +19,7 @@ use std::libc::S_IRWXU;
 use std::io::fs::mkdir;
 use std::task;
 use std::cell::Cell;
-use std::os::{change_dir, self_exe_path, getenv};
+use std::os::{change_dir, self_exe_path, getenv, make_absolute};
 // ExtrA:
 use extra::getopts::{optflag, optopt, getopts, Opt, Matches};
 
@@ -252,17 +252,30 @@ fn main() {
         if matches.opt_present("a") {
             match getOption(&matches, ["a"]) {
                 Some(a) => {
+                    let addr = |r: ~str| -> ~str {
+                        if (  r.starts_with("git@")
+                              || r.starts_with("https://git")
+                              || r.starts_with("hg@")) { r
+                        } else {
+                            let rpath = Path::init(r.as_slice());
+                            if rpath.exists() {
+                                let apath = make_absolute(&rpath);
+                                apath.as_str().unwrap().to_owned()
+                            } else { r
+                            }
+                        }
+                    };
                     if sync == -1 {
                         Sync.push( Sync {
                             sync: maybe_sync.unwrap(),
                             repositories: ~[ 
-                                add_Repo(a, maybe_type, maybe_exec, matches.opt_str("u"))
+                                add_Repo(addr(a), maybe_type, maybe_exec, matches.opt_str("u"))
                                 ]
                             });
                         save_RepoList( cfg, Sync, app.pretty );
                     } else {
                         Sync[sync].repositories.push(
-                            add_Repo(a, maybe_type, maybe_exec, matches.opt_str("u")));
+                            add_Repo(addr(a.to_owned()), maybe_type, maybe_exec, matches.opt_str("u")));
                         save_RepoList( cfg, Sync, app.pretty );
                         println!("{} added", a);
                     }
