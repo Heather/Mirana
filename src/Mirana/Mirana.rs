@@ -380,7 +380,8 @@ fn main() {
                                             if ifBranch.is_some() {
                                                 Sync[sync].repositories[repo].remotes[0].branches.remove(
                                                     ifBranch.unwrap());
-                                                println!("{} removed", b);
+                                                save_RepoList( cfg, Sync, app.pretty );
+                                                println!("{} branch removed", b);
                                             }
                                         }
                                     } else { fail!("There are no such remotes") }
