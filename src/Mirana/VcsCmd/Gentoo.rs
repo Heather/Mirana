@@ -7,7 +7,7 @@ use std::os::{change_dir};
 ///Full Gentoo Update
 ///</Summary>
 pub fn gentooFullUpdate(loc: &str, ncores: uint) {
-    let p86 = & Path::init( loc );
+    let p86 = & Path::new( loc );
     if p86.exists() {
         change_dir(p86);
         gentoo(loc, ncores);

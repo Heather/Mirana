@@ -17,7 +17,7 @@ pub fn check(app: &App) {
         match config.detector {
             Some(ref detector) => {
                 let od = detector.to_owned();
-                if (Path::init( od.as_slice() )).exists() {
+                if (Path::new( od.as_slice() )).exists() {
                     println!("*{:s}:", od);
                     match config.vcs {
                         Some(vcs)       => match (toTrait(vcs)) {
@@ -32,7 +32,7 @@ pub fn check(app: &App) {
 }
 
 fn make(cfg: &MakeCfg) {
-    let detectorPath = & Path::init( cfg.detector.to_owned() );
+    let detectorPath = & Path::new( cfg.detector.to_owned() );
     if detectorPath.exists() { 
         fancy(||{
             for c in cfg.cmd.iter() {

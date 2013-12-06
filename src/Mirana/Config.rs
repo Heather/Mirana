@@ -23,7 +23,7 @@ fn load_JSON<T: Decodable<json::Decoder>>(p: &Path) -> ~[T] {
                 let mut f2 = f;
                 let reader  = &mut f2 as &mut io::Reader;
                 let res     = json::from_reader(reader).expect("JSON is broken");
-                Decodable::decode(&mut json::Decoder::init(res))
+                Decodable::decode(&mut json::Decoder::new(res))
             }, None => ~[]
         }
     } else { ~[] }
@@ -36,7 +36,7 @@ fn save_PrettyJSON<'a, T: Encodable<json::PrettyEncoder<'a>>>(p: &Path, toEncode
     match File::create(p) {
         Some(f) => {
             let mut f2 = f;
-            let a = &mut json::PrettyEncoder::init(
+            let a = &mut json::PrettyEncoder::new(
                 &mut f2 as &mut io::Writer);
             toEncode.encode(a);
         }, None => fail!("failed to save json")
@@ -51,7 +51,7 @@ fn save_JSON<'a, T: Encodable<json::Encoder<'a>>>(p: &Path, toEncode: ~[T]) {
         Some(f) => {
             let mut f2 = f;
             toEncode.encode(
-                &mut json::Encoder::init(
+                &mut json::Encoder::new(
                     &mut f2 as &mut io::Writer));
         }, None => fail!("failed to save json")
     };
@@ -203,7 +203,7 @@ pub fn save_Defaults(pr: &Path, mut Sync: ~[Sync],
         });
     if nix {
         let portage = ~"/usr/portage";
-        let portagePath = & Path::init( portage.clone() );
+        let portagePath = & Path::new( portage.clone() );
         if portagePath.exists() {
             Sync.push( Sync { /* Gentoo update sync */
                 sync: ~"Gentoo",

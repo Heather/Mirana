@@ -23,7 +23,7 @@ use std::os::{change_dir, self_exe_path, getenv, make_absolute};
 // ExtrA:
 use extra::getopts::{optflag, optopt, getopts, Opt, Matches};
 
-static r_version: &'static str = "  Mirana v0.2.4";
+static r_version: &'static str = "  Mirana v0.2.5";
 static mut ncore: uint = 1;
 
 fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
@@ -34,6 +34,7 @@ fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
 
         -j --jobs
 
+        check\t Display current repository vcs
         init\t Creates default shade based on folders around
         
         pull\t pull changes in any vcs
@@ -129,7 +130,7 @@ fn main() {
     //Load JSON configuration---------------------------------------------
     let (ref cfg, ref appCfg) = {
             if nix {
-                let prefix = Path::init( 
+                let prefix = Path::new( 
                     getenv("XDG_CONFIG_HOME")
                     .unwrap_or(getenv("HOME")
                     .unwrap_or(~"./"))).join("Mirana");
@@ -138,7 +139,7 @@ fn main() {
                     prefix.join( ".mirana.conf" )
                 )
             } else { 
-                let prefix = Path::init( getenv("HOME").unwrap_or(~"./") );
+                let prefix = Path::new( getenv("HOME").unwrap_or(~"./") );
                 (   prefix.join( "sync.conf" ),
                     prefix.join( "mirana.conf" )
                 )
@@ -156,7 +157,7 @@ fn main() {
             match app.vcs.iter().filter_map( |config| 
                 { match config.detector {
                         Some(ref detector) => {
-                            match (Path::init( detector.to_owned() )).exists() {
+                            match (Path::new( detector.to_owned() )).exists() {
                                 true    => Some(config),
                                 false   => None
                             }
@@ -190,7 +191,7 @@ fn main() {
             match x {
                 "make"  => { println(""); fancy(||{make_any(&app);}); return; },
                 "check" => { println(""); fancy(||{check(&app); });   return; },
-                "init"  => println!("Init is not implemented yet"),
+                "init"  => { println!("Init is not implemented yet"); return; },
                 _       => () /* well, go next */
             }
         }
@@ -225,7 +226,7 @@ fn main() {
     println("_________________________________________________________________________");
     if nix && ( matches.opt_present("g") || matches.opt_present("gentoo") ) {
         let x86 = "/home/gentoo-x86";
-        let p86 = & Path::init( x86 );
+        let p86 = & Path::new( x86 );
         if p86.exists() {   change_dir(p86);
                             unsafe { gentoo(x86, ncore); }
         } else { println!("Path doesn't exist: {}", x86);
@@ -257,7 +258,7 @@ fn main() {
                               || r.starts_with("https://git")
                               || r.starts_with("hg@")) { r
                         } else {
-                            let rpath = Path::init(r.as_slice());
+                            let rpath = Path::new(r.as_slice());
                             if rpath.exists() {
                                 let apath = make_absolute(&rpath);
                                 apath.as_str().unwrap().to_owned()
@@ -409,13 +410,13 @@ fn main() {
                         let project = ps[0];
                         let prefix = getenv("HOME").unwrap_or(~"./");
                         let p = format!("{}/{}", prefix, project);
-                        if ! (&Path::init( p.as_slice() )).exists() {
+                        if ! (&Path::new( p.as_slice() )).exists() {
                             println!(" * > clone into : {:s}", p);
                             cloneThing(p);
                         }
-                        Path::init( p )
-                    } else { Path::init( l ) }
-                } else { Path::init( l ) }
+                        Path::new( p )
+                    } else { Path::new( l ) }
+                } else { Path::new( l ) }
             };
             //-------------------------- Real loc ----------------------------------
             let loc= if (  rep.loc.starts_with("git@")
@@ -427,7 +428,7 @@ fn main() {
                 smartpath(rep.loc, | p: &str | {
                     e("hg", [&"clone", rep.loc.as_slice(), p]);
                     })
-            } else { Path::init( rep.loc.as_slice() ) };
+            } else { Path::new( rep.loc.as_slice() ) };
             //---------------------------- CELL -----------------------------------
             let apclone = Cell::new( app.clone() );
             let rclone  = Cell::new( rep.clone() );
