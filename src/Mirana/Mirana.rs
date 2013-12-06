@@ -23,7 +23,7 @@ use std::os::{change_dir, self_exe_path, getenv, make_absolute};
 // ExtrA:
 use extra::getopts::{optflag, optopt, getopts, Opt, Matches};
 
-static r_version: &'static str = "  Mirana v0.2.5";
+static r_version: &'static str = "  Mirana v0.2.6";
 static mut ncore: uint = 1;
 
 fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
@@ -39,7 +39,9 @@ fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
         
         pull\t pull changes in any vcs
         pusg\t push changes in any vcs
-        make\t build project
+        
+        make\t build current project or specified one
+        sync\t perform sync of specified project
 
         -l --list\tPretty print repositories in sync
         -d\t\tDelete repo from configuration
@@ -94,6 +96,24 @@ fn find_Branch(remote: &Remote, pattern: &str) -> Option<uint> {
 fn getOption(matches: &Matches, opts: &[&str]) -> Option<~str> {
     opts.iter().filter_map(|opt| matches.opt_str(*opt)).next()
 }
+fn smartpath(l : &str, cloneThing: |p : &str|) -> Path {
+    let ssps: ~[&str] = l.split('/').collect();
+    let sspslen = ssps.len();
+    if sspslen > 1 {
+        let ssp = ssps[sspslen - 1];
+        let ps: ~[&str] = ssp.split('.').collect();
+        if ps.len() > 0 {
+            let project = ps[0];
+            let prefix = getenv("HOME").unwrap_or(~"./");
+            let p = format!("{}/{}", prefix, project);
+            if ! (&Path::new( p.as_slice() )).exists() {
+                println!(" * > clone into : {:s}", p);
+                cloneThing(p);
+            }
+            Path::new( p )
+        } else { Path::new( l ) }
+    } else { Path::new( l ) }
+}
 #[main]
 fn main() {
     println("_________________________________________________________________________");
@@ -147,6 +167,17 @@ fn main() {
         };
     let app        = load_App( appCfg, nix );
     let mut Sync   = load_RepoList( cfg );
+    let maybe_sync = getOption(&matches, ["s", "sync"]);
+    let sync = if matches.opt_present("s") || matches.opt_present("sync") {
+        match maybe_sync {
+            Some(ref ss) => {
+                match Sync.iter().position( |shd| shd.sync == *ss ) {
+                    Some(ps)    => ps,
+                    None        => -1
+                }
+            }, None => 0
+        }
+    } else { 0 };
     /* CLI */
     if args.len() > 1 {
         let x = args[1].as_slice();
@@ -189,10 +220,40 @@ fn main() {
                 }
         } else {
             match x {
-                "make"  => { println(""); fancy(||{make_any(&app);}); return; },
-                "check" => { println(""); fancy(||{check(&app); });   return; },
-                "init"  => { println!("Init is not implemented yet"); return; },
-                _       => () /* well, go next */
+                "sync" => {
+                    if args.len() > 2 {
+                        let y = args[2].as_slice();
+                        match find_Repo(Sync, sync, y) {
+                            Some(ind) => {
+                                let rep = Sync[sync].repositories[ind];
+                                //-------------------------- Real loc ----------------------------------
+                                let loc = & if (  rep.loc.starts_with("git@")
+                                            || rep.loc.starts_with("https://git")) {
+                                    smartpath(rep.loc, | p: &str | {
+                                        e("git", [&"clone", rep.loc.as_slice(), p]);
+                                        })
+                                } else if rep.loc.starts_with("hg@") {
+                                    smartpath(rep.loc, | p: &str | {
+                                        e("hg", [&"clone", rep.loc.as_slice(), p]);
+                                        })
+                                } else { Path::new( rep.loc.as_slice() ) };
+                                if loc.exists() {
+                                    change_dir(loc);
+                                    runSync( app, rep, None, 1);
+                                    change_dir(&self_exe_path().unwrap());
+                                } else {
+                                    println!(" -> {:s} does not exist", rep.loc);
+                                }
+                            },
+                            None => fail!("{} not found", y)
+                        }
+                    } else { println("You must say what to sync");
+                    }
+                    return; 
+                },  "make"  => { println(""); fancy(||{make_any(&app);}); return; },
+                    "check" => { println(""); fancy(||{check(&app); });   return; },
+                    "init"  => { println("Init is not implemented yet"); return; },
+                _  => () /* well, go next */
             }
         }
     }
@@ -232,18 +293,7 @@ fn main() {
         } else { println!("Path doesn't exist: {}", x86);
         } return;
     }
-    //--------------------------------------------------------------------
-    let maybe_sync = getOption(&matches, ["s", "sync"]);
-    let sync = if matches.opt_present("s") || matches.opt_present("sync") {
-        match maybe_sync {
-            Some(ref ss) => {
-                match Sync.iter().position( |shd| shd.sync == *ss ) {
-                    Some(ps)    => ps,
-                    None        => -1
-                }
-            }, None => 0
-        }
-    } else { 0 };
+    //------------------------------------------------------------------------------------
     if ( cfg.exists() ) {
         let maybe_type      = matches.opt_str("t");
         let maybe_edit      = getOption(&matches, ["e", "edit"]);
@@ -399,25 +449,6 @@ fn main() {
         let mut failed = 0;
         for rep in Sync[sync].repositories.iter() {
             println!(" *  repo: {}", rep.loc);
-            //----------------------- Smart path ----------------------------------
-            let smartpath = |l : &str, cloneThing: |p : &str|| -> Path {
-                let ssps: ~[&str] = l.split('/').collect();
-                let sspslen = ssps.len();
-                if sspslen > 1 {
-                    let ssp = ssps[sspslen - 1];
-                    let ps: ~[&str] = ssp.split('.').collect();
-                    if ps.len() > 0 {
-                        let project = ps[0];
-                        let prefix = getenv("HOME").unwrap_or(~"./");
-                        let p = format!("{}/{}", prefix, project);
-                        if ! (&Path::new( p.as_slice() )).exists() {
-                            println!(" * > clone into : {:s}", p);
-                            cloneThing(p);
-                        }
-                        Path::new( p )
-                    } else { Path::new( l ) }
-                } else { Path::new( l ) }
-            };
             //-------------------------- Real loc ----------------------------------
             let loc= if (  rep.loc.starts_with("git@")
                         || rep.loc.starts_with("https://git")) {
