@@ -18,7 +18,7 @@ pub fn check(app: &App) {
             Some(ref detector) => {
                 let od = detector.to_owned();
                 if (Path::new( od.as_slice() )).exists() {
-                    println!("*{:s}:", od);
+                    println!("|{:s}:", od);
                     match config.vcs {
                         Some(vcs)       => match (toTrait(vcs)) {
                             Some(vcs)   => vcs.list(),
