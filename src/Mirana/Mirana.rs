@@ -216,8 +216,8 @@ fn main() {
                         "push"  => process(push, &cfg.custom,( | v: &'static Vcs, a : &[&str] | { v.push(a); })),
                         _       => fail!("CLI Impossible case")
                     }
-                }, None => fail!("No vcs found in current directory")
-                }
+                }, None => println("No vcs found in current directory")
+            } return;
         } else {
             match x {
                 "sync" => {
@@ -252,7 +252,7 @@ fn main() {
                     return; 
                 },  "make"  => { println(""); fancy(||{make_any(&app);}); return; },
                     "check" => { println(""); fancy(||{check(&app); });   return; },
-                    "init"  => { println("Init is not implemented yet"); return; },
+                    "init"  => { println("Init is not implemented yet");  return; },
                 _  => () /* well, go next */
             }
         }
