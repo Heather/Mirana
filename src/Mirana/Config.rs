@@ -22,7 +22,7 @@ fn load_JSON<T: Decodable<json::Decoder>>(p: &Path) -> ~[T] {
             Some(f) => {
                 let mut f2 = f;
                 let reader  = &mut f2 as &mut io::Reader;
-                let res     = json::from_reader(reader).expect("JSON is broken");
+                let res     = json::from_reader(reader).unwrap();
                 Decodable::decode(&mut json::Decoder::new(res))
             }, None => ~[]
         }

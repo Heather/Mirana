@@ -18,7 +18,7 @@ use std::os;
 use std::libc::S_IRWXU;
 use std::io::fs::mkdir;
 use std::task;
-use std::cell::Cell;
+
 use std::os::{change_dir, self_exe_path, getenv, make_absolute};
 // ExtrA:
 use extra::getopts::{optflag, optopt, getopts, Opt, Matches};
@@ -460,22 +460,20 @@ fn main() {
                     e("hg", [&"clone", rep.loc.as_slice(), p]);
                     })
             } else { Path::new( rep.loc.as_slice() ) };
-            //---------------------------- CELL -----------------------------------
-            let apclone = Cell::new( app.clone() );
-            let rclone  = Cell::new( rep.clone() );
-            let lclone  = Cell::new( loc );
-            let atclone = Cell::new( maybe_type.clone() );
             //---------------------------- sync -----------------------------------
+            let aclone  = app.clone();
+            let atclone = maybe_type.clone();
+            let rclone  = rep.clone();
             match do task::try { unsafe {
-                let loc = & lclone.take();
-                let rep = rclone.take();
+                let loc = & loc;
+                let repx = rclone;
                 if loc.exists() {
                     change_dir(loc);
-                    runSync(      apclone.take()
-                           , rep, atclone.take()
+                    runSync(        aclone
+                           , repx,  atclone
                            , ncore);
                 } else {
-                    println!(" -> {:s} does not exist", rep.loc);
+                    println!(" -> {:s} does not exist", repx.loc);
                 }
             }
             } { Ok(_) => { success += 1; },
