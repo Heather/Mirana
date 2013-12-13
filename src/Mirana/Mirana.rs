@@ -27,7 +27,7 @@ static r_version: &'static str = "  Mirana v0.2.7";
 static mut ncore: uint = 1;
 
 fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
- /* (|x:|xx:|xxx:|||||{x(|xxx:|||{xxx()})})(|xx:|xxx:||||{xx(||{()})})); */
+ /* let r = (|u:|s:|t:|||||{u(|t:|||{t()})})(|s:|t:||||{s(||{()})})); */
     println!("Usage: {} [options]", program);
     println("
         -h --help\tUsage
@@ -122,6 +122,20 @@ fn main() {
     let args = os::args();
     let nix = !cfg!(target_os = "win32");
     let program = args[0].as_slice();
+    if nix {
+        print (", POSIX");
+        match do task::try {
+            let nproc = exe("nproc", []);
+            match from_str::<uint> (nproc.trim()) {
+                Some(0) => 1,
+                Some(n) => n + 1,
+                None => 1
+            }
+        } {  Ok(n)  => {  println!(", {:u} Core", n); unsafe { ncore = n; }
+          }, Err(e) => {  println!(" -> can't get cores count: {:?}", e);
+          }
+        }
+    } else { println (", Windows"); };
     /* Load JSON configuration */
     let (ref cfg, ref appCfg) = {
             if nix {
@@ -148,7 +162,6 @@ fn main() {
         let C = ["pull", "push", "commit"];
         if  C.iter().any(
             |c| *c == x) {
-            println("");
             match app.vcs.iter().filter_map( |config| 
                 { match config.detector {
                         Some(ref detector) => {
@@ -168,7 +181,9 @@ fn main() {
                             None => {
                                 match cfg.vcs {
                                     Some(vcs)   => match (toTrait(vcs)) {
-                                        Some(t) => withVCS(t, args.iter().map(|a| a.as_slice()).to_owned_vec()),
+                                        Some(t) => fancy(||{
+                                            withVCS(t, args.iter().map(|a| a.as_slice()).to_owned_vec());
+                                            }),
                                         None    => print("NO trait for this vcs") },
                                     None        => print("No VCS provided")
                                 }
@@ -215,8 +230,8 @@ fn main() {
                     } else { println("You must say what to sync");
                     }
                     return; 
-                },  "make"  => { println(""); fancy(||{make_any(&app);}); return; },
-                    "check" => { println(""); fancy(||{check(&app); });   return; },
+                },  "make"  => { fancy(||{make_any(&app);}); return; },
+                    "check" => { fancy(||{check(&app); });   return; },
                     "init"  => { println("Init is not implemented yet");  return; },
                 _  => () /* well, go next */
             }
@@ -260,32 +275,15 @@ fn main() {
         }
     } else { 0 };
     if nix {
-        print (", POSIX");
         let maybe_jobs = getOption(&matches, ["j", "jobs"]);
-        match maybe_jobs {
-            Some(j) => {
-                let jcore = match from_str::<uint> (j.trim()) {
-                                Some(0) => 1,
-                                Some(n) => n,
-                                None => 1
-                };
-                println!(", {} Core", jcore);
-                unsafe { ncore = jcore; }
-            },  None    => {
-                match do task::try {
-                    let nproc = exe("nproc", []);
-                    match from_str::<uint> (nproc.trim()) {
-                        Some(0) => 1,
-                        Some(n) => n + 1,
-                        None => 1
-                    }
-                } {  Ok(n)  => {  println!(", {:u} Core", n); unsafe { ncore = n; }
-                  }, Err(e) => {  println!(" -> can't get cores count: {:?}", e);
-                  }
-                }
-            }
-        }
-    } else { println (", Windows"); };
+        if maybe_jobs.is_some() { unsafe {
+            ncore = match from_str::<uint> (maybe_jobs.as_ref().map(|s| s.as_slice()).unwrap().trim()) {
+                            Some(0) => 1,
+                            Some(n) => n,
+                            None => 1
+            };
+        }}
+    }
     println("_________________________________________________________________________");
     if nix && ( matches.opt_present("g") || matches.opt_present("gentoo") ) {
         let x86 = "/home/gentoo-x86";
