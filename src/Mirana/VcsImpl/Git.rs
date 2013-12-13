@@ -20,6 +20,9 @@ impl Vcs for Git {
     fn push(&self, args : &[&str]) {
         e("git", &[&"push"] + args.slice_from(2));
     }
+    fn commit(&self, args : &[&str]) {
+        e("git", &[&"commit"] + args.slice_from(2));
+    }
     fn pull_branch(&self,  branch: &str) {
         gitPull(branch);
     }

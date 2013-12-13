@@ -23,7 +23,7 @@ use std::os::{change_dir, self_exe_path, getenv, make_absolute};
 // ExtrA:
 use extra::getopts::{optflag, optopt, getopts, Opt, Matches};
 
-static r_version: &'static str = "  Mirana v0.2.6";
+static r_version: &'static str = "  Mirana v0.2.7";
 static mut ncore: uint = 1;
 
 fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
@@ -37,7 +37,8 @@ fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
         check\t Display current repository vcs
         init\t Creates default shade based on folders around
         
-        pull\t pull changes in any vcs
+        commit\t commit changes
+        pull\t pull changes
         pusg\t push changes in any vcs
         
         make\t build current project or specified one
@@ -119,35 +120,9 @@ fn main() {
     println("_________________________________________________________________________");
     print!(" {:s} ", r_version);
     let args = os::args();
-    let program = args[0].as_slice();
-    let opts = ~[
-        optflag("h"),   optflag("help"),
-        optopt("j"),    optopt("jobs"),
-
-        optflag("l"),   optflag("list"),
-
-        optflag("add"),     optopt("a"),
-        optflag("delete"),  optopt("d"),
-
-        optopt("e"), optopt("edit"),
-        optopt("s"), optopt("sync"),
-        optopt("r"), optopt("remote"),
-        optopt("u"), optopt("upstream"),
-        optopt("m"), optopt("master"),
-        optopt("b"), optopt("branch"),
-        optopt("x"), optopt("exec"),
-        optopt("t"), optopt("type"),
-        optflag("g"), optflag("gentoo")
-    ];
-    let matches = match getopts(args.tail(), opts) {
-        Ok(m) => { m }
-        Err(f) => { fail!(f.to_err_msg()) }
-    };
     let nix = !cfg!(target_os = "win32");
-    if matches.opt_present("h") || matches.opt_present("help") {
-        print_usage(program, opts, nix); return;
-    }
-    //Load JSON configuration---------------------------------------------
+    let program = args[0].as_slice();
+    /* Load JSON configuration */
     let (ref cfg, ref appCfg) = {
             if nix {
                 let prefix = Path::new( 
@@ -167,21 +142,10 @@ fn main() {
         };
     let app        = load_App( appCfg, nix );
     let mut Sync   = load_RepoList( cfg );
-    let maybe_sync = getOption(&matches, ["s", "sync"]);
-    let sync = if matches.opt_present("s") || matches.opt_present("sync") {
-        match maybe_sync {
-            Some(ref ss) => {
-                match Sync.iter().position( |shd| shd.sync == *ss ) {
-                    Some(ps)    => ps,
-                    None        => -1
-                }
-            }, None => 0
-        }
-    } else { 0 };
     /* CLI */
     if args.len() > 1 {
         let x = args[1].as_slice();
-        let C = ["pull", "push"];
+        let C = ["pull", "push", "commit"];
         if  C.iter().any(
             |c| *c == x) {
             println("");
@@ -214,6 +178,7 @@ fn main() {
                     match x {
                         "pull"  => process(pull, &cfg.custom,( | v: &'static Vcs, a : &[&str] | { v.pull(a); })),
                         "push"  => process(push, &cfg.custom,( | v: &'static Vcs, a : &[&str] | { v.push(a); })),
+                        "commit"=> process(push, &cfg.custom,( | v: &'static Vcs, a : &[&str] | { v.commit(a); })),
                         _       => fail!("CLI Impossible case")
                     }
                 }, None => println("No vcs found in current directory")
@@ -223,9 +188,9 @@ fn main() {
                 "sync" => {
                     if args.len() > 2 {
                         let y = args[2].as_slice();
-                        match find_Repo(Sync, sync, y) {
+                        match find_Repo(Sync, 0, y) { /* TODO: search in all syncs... or something else */
                             Some(ind) => {
-                                let rep = Sync[sync].repositories[ind];
+                                let rep = Sync[0].repositories[ind];
                                 //-------------------------- Real loc ----------------------------------
                                 let loc = & if (  rep.loc.starts_with("git@")
                                             || rep.loc.starts_with("https://git")) {
@@ -257,6 +222,43 @@ fn main() {
             }
         }
     }
+    let opts = ~[
+        optflag("h"),   optflag("help"),
+        optopt("j"),    optopt("jobs"),
+
+        optflag("l"),   optflag("list"),
+
+        optflag("add"),     optopt("a"),
+        optflag("delete"),  optopt("d"),
+
+        optopt("e"), optopt("edit"),
+        optopt("s"), optopt("sync"),
+        optopt("r"), optopt("remote"),
+        optopt("u"), optopt("upstream"),
+        optopt("m"), optopt("master"),
+        optopt("b"), optopt("branch"),
+        optopt("x"), optopt("exec"),
+        optopt("t"), optopt("type"),
+        optflag("g"), optflag("gentoo")
+    ];
+    let matches = match getopts(args.tail(), opts) {
+        Ok(m) => { m }
+        Err(f) => { fail!(f.to_err_msg()) }
+    };
+    if matches.opt_present("h") || matches.opt_present("help") {
+        print_usage(program, opts, nix); return;
+    }
+    let maybe_sync = getOption(&matches, ["s", "sync"]);
+    let sync = if matches.opt_present("s") || matches.opt_present("sync") {
+        match maybe_sync {
+            Some(ref ss) => {
+                match Sync.iter().position( |shd| shd.sync == *ss ) {
+                    Some(ps)    => ps,
+                    None        => -1
+                }
+            }, None => 0
+        }
+    } else { 0 };
     if nix {
         print (", POSIX");
         let maybe_jobs = getOption(&matches, ["j", "jobs"]);

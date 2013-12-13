@@ -15,6 +15,9 @@ impl Vcs for Hg {
     fn push(&self, args : &[&str]) {
         e("hg", &[&"push"] + args.slice_from(2));
     }
+    fn commit(&self, args : &[&str]) {
+        e("hg", &[&"commit"] + args.slice_from(2));
+    }
     fn pull_branch(&self, branch: &str) {
         hgPull(branch);
     }
