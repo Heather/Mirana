@@ -23,61 +23,62 @@ use std::os::{change_dir, self_exe_path, getenv, make_absolute};
 // ExtrA:
 use extra::getopts::{optflag, optopt, getopts, Opt, Matches};
 
-static r_version: &'static str = "  Mirana v0.2.7";
+static r_version: &'static str = "  Mirana v0.2.8";
 static mut ncore: uint = 1;
 
 fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
- /* let r = (|u:|s:|t:|||||{u(|t:|||{t()})})(|s:|t:||||{s(||{()})})); */
-    println!("Usage: {} [options]", program);
-    println("
-        -h --help\tUsage
-
-        -j --jobs
-
-        check\t Display current repository vcs
-        init\t Creates default shade based on folders around
-        
-        commit\t commit changes
-        pull\t pull changes
-        pusg\t push changes in any vcs
-        
-        make\t build current project or specified one
-        sync\t perform sync of specified project
-
-        -l --list\tPretty print repositories in sync
-        -d\t\tDelete repo from configuration
-        -a\t\tAdd repo to configuration
-
-        -e --edit\t\tEdit repo configuration
-
-            --add\tAdd something to repo configuration
-            --delete\tDelete something from repo configuration
-
-        -s --sync\tSync config
-        -r --remote\tSpecify remote
-        -u --upstream\tSpecify upstream repository
-        -m --master\tSpecify upstream master branch
-        -b --branch\tBranch of adding / editing repo or filtering type
-        -x --exec\tActual action for repository (pull, push, rebase)
-        -t --type\tType of adding / editing repo or filtering type");
-    if nix {
-        println(" -g --gentoo\tSync Gentoo-x86");
-    } else {
+    fancy(||{
+        println!("Usage: {} [options]", program);
         println("
-        Stone word backfire with vengeance
-                Hopeless divine intervention
-                
-                            Leader, where's the peace you pursue
-    Can't let any more follow you
-            Teach to bleach the stains of your guilt
-        Envy of moral free lives built
-                        Live with the torment that they live through
-                        
-                        Your sins will only rest on you
+            -h --help\tUsage
+            -v --version\tDisplay version
 
-        ");
-    }
-    println("_________________________________________________________________________");
+            -j --jobs
+
+            check\t Display current repository vcs
+            init\t Creates default shade based on folders around
+            
+            commit\t commit changes
+            pull\t pull changes
+            pusg\t push changes in any vcs
+            
+            make\t build current project or specified one
+            sync\t perform sync of specified project
+
+            -l --list\tPretty print repositories in sync
+            -d\t\tDelete repo from configuration
+            -a\t\tAdd repo to configuration
+
+            -e --edit\t\tEdit repo configuration
+
+                --add\tAdd something to repo configuration
+                --delete\tDelete something from repo configuration
+
+            -s --sync\tSync config
+            -r --remote\tSpecify remote
+            -u --upstream\tSpecify upstream repository
+            -m --master\tSpecify upstream master branch
+            -b --branch\tBranch of adding / editing repo or filtering type
+            -x --exec\tActual action for repository (pull, push, rebase)
+            -t --type\tType of adding / editing repo or filtering type");
+        if nix {
+            println(" -g --gentoo\tSync Gentoo-x86");
+        } else {
+            println("
+            Stone word backfire with vengeance
+                    Hopeless divine intervention
+                    
+                                Leader, where's the peace you pursue
+        Can't let any more follow you
+                Teach to bleach the stains of your guilt
+            Envy of moral free lives built
+                            Live with the torment that they live through
+                            
+                            Your sins will only rest on you
+
+            ");
+        }
+    });
 }
 fn find_Repo(Sync: &[Sync], shade: uint, pattern: &str) -> Option<uint> {
     Sync[shade]    .repositories
@@ -239,6 +240,7 @@ fn main() {
     }
     let opts = ~[
         optflag("h"),   optflag("help"),
+        optflag("v"),   optflag("version"),
         optopt("j"),    optopt("jobs"),
 
         optflag("l"),   optflag("list"),
@@ -260,7 +262,10 @@ fn main() {
         Ok(m) => { m }
         Err(f) => { fail!(f.to_err_msg()) }
     };
-    if matches.opt_present("h") || matches.opt_present("help") {
+    if matches.opt_present("v") || matches.opt_present("version") {
+        println("_________________________________________________________________________");
+        return;
+    } else if matches.opt_present("h") || matches.opt_present("help") {
         print_usage(program, opts, nix); return;
     }
     let maybe_sync = getOption(&matches, ["s", "sync"]);
@@ -504,3 +509,4 @@ fn main() {
         });
     }
 }
+// let r = (|u:|s:|t:|||||{u(|t:|||{t()})})(|s:|t:||||{s(||{()})}));
