@@ -30,39 +30,39 @@ fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
     fancy(||{
         println!("Usage: {} [options]", program);
         println("
-            -h --help\tUsage
-            -v --version\tDisplay version
+        -h --help\tUsage
+        -v --version\tDisplay version
 
-            -j --jobs
+        -j --jobs\tThreads
 
-            check\t Display current repository vcs
-            init\t Creates default shade based on folders around
-            
-            commit\t commit changes
-            pull\t pull changes
-            pusg\t push changes in any vcs
-            
-            make\t build current project or specified one
-            sync\t perform sync of specified project
+        check\t Display current repository vcs
+        init\t Creates default shade based on folders around
+        
+        commit\t commit changes
+        pull\t pull changes
+        pusg\t push changes in any vcs
+        
+        make\t build current project or specified one
+        sync\t perform sync of specified project
 
-            -l --list\tPretty print repositories in sync
-            -d\t\tDelete repo from configuration
-            -a\t\tAdd repo to configuration
+        -l --list\tPretty print repositories in sync
+        -d\t\tDelete repo from configuration
+        -a\t\tAdd repo to configuration
 
-            -e --edit\t\tEdit repo configuration
+        -e --edit\t\tEdit repo configuration
 
-                --add\tAdd something to repo configuration
-                --delete\tDelete something from repo configuration
+            --add\t\tAdd something to repo configuration
+            --delete\tDelete something from repo configuration
 
-            -s --sync\tSync config
-            -r --remote\tSpecify remote
-            -u --upstream\tSpecify upstream repository
-            -m --master\tSpecify upstream master branch
-            -b --branch\tBranch of adding / editing repo or filtering type
-            -x --exec\tActual action for repository (pull, push, rebase)
-            -t --type\tType of adding / editing repo or filtering type");
+        -s --sync\t\tSync config
+        -r --remote\t\tSpecify remote
+        -u --upstream\tSpecify upstream repository
+        -m --master\t\tSpecify upstream master branch
+        -b --branch\t\tBranch of adding / editing repo or filtering type
+        -x --exec\t\tActual action for repository (pull, push, rebase)
+        -t --type\t\tType of adding / editing repo or filtering type");
         if nix {
-            println(" -g --gentoo\tSync Gentoo-x86");
+            println("        -g --gentoo\t\tSync Gentoo-x86");
         } else {
             println("
             Stone word backfire with vengeance
