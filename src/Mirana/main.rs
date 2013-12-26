@@ -1,4 +1,4 @@
-#[link(name = "Mirana",
+#[crate_id(name = "Mirana",
        vers = "0.1.5",
        author = "Heather Cynede",
        url = "https://github.com/Heather/Mirana")];
