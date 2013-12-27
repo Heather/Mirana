@@ -1,4 +1,3 @@
-use std::task;
 use std::io::timer::sleep;
 
 ///<Summary>
@@ -8,23 +7,22 @@ use std::io::timer::sleep;
 fn fly<U>(animation: &[&str], symbols: int, delay: u64, f: || -> U) -> U {
     let howtofly = animation.map(|x|x.to_owned());
     let (port, chan) = Chan::new();
-    do task::spawn {
+    do spawn {
         let mut prefix = ~"";
         for _ in range (0, symbols) {
             print(" ");
             prefix = format!("{:s}\x08", prefix);
         }
-        let mut pkb = port.iter().peekable();
-        while pkb.peek().is_some() {
+        while port.try_recv().is_none() {
             for fly in howtofly.iter() {
                 print!("{:s}{:s}", prefix, *fly);
                 sleep(delay);
-            };
+            }
         }
     }
-    let ret = f();
+    let res = f();
     chan.send(());
-    ret
+    res
 }
 
 ///<Summary>

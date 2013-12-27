@@ -23,7 +23,7 @@ use std::os::{change_dir, self_exe_path, getenv, make_absolute};
 // ExtrA:
 use extra::getopts::{optflag, optopt, getopts, Opt, Matches};
 
-static r_version: &'static str = "  Mirana v0.2.9";
+static r_version: &'static str = "  Mirana v0.3.0";
 static mut ncore: uint = 1;
 
 fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
@@ -233,7 +233,19 @@ fn main() {
                     return; 
                 },  "make"  => { fancy(||{make_any(&app);}); return; },
                     "check" => { fancy(||{check(&app); });   return; },
-                    "init"  => { println("Init is not implemented yet");  return; },
+                    "init"  => { 
+                        println("Init is not implemented yet");  
+                        if app.wait { /* -- animation test -- */
+                            println("Please, kill me ");
+                            rustbuildbotdance(||{
+                                while(true) { 
+                                    (|r:|s:|t:|||||{r(|t:|||{t()})})
+                                    (|s:|t:||||{s(||{()})})
+                                }
+                            });
+                        }
+                        return; 
+                    },
                 _  => () /* well, go next */
             }
         }
@@ -503,10 +515,12 @@ fn main() {
         save_Defaults(cfg, Sync, appCfg, app.clone(), nix);
     }
     if app.wait {
-        println("Please, kill me ");    /* println because print FAILS here...    */
-        rustbuildbotdance(||{           /* even butterflies feels buggy now...    */
-            while(true) { ; }           /* noone knows how to read_line in new IO */
+        println("Please, kill me ");
+        rustbuildbotdance(||{
+            while(true) { 
+                (|r:|s:|t:|||||{r(|t:|||{t()})})
+                (|s:|t:||||{s(||{()})})
+            }
         });
     }
 }
-// let r = (|u:|s:|t:|||||{u(|t:|||{t()})})(|s:|t:||||{s(||{()})}));
