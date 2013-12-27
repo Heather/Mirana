@@ -1,4 +1,5 @@
 notifications:
+  irc: "chat.freenode.net#gentoo-dotnet"
   email: false
 before_install:
   - yes | sudo add-apt-repository ppa:hansjorg/rust
