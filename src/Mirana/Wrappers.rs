@@ -19,10 +19,9 @@ fn fly<U>(animation: &[&str], symbols: int, delay: u64, f: || -> U) -> U {
                 sleep(delay);
             }
         }
-    }
-    let res = f();
-    chan.send(());
-    res
+    }       let res = f();
+            chan.send(());
+            res
 }
 
 ///<Summary>

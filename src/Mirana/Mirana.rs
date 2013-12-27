@@ -23,7 +23,7 @@ use std::os::{change_dir, self_exe_path, getenv, make_absolute};
 // ExtrA:
 use extra::getopts::{optflag, optopt, getopts, Opt, Matches};
 
-static r_version: &'static str = "  Mirana v0.3.0";
+static r_version: &'static str = "  Mirana v0.3.1";
 static mut ncore: uint = 1;
 
 fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
@@ -233,19 +233,7 @@ fn main() {
                     return; 
                 },  "make"  => { fancy(||{make_any(&app);}); return; },
                     "check" => { fancy(||{check(&app); });   return; },
-                    "init"  => { 
-                        println("Init is not implemented yet");  
-                        if app.wait { /* -- animation test -- */
-                            println("Please, kill me ");
-                            rustbuildbotdance(||{
-                                while(true) { 
-                                    (|r:|s:|t:|||||{r(|t:|||{t()})})
-                                    (|s:|t:||||{s(||{()})})
-                                }
-                            });
-                        }
-                        return; 
-                    },
+                    "init"  => { println("Init is not implemented yet"); return; },
                 _  => () /* well, go next */
             }
         }
