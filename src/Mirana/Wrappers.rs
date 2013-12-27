@@ -7,19 +7,20 @@ use std::io::timer::sleep;
 #[inline]
 fn fly<U>(animation: &[&str], symbols: int, delay: u64, f: || -> U) -> U {
     let howtofly = animation.map(|x|x.to_owned());
-    let (_, chan) = Chan::new(); /* port, chan */
-    do task::spawn { /* _sched(task::SingleThreaded) */
+    let (port, chan) = Chan::new();
+    do task::spawn {
         let mut prefix = ~"";
         for _ in range (0, symbols) {
             print(" ");
             prefix = format!("{:s}\x08", prefix);
         }
-        /* while !port.peek() { */
+        let mut pkb = port.iter().peekable();
+        while pkb.peek().is_some() {
             for fly in howtofly.iter() {
                 print!("{:s}{:s}", prefix, *fly);
                 sleep(delay);
             };
-        /* } */
+        }
     }
     let ret = f();
     chan.send(());
