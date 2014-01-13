@@ -1,6 +1,8 @@
 use std::run::{process_output, process_status};
 use std::str::from_utf8_owned;
 
+use std::io::print;
+
 ///<Summary>
 ///Shell execute without error, returns result
 ///</Summary>

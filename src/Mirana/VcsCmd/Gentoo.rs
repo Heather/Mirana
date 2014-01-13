@@ -26,13 +26,13 @@ pub fn gentooFullUpdate(loc: &str, ncores: uint) {
 ///</Summary>
 pub fn gentoo(loc: &str, ncores: uint) {
     let jobs = format!("--jobs={:u}", ncores);
-    println("_________________________________________________________________________");
-    print("# pulling gentoo-x86 " );
+    println!("_________________________________________________________________________");
+    print!("> pulling gentoo-x86 " );
     butterfly(||{
         exy("cvs", [&"update"]);
     });
-    println("");
-    print("#regen cache for ::gentoo-x86 " );
+    println!("");
+    print!("> regen cache for ::gentoo-x86 " );
     let repo = (format!("--portdir={}", loc));
     butterfly(||{ 
         exy ("egencache", 
@@ -41,7 +41,7 @@ pub fn gentoo(loc: &str, ncores: uint) {
                ,repo.as_slice()
                ,jobs.as_slice()]);
     });
-    println("_________________________________________________________________________");
+    println!("_________________________________________________________________________");
 }
 
 ///<Summary>

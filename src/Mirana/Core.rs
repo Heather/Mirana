@@ -22,8 +22,8 @@ pub fn check(app: &App) {
                     match config.vcs {
                         Some(vcs)       => match (toTrait(vcs)) {
                             Some(vcs)   => vcs.list(),
-                            None        => println("NO trait for this vcs :(") },
-                        None            => println("No VCS Flavor for this config :(")
+                            None        => println!("NO trait for this vcs :(") },
+                        None            => println!("No VCS Flavor for this config :(")
                     }
                 }
             }, None => ()
@@ -88,7 +88,7 @@ pub fn runSync(app: App, repo: Repository, typeFilter: Option<~str>, ncore: uint
                     }
                     match repo.make {
                         Some(ref mk) => { make_single(&app, mk.to_owned());
-                        }, None => println(" [No make]")
+                        }, None => println!(" [No make]")
                     }
                 }
             }

@@ -10,7 +10,7 @@ fn fly<U>(animation: &[&str], symbols: int, delay: u64, f: || -> U) -> U {
     do spawn {
         let mut prefix = ~"";
         for _ in range (0, symbols) {
-            print(" ");
+            print!(" ");
             prefix = format!("{:s}\x08", prefix);
         }
         while port.try_recv().is_none() {
@@ -50,8 +50,8 @@ pub fn rustbuildbotdance<U>(f: || -> U) -> U {
 ///</Summary>
 #[inline]
 pub fn fancy<U>(f: || -> U) -> U {
-    println("_________________________________________________________________________");
+    println!("_________________________________________________________________________");
     let ret = f();
-    println("_________________________________________________________________________");
+    println!("_________________________________________________________________________");
     ret
 }

@@ -29,7 +29,7 @@ static mut ncore: uint = 1;
 fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
     fancy(||{
         println!("Usage: {} [options]", program);
-        println("
+        println!("
         -h --help\tUsage
         -v --version\tDisplay version
 
@@ -62,9 +62,9 @@ fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
         -x --exec\t\tActual action for repository (pull, push, rebase)
         -t --type\t\tType of adding / editing repo or filtering type");
         if nix {
-            println("        -g --gentoo\t\tSync Gentoo-x86");
+            println!("        -g --gentoo\t\tSync Gentoo-x86");
         } else {
-            println("
+            println!("
             Stone word backfire with vengeance
                     Hopeless divine intervention
                     
@@ -118,13 +118,13 @@ fn smartpath(l : &str, cloneThing: |p : &str|) -> Path {
 }
 #[main]
 fn main() {
-    println("_________________________________________________________________________");
+    println!("_________________________________________________________________________");
     print!(" {:s} ", r_version);
     let args = os::args();
     let nix = !cfg!(target_os = "win32");
     let program = args[0].as_slice();
     if nix {
-        print (", POSIX");
+        print! (", POSIX");
         match do task::try {
             let nproc = exe("nproc", []);
             match from_str::<uint> (nproc.trim()) {
@@ -136,7 +136,7 @@ fn main() {
           }, Err(e) => {  println!(" -> can't get cores count: {:?}", e);
           }
         }
-    } else { println (", Windows"); };
+    } else { println! (", Windows"); };
     /* Load JSON configuration */
     let (ref cfg, ref appCfg) = {
             if nix {
@@ -185,8 +185,8 @@ fn main() {
                                         Some(t) => fancy(||{
                                             withVCS(t, args.iter().map(|a| a.as_slice()).to_owned_vec());
                                             }),
-                                        None    => print("NO trait for this vcs") },
-                                    None        => print("No VCS provided")
+                                        None    => print!("NO trait for this vcs") },
+                                    None        => print!("No VCS provided")
                                 }
                             }
                         }
@@ -197,7 +197,7 @@ fn main() {
                         "commit"=> process(push, &cfg.custom,( | v: &'static Vcs, a : &[&str] | { v.commit(a); })),
                         _       => fail!("CLI Impossible case")
                     }
-                }, None => println("No vcs found in current directory")
+                }, None => println!("No vcs found in current directory")
             } return;
         } else {
             match x {
@@ -228,12 +228,12 @@ fn main() {
                             },
                             None => fail!("{} not found", y)
                         }
-                    } else { println("You must say what to sync");
+                    } else { println!("You must say what to sync");
                     }
                     return; 
                 },  "make"  => { fancy(||{make_any(&app);}); return; },
                     "check" => { fancy(||{check(&app); });   return; },
-                    "init"  => { println("Init is not implemented yet"); return; },
+                    "init"  => { println!("Init is not implemented yet"); return; },
                 _  => () /* well, go next */
             }
         }
@@ -263,7 +263,7 @@ fn main() {
         Err(f) => { fail!(f.to_err_msg()) }
     };
     if matches.opt_present("v") || matches.opt_present("version") {
-        println("_________________________________________________________________________");
+        println!("_________________________________________________________________________");
         return;
     } else if matches.opt_present("h") || matches.opt_present("help") {
         print_usage(program, opts, nix); return;
@@ -289,7 +289,7 @@ fn main() {
             };
         }}
     }
-    println("_________________________________________________________________________");
+    println!("_________________________________________________________________________");
     if nix && ( matches.opt_present("g") || matches.opt_present("gentoo") ) {
         let x86 = "/home/gentoo-x86";
         let p86 = & Path::new( x86 );
@@ -363,19 +363,19 @@ fn main() {
                                 }) {
                         println!(" *  Type: {:?}", rem.t);
                         println!(" *  Upstream: {} {}", rem.upstream, rem.master);
-                        print   (" *  Branches:");
+                        print!  (" *  Branches:");
                         for b in rem.branches.iter() {
                             print!(" {:s}", *b);
                         }
-                        println("");
+                        println!("");
                     }
-                    print   (">-- Actions:");
+                    print!   (">-- Actions:");
                     for x in rep.actions.iter() {
                         print!(" {:?}", *x);
                     }
-                    println("");
+                    println!("");
                     println!(">-- Make: {:?}", rep.make);
-                    println("_________________________________________________________________________");
+                    println!("_________________________________________________________________________");
                 }
             } return;
         } else if matches.opt_present("e") || matches.opt_present("edit") {
@@ -489,21 +489,21 @@ fn main() {
             } total += 1;
             change_dir(&self_exe_path().unwrap());
         }
-        print("_________________________________________________________________________");
+        print!("_________________________________________________________________________");
         println!("
         success  {}
         failed   {}
         total    {}", success, failed, total);
-        println("_________________________________________________________________________");
+        println!("_________________________________________________________________________");
     } else {
-        println("
+        println!("
         No config file found, consider providing one
         For now one is created just for example
         ");
         save_Defaults(cfg, Sync, appCfg, app.clone(), nix);
     }
     if app.wait {
-        println("Please, kill me ");
+        println!("Please, kill me ");
         rustbuildbotdance(||{
             while(true) { 
                 (|r:|s:|t:|||||{r(|t:|||{t()})})
