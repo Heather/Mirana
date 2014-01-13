@@ -8,3 +8,6 @@ install:
   - sudo apt-get install rust-nightly
 script:
   - make
+after_script:
+ - ./Mirana
+ - ./Mirana
