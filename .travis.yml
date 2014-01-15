@@ -10,4 +10,3 @@ script:
   - make
 after_script:
  - ./Mirana
- - ./Mirana
