@@ -20,10 +20,11 @@ use std::io::fs::mkdir;
 use std::task;
 
 use std::os::{change_dir, self_exe_path, getenv, make_absolute};
+
 // ExtrA:
 use extra::getopts::{optflag, optopt, getopts, Opt, Matches};
 
-static r_version: &'static str = "  Mirana v0.3.1";
+static r_version: &'static str = "  Mirana v0.3.2";
 static mut ncore: uint = 1;
 
 fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
@@ -36,7 +37,6 @@ fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
         -j --jobs\tThreads
 
         check\t Display current repository vcs
-        init\t Creates default shade based on folders around
         
         commit\t commit changes
         pull\t pull changes
@@ -98,23 +98,35 @@ fn find_Branch(remote: &Remote, pattern: &str) -> Option<uint> {
 fn getOption(matches: &Matches, opts: &[&str]) -> Option<~str> {
     opts.iter().filter_map(|opt| matches.opt_str(*opt)).next()
 }
-fn smartpath(l : &str, cloneThing: |p : &str|) -> Path {
-    let ssps: ~[&str] = l.split('/').collect();
-    let sspslen = ssps.len();
-    if sspslen > 1 {
-        let ssp = ssps[sspslen - 1];
-        let ps: ~[&str] = ssp.split('.').collect();
-        if ps.len() > 0 {
-            let project = ps[0];
-            let prefix = getenv("HOME").unwrap_or(~"./");
-            let p = format!("{}/{}", prefix, project);
-            if ! (&Path::new( p.as_slice() )).exists() {
-                println!(" * > clone into : {:s}", p);
-                cloneThing(p);
-            }
-            Path::new( p )
+fn smartinit(rep : &Repository) -> Path {
+    let smartpath = |l : &str, cloneThing: |p : &str|| -> Path {
+        let ssps: ~[&str] = l.split('/').collect();
+        let sspslen = ssps.len();
+        if sspslen > 1 {
+            let ssp = ssps[sspslen - 1];
+            let ps: ~[&str] = ssp.split('.').collect();
+            if ps.len() > 0 {
+                let project = ps[0];
+                let prefix = getenv("HOME").unwrap_or(~"./");
+                let p = format!("{}/{}", prefix, project);
+                if ! (&Path::new( p.as_slice() )).exists() {
+                    println!(" * > clone into : {:s}", p);
+                    cloneThing(p);
+                }
+                Path::new( p )
+            } else { Path::new( l ) }
         } else { Path::new( l ) }
-    } else { Path::new( l ) }
+    };
+    if ( rep.loc.starts_with("git@")
+                || rep.loc.starts_with("https://git")) {
+        smartpath(rep.loc, | p: &str | {
+            e("git", [&"clone", rep.loc.as_slice(), p]);
+            })
+    } else if rep.loc.starts_with("hg@") {
+        smartpath(rep.loc, | p: &str | {
+            e("hg", [&"clone", rep.loc.as_slice(), p]);
+            })
+    } else { Path::new( rep.loc.as_slice() ) }
 }
 #[main]
 fn main() {
@@ -208,16 +220,7 @@ fn main() {
                             Some(ind) => {
                                 let rep = Sync[0].repositories[ind];
                                 //-------------------------- Real loc ----------------------------------
-                                let loc = & if (  rep.loc.starts_with("git@")
-                                            || rep.loc.starts_with("https://git")) {
-                                    smartpath(rep.loc, | p: &str | {
-                                        e("git", [&"clone", rep.loc.as_slice(), p]);
-                                        })
-                                } else if rep.loc.starts_with("hg@") {
-                                    smartpath(rep.loc, | p: &str | {
-                                        e("hg", [&"clone", rep.loc.as_slice(), p]);
-                                        })
-                                } else { Path::new( rep.loc.as_slice() ) };
+                                let loc = &smartinit(&rep);
                                 if loc.exists() {
                                     change_dir(loc);
                                     runSync( app, rep, None, 1);
@@ -232,8 +235,7 @@ fn main() {
                     }
                     return; 
                 },  "make"  => { fancy(||{make_any(&app);}); return; },
-                    "check" => { fancy(||{check(&app); });   return; },
-                    "init"  => { println!("Init is not implemented yet"); return; },
+                    "check" => { fancy(||{check(&app); });   return; }
                 _  => () /* well, go next */
             }
         }
@@ -454,23 +456,12 @@ fn main() {
         let mut failed = 0;
         for rep in Sync[sync].repositories.iter() {
             println!(" *  repo: {}", rep.loc);
-            //-------------------------- Real loc ----------------------------------
-            let loc= if (  rep.loc.starts_with("git@")
-                        || rep.loc.starts_with("https://git")) {
-                smartpath(rep.loc, | p: &str | {
-                    e("git", [&"clone", rep.loc.as_slice(), p]);
-                    })
-            } else if rep.loc.starts_with("hg@") {
-                smartpath(rep.loc, | p: &str | {
-                    e("hg", [&"clone", rep.loc.as_slice(), p]);
-                    })
-            } else { Path::new( rep.loc.as_slice() ) };
             //---------------------------- sync -----------------------------------
             let aclone  = app.clone();
             let atclone = maybe_type.clone();
             let rclone  = rep.clone();
             match do task::try { unsafe {
-                let loc = & loc;
+                let loc = & smartinit(&rclone);
                 let repx = rclone;
                 if loc.exists() {
                     change_dir(loc);
