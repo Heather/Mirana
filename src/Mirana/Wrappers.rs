@@ -1,4 +1,5 @@
 use std::io::timer::sleep;
+use std::comm::Empty;
 
 ///<Summary>
 ///Core how to Fly function
@@ -13,7 +14,7 @@ fn fly<U>(animation: &[&str], symbols: int, delay: u64, f: || -> U) -> U {
             print!(" ");
             prefix = format!("{:s}\x08", prefix);
         }
-        while port.try_recv().is_none() {
+        while (port.try_recv() == Empty) {
             for fly in howtofly.iter() {
                 print!("{:s}{:s}", prefix, *fly);
                 sleep(delay);
