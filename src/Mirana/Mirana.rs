@@ -40,7 +40,7 @@ fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
         
         commit\t commit changes
         pull\t pull changes
-        pusg\t push changes in any vcs
+        push\t push changes in any vcs
         
         make\t build current project or specified one
         sync\t perform sync of specified project
@@ -56,7 +56,7 @@ fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
 
         -s --sync\t\tSync config
         -r --remote\t\tSpecify remote
-        -u --upstream\tSpecify upstream repository
+        -u --upstream\t\tSpecify upstream repository
         -m --master\t\tSpecify upstream master branch
         -b --branch\t\tBranch of adding / editing repo or filtering type
         -x --exec\t\tActual action for repository (pull, push, rebase)
