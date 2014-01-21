@@ -24,7 +24,7 @@ use std::os::{change_dir, self_exe_path, getenv, make_absolute};
 // ExtrA:
 use extra::getopts::{optflag, optopt, getopts, Opt, Matches};
 
-static r_version: &'static str = "  Mirana v0.3.4";
+static r_version: &'static str = "  Mirana v0.3.5";
 static mut ncore: uint = 1;
 
 fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
@@ -364,7 +364,15 @@ fn main() {
                             None => true
                                 }) {
                         println!(" *  Type: {:?}", rem.t);
-                        println!(" *  Upstream: {} {}", rem.upstream, rem.master);
+                        let upstream = match rem.upstream {
+                            Some(ref upx) => upx.to_owned(),
+                            None          => ~"-"
+                        };
+                        let master = match rem.master {
+                            Some(ref mst) => mst.to_owned(),
+                            None          => ~""
+                        };
+                        println!(" *  Upstream: {} {}", upstream, master);
                         print!  (" *  Branches:");
                         for b in rem.branches.iter() {
                             print!(" {:s}", *b);
