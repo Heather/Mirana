@@ -1,11 +1,9 @@
 use Shell::e;
-use Wrappers::fancy;
+use Wrappers::λ;
 
 ///<Summary>
 ///Cvs update
 ///</Summary>
 pub fn cvsUpdate() {
-    fancy(||{
-        e("cvs", [&"update"]);
-    });
+    λ(||{ e("cvs", [&"update"]); });
 }

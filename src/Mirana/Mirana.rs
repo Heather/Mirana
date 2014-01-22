@@ -1,7 +1,7 @@
 use Model       ::{Sync, Repository, Remote, VcsFlavor, Custom
                   , Action, pull, push};
 use Shell       ::{e, exe};
-use Wrappers    ::{λ, fancy};
+use Wrappers    ::{λ, ξ};
 use Misc        ::{toVCS, toTrait};
 use Core        ::{runSync, make_any, check};
 use Config      ::{ save_RepoList
@@ -28,7 +28,7 @@ static r_version: &'static str = "  Mirana v0.3.6";
 static mut ncore: uint = 1;
 
 fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
-    fancy(||{
+    λ(||{
         println!("Usage: {} [options]", program);
         println!("
         -h --help\tUsage
@@ -190,11 +190,11 @@ fn main() {
                     {   match (*custom).iter().filter_map(|ref c| 
                             if c.action == action { Some( c.cmd.to_owned() ) }
                             else { None }).next() {
-                            Some(cmd) => fancy(||{ e(cmd, []) }),
+                            Some(cmd) => λ(||{ e(cmd, []) }),
                             None => {
                                 match cfg.vcs {
                                     Some(vcs)   => match toTrait(vcs) {
-                                        Some(t) => fancy(||{
+                                        Some(t) => λ(||{
                                             withVCS(t, args.iter().map(|a| a.as_slice()).to_owned_vec());
                                             }),
                                         None    => print!("NO trait for this vcs") },
@@ -234,8 +234,8 @@ fn main() {
                     } else { println!("You must say what to sync");
                     }
                     return; 
-                },  "make"  => { fancy(||{make_any(&app);}); return; },
-                    "check" => { fancy(||{check(&app); });   return; }
+                },  "make"  => { λ(||{make_any(&app);}); return; },
+                    "check" => { λ(||{check(&app); });   return; }
                 _  => () /* well, go next */
             }
         }
@@ -503,7 +503,7 @@ fn main() {
     }
     if app.wait {
         println!("Please, kill me ");
-        λ::<()> (|| { loop {
+        ξ::<()> (|| { loop {
                 (|r:|s:|t:|||||{r(|t:|||{t()})})
                 (|s:|t:||||{s(||{()})})
             }}

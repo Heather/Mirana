@@ -1,5 +1,5 @@
 use Shell::e;
-use Wrappers::fancy;
+use Wrappers::λ;
 
 /*
     TODO: Get rid of "bugs" when they will be fixed in Rust
@@ -16,7 +16,7 @@ pub fn gitList() {
 ///Just git pull
 ///</Summary>
 pub fn gitPull(branch: &str) {
-    fancy(||{
+    λ(||{
         let bug1 = "checkout";
         let bug2 = "pull";
         e("git", [bug1.as_slice(), branch]);
@@ -29,7 +29,7 @@ pub fn gitPull(branch: &str) {
 ///Just git push
 ///</Summary>
 pub fn gitPush(branch: &str) {
-    fancy(||{
+    λ(||{
         let bug1 = "push";
         e("git", [bug1.as_slice(), "origin", branch]);
     });
@@ -51,7 +51,7 @@ pub fn gitMerge(branch: &str, maybe_master: &Option<~str>, maybe_upstream: &Opti
     let bug4 = "push";
     let bug5 = "merge";
     
-    fancy(||{
+    λ(||{
         e("git", [bug1.as_slice(), branch]);
         e("git", [&"rebase", "--abort"]);
         e("git", [bug2.as_slice(), "origin", branch]);
@@ -74,7 +74,7 @@ pub fn gitRebase(branch: &str, maybe_master: &Option<~str>, maybe_upstream: &Opt
     let bug3 = "fetch";
     let bug4 = "push";
     
-    fancy(||{
+    λ(||{
         e("git", [bug1.as_slice(), branch]);
         e("git", [&"rebase", "--abort"]);
         e("git", [bug2.as_slice(), "origin", branch]);

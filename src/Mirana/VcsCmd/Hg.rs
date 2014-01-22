@@ -1,5 +1,5 @@
 use Shell::e;
-use Wrappers::fancy;
+use Wrappers::λ;
 
 /*
     TODO: Get rid of "bugs" when they will be fixed in Rust
@@ -17,7 +17,7 @@ pub fn hgList() {
 ///</Summary>
 pub fn hgPull(branch: &str) {
     let bug1 = "pull";
-    fancy(||{
+    λ(||{
         e("hg", [bug1.as_slice(), "--rebase", "--branch", branch]);
         e("hg", [&"update"]);
     });
@@ -27,7 +27,7 @@ pub fn hgPull(branch: &str) {
 ///Just hg push
 ///</Summary>
 pub fn hgPush() {
-    fancy(||{
+    λ(||{
         e("hg", [&"push"]);
     });
 }
@@ -42,7 +42,7 @@ pub fn hgRebase(branch: &str, maybe_upstream: &Option<~str>) {
     let bug1 = "pull";
     let bug2 = "push";
     
-    fancy(||{
+    λ(||{
         e("hg", [bug1.as_slice(), "--update", "--rebase", "--branch", branch, upstream]);
         e("hg", [bug2.as_slice(), branch, "--force"]);
     });

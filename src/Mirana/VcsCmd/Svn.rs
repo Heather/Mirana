@@ -1,11 +1,11 @@
 use Shell::e;
-use Wrappers::fancy;
+use Wrappers::λ;
 
 ///<Summary>
 ///Svn update
 ///</Summary>
 pub fn svnUpdate() {
-    fancy(||{
+    λ(||{
         e("svn", [&"update"]);
     });
 }

@@ -6,7 +6,7 @@ use Misc                ::{toVCS, toTrait};
 use VcsCmd::Gentoo      ::{gentooFullUpdate};
 
 use Shell               ::{e};
-use Wrappers            ::{fancy};
+use Wrappers            ::{λ};
 
 // Stars
 use Traits::Vcs;
@@ -34,10 +34,8 @@ pub fn check(app: &App) {
 fn make(cfg: &MakeCfg) {
     let detectorPath = & Path::new( cfg.detector.to_owned() );
     if detectorPath.exists() { 
-        fancy(||{
-            for c in cfg.cmd.iter() {
-                e(c.as_slice(), []);
-            }
+        λ(||{ for c in cfg.cmd.iter() {
+            e(c.as_slice(), []); }
         });
     } else { println!("no {:s} found", cfg.detector);
     }

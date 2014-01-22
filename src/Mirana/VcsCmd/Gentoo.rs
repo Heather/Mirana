@@ -1,5 +1,5 @@
 use Shell::{e, exec, exy};
-use Wrappers::{λButterfly, fancy};
+use Wrappers::{λButterfly, λ};
 
 use std::os::{change_dir};
 
@@ -53,7 +53,7 @@ pub fn gentooUpdate(ncores: uint, keep: bool) {
         if keep { "--keep-going"
         } else { ""
         };
-    fancy(||{
+    λ(||{
         e("emerge", 
           [&"-vuDN"
            ,"@world"
@@ -68,16 +68,12 @@ pub fn gentooUpdate(ncores: uint, keep: bool) {
 ///emerge --sync
 ///</Summary>
 pub fn emerge_sync() {
-    fancy(||{
-        exec("emerge", [&"--sync"]);
-    });
+    λ(||{ exec("emerge", [&"--sync"]); });
 }
 
 ///<Summary>
 ///eix-update
 ///</Summary>
 pub fn eix_update() {
-    fancy(||{
-        e("eix-update", []);
-    });
+    λ(||{ e("eix-update", []); });
 }

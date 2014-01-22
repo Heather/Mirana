@@ -36,7 +36,7 @@ pub fn λButterfly<U>(f: || -> U) -> U {
 ///<Summary>
 ///Stupid butterfly
 ///</Summary>
-pub fn λ<U>(f: || -> U) -> U {
+pub fn ξ<U>(f: || -> U) -> U {
     let animation = [
         &"<(^.^<)"
         ,"<(^.^)>"
@@ -50,7 +50,7 @@ pub fn λ<U>(f: || -> U) -> U {
 ///Simple lines surround
 ///</Summary>
 #[inline]
-pub fn fancy<U>(f: || -> U) -> U {
+pub fn λ<U>(f: || -> U) -> U {
     println!("_________________________________________________________________________");
     let ret = f();
     println!("_________________________________________________________________________");
