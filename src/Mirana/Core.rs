@@ -20,7 +20,7 @@ pub fn check(app: &App) {
                 if (Path::new( od.as_slice() )).exists() {
                     println!("|{:s}:", od);
                     match config.vcs {
-                        Some(vcs)       => match (toTrait(vcs)) {
+                        Some(vcs)       => match toTrait(vcs) {
                             Some(vcs)   => vcs.list(),
                             None        => println!("NO trait for this vcs :(") },
                         None            => println!("No VCS Flavor for this config :(")

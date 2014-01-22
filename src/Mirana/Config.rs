@@ -16,7 +16,7 @@ use extra::serialize::Encoder;
 ///Load JSON config
 ///</Summary>
 fn load_JSON<T: Decodable<json::Decoder>>(p: &Path) -> ~[T] {
-    if ( p.exists() ) {
+    if p.exists() {
         let filereader = File::open(p);
         match filereader {
             Some(f) => {

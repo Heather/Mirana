@@ -24,7 +24,7 @@ use std::os::{change_dir, self_exe_path, getenv, make_absolute};
 // ExtrA:
 use extra::getopts::{optflag, optopt, getopts, Opt, Matches};
 
-static r_version: &'static str = "  Mirana v0.3.5";
+static r_version: &'static str = "  Mirana v0.3.6";
 static mut ncore: uint = 1;
 
 fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
@@ -117,8 +117,8 @@ fn smartinit(rep : &Repository) -> Path {
             } else { Path::new( l ) }
         } else { Path::new( l ) }
     };
-    if ( rep.loc.starts_with("git@")
-                || rep.loc.starts_with("https://git")) {
+    if rep.loc.starts_with("git@")
+            || rep.loc.starts_with("https://git") {
         smartpath(rep.loc, | p: &str | {
             e("git", [&"clone", rep.loc.as_slice(), p]);
             })
@@ -193,7 +193,7 @@ fn main() {
                             Some(cmd) => fancy(||{ e(cmd, []) }),
                             None => {
                                 match cfg.vcs {
-                                    Some(vcs)   => match (toTrait(vcs)) {
+                                    Some(vcs)   => match toTrait(vcs) {
                                         Some(t) => fancy(||{
                                             withVCS(t, args.iter().map(|a| a.as_slice()).to_owned_vec());
                                             }),
@@ -301,7 +301,7 @@ fn main() {
         } return;
     }
     //------------------------------------------------------------------------------------
-    if ( cfg.exists() ) {
+    if cfg.exists() {
         let maybe_type      = matches.opt_str("t");
         let maybe_edit      = getOption(&matches, ["e", "edit"]);
         let maybe_exec      = getOption(&matches, ["x", "exec"]);
@@ -311,9 +311,9 @@ fn main() {
             match getOption(&matches, ["a"]) {
                 Some(a) => {
                     let addr = |r: ~str| -> ~str {
-                        if (  r.starts_with("git@")
-                              || r.starts_with("https://git")
-                              || r.starts_with("hg@")) { r
+                        if r.starts_with("git@")
+                            || r.starts_with("https://git")
+                            || r.starts_with("hg@") { r
                         } else {
                             let rpath = Path::new(r.as_slice());
                             if rpath.exists() {
@@ -355,7 +355,7 @@ fn main() {
                 }, None => fail!("No add argument provided")
             } return;
         } else if matches.opt_present("l") || matches.opt_present("list") {
-            if ( cfg.exists() ) {
+            if cfg.exists() {
                 for rep in Sync[sync].repositories.iter() {
                     println!(">-- Repo: {:s}", rep.loc);
                     for rem in rep.remotes.iter().filter(
@@ -504,7 +504,7 @@ fn main() {
     if app.wait {
         println!("Please, kill me ");
         rustbuildbotdance(||{
-            while(true) { 
+            while true { // loop fails here
                 (|r:|s:|t:|||||{r(|t:|||{t()})})
                 (|s:|t:||||{s(||{()})})
             }
