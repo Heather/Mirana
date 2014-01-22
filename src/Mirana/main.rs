@@ -6,6 +6,8 @@
 #[comment = "Mirana VCS sync"];
 #[license = "LGPL2"];
 
+#[feature(non_ascii_idents)];
+
 #[crate_type = "bin"];
 extern mod extra;
 

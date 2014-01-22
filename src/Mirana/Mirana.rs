@@ -503,10 +503,10 @@ fn main() {
     }
     if app.wait {
         println!("Please, kill me ");
-        rustbuildbotdance::<()> (||{ loop {
+        rustbuildbotdance::<()> (|| { loop {
                 (|r:|s:|t:|||||{r(|t:|||{t()})})
                 (|s:|t:||||{s(||{()})})
-            }
-        });
+            }}
+        );
     }
 }
