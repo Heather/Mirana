@@ -503,8 +503,7 @@ fn main() {
     }
     if app.wait {
         println!("Please, kill me ");
-        rustbuildbotdance(||{
-            while true { // loop fails here
+        rustbuildbotdance::<()> (||{ loop {
                 (|r:|s:|t:|||||{r(|t:|||{t()})})
                 (|s:|t:||||{s(||{()})})
             }
