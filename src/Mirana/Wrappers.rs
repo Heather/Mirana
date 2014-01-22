@@ -5,7 +5,7 @@ use std::comm::Empty;
 ///Core how to Fly function
 ///</Summary>
 #[inline]
-fn λ<Ψ>(animation: &[&str], symbols: int, delay: u64, Ω: || -> Ψ) -> Ψ {
+fn λFly<Ψ>(animation: &[&str], symbols: int, delay: u64, Ω: || -> Ψ) -> Ψ {
     let howtofly = animation.map(|x|x.to_owned());
     let (port, chan) = Chan::new();
     do spawn {
@@ -28,22 +28,22 @@ fn λ<Ψ>(animation: &[&str], symbols: int, delay: u64, Ω: || -> Ψ) -> Ψ {
 ///<Summary>
 ///Simple butterfly
 ///</Summary>
-pub fn butterfly<U>(f: || -> U) -> U {
+pub fn λButterfly<U>(f: || -> U) -> U {
     let animation = [&"|","/","-","\\"];
-    λ(animation, 1, 1, f)
+    λFly(animation, 1, 1, f)
 }
 
 ///<Summary>
 ///Stupid butterfly
 ///</Summary>
-pub fn rustbuildbotdance<U>(f: || -> U) -> U {
+pub fn λ<U>(f: || -> U) -> U {
     let animation = [
         &"<(^.^<)"
         ,"<(^.^)>"
         ,"(>^.^)>"
         ,"(7^.^)7"
         ,"(>^.^<)"];
-    λ(animation, 7, 2, f)
+    λFly(animation, 7, 2, f)
 }
 
 ///<Summary>

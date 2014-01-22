@@ -1,7 +1,7 @@
 use Model       ::{Sync, Repository, Remote, VcsFlavor, Custom
                   , Action, pull, push};
 use Shell       ::{e, exe};
-use Wrappers    ::{rustbuildbotdance, fancy};
+use Wrappers    ::{λ, fancy};
 use Misc        ::{toVCS, toTrait};
 use Core        ::{runSync, make_any, check};
 use Config      ::{ save_RepoList
@@ -503,7 +503,7 @@ fn main() {
     }
     if app.wait {
         println!("Please, kill me ");
-        rustbuildbotdance::<()> (|| { loop {
+        λ::<()> (|| { loop {
                 (|r:|s:|t:|||||{r(|t:|||{t()})})
                 (|s:|t:||||{s(||{()})})
             }}

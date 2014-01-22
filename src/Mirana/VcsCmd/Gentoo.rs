@@ -1,5 +1,5 @@
 use Shell::{e, exec, exy};
-use Wrappers::{butterfly, fancy};
+use Wrappers::{λButterfly, fancy};
 
 use std::os::{change_dir};
 
@@ -28,13 +28,13 @@ pub fn gentoo(loc: &str, ncores: uint) {
     let jobs = format!("--jobs={:u}", ncores);
     println!("_________________________________________________________________________");
     print!("> pulling gentoo-x86 " );
-    butterfly(||{
+    λButterfly(||{
         exy("cvs", [&"update"]);
     });
     println!("");
     print!("> regen cache for ::gentoo-x86 " );
     let repo = (format!("--portdir={}", loc));
-    butterfly(||{ 
+    λButterfly(||{ 
         exy ("egencache", 
               [&"--update"
                ,"--repo=gentoo"
