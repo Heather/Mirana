@@ -28,31 +28,31 @@ fn λFly<Ψ>(animation: &[&str], symbols: int, delay: u64, Ω: || -> Ψ) -> Ψ {
 ///<Summary>
 ///Simple butterfly
 ///</Summary>
-pub fn λButterfly<U>(f: || -> U) -> U {
+pub fn λButterfly<Ψ>(Ω: || -> Ψ) -> Ψ {
     let animation = [&"|","/","-","\\"];
-    λFly(animation, 1, 1, f)
+    λFly(animation, 1, 1, Ω)
 }
 
 ///<Summary>
 ///Stupid butterfly
 ///</Summary>
-pub fn ξ<U>(f: || -> U) -> U {
+pub fn ξ<Ψ>(Ω: || -> Ψ) -> Ψ {
     let animation = [
         &"<(^.^<)"
         ,"<(^.^)>"
         ,"(>^.^)>"
         ,"(7^.^)7"
         ,"(>^.^<)"];
-    λFly(animation, 7, 2, f)
+    λFly(animation, 7, 2, Ω)
 }
 
 ///<Summary>
 ///Simple lines surround
 ///</Summary>
 #[inline]
-pub fn λ<U>(f: || -> U) -> U {
+pub fn λ<Ψ>(Ω: || -> Ψ) -> Ψ {
     println!("_________________________________________________________________________");
-    let ret = f();
+    let ret = Ω();
     println!("_________________________________________________________________________");
     ret
 }
