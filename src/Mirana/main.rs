@@ -13,6 +13,7 @@ extern mod extra;
 
 /* Base modules */
 pub mod Model;
+pub mod Help;
 pub mod Shell;
 pub mod Wrappers;
 pub mod Misc;
