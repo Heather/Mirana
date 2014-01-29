@@ -1,4 +1,4 @@
-use Model::{VcsFlavor, Action
+use Model::{VcsFlavor, Action, Repository, Remote, Sync
     , git
     , hg
     , svn
@@ -55,4 +55,31 @@ pub fn toTrait(vcs: VcsFlavor) -> Option<&'static Vcs> {
               , hg  => Some( &Hg  as &'static Vcs )
               , _   => None
     }
+}
+
+///<Summary>
+///Find repository
+///</Summary>
+pub fn find_Repo(Sync: &[Sync], shade: uint, pattern: &str) -> Option<uint> {
+    Sync[shade]    .repositories
+                    .iter()
+                    .position ( |r| r.loc.contains( pattern ) )
+}
+
+///<Summary>
+///Find remote
+///</Summary>
+pub fn find_Remote(repository: &Repository, tp: VcsFlavor) -> Option<uint> {
+    repository      .remotes
+                    .iter()
+                    .position ( |r| r.t == tp )
+}
+
+///<Summary>
+///Find branch
+///</Summary>
+pub fn find_Branch(remote: &Remote, pattern: &str) -> Option<uint> {
+    remote          .branches
+                    .iter()
+                    .position ( |b| b.contains( pattern ) )
 }

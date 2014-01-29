@@ -1,8 +1,11 @@
-use Model       ::{Sync, Repository, Remote, VcsFlavor, Custom
+use Model       ::{Sync, Repository, Custom
                   , Action, pull, push};
 use Shell       ::{e, exe};
 use Wrappers    ::{λ, ξ};
-use Misc        ::{toVCS, toTrait};
+use Misc        ::{toVCS, toTrait
+                  , find_Repo
+                  , find_Remote
+                  , find_Branch};
 use Core        ::{runSync, make_any, check};
 use Config      ::{ save_RepoList
                   , save_Defaults
@@ -24,7 +27,7 @@ use std::os::{change_dir, self_exe_path, getenv, make_absolute};
 // ExtrA:
 use extra::getopts::{optflag, optopt, getopts, Opt, Matches};
 
-static r_version: &'static str = "  Mirana v0.3.6";
+static r_version: &'static str = "  Mirana v0.3.7";
 static mut ncore: uint = 1;
 
 fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
@@ -80,21 +83,6 @@ fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
         }
     });
 }
-fn find_Repo(Sync: &[Sync], shade: uint, pattern: &str) -> Option<uint> {
-    Sync[shade]    .repositories
-                    .iter()
-                    .position ( |r| r.loc.contains( pattern ) )
-}
-fn find_Remote(repository: &Repository, tp: VcsFlavor) -> Option<uint> {
-    repository      .remotes
-                    .iter()
-                    .position ( |r| r.t == tp )
-}
-fn find_Branch(remote: &Remote, pattern: &str) -> Option<uint> {
-    remote          .branches
-                    .iter()
-                    .position ( |b| b.contains( pattern ) )
-}
 fn getOption(matches: &Matches, opts: &[&str]) -> Option<~str> {
     opts.iter().filter_map(|opt| matches.opt_str(*opt)).next()
 }
@@ -134,7 +122,6 @@ fn main() {
     print!(" {:s} ", r_version);
     let args = os::args();
     let nix = !cfg!(target_os = "win32");
-    let program = args[0].as_slice();
     if nix {
         print! (", POSIX");
         match do task::try {
@@ -268,7 +255,7 @@ fn main() {
         println!("_________________________________________________________________________");
         return;
     } else if matches.opt_present("h") || matches.opt_present("help") {
-        print_usage(program, opts, nix); return;
+        print_usage(args[0], opts, nix); return;
     }
     let maybe_sync = getOption(&matches, ["s", "sync"]);
     let sync = if matches.opt_present("s") || matches.opt_present("sync") {
