@@ -6,9 +6,10 @@ use Model::{VcsFlavor, Action, Repository, Remote, Sync
     , Gentoo
     , pull, push, update, rebase, merge};
 
+use std::os::{getenv};
 
-// Uncomment when Rust bug will be fixed: 
-//
+use Shell::e;
+
 use Traits::Vcs;
 use VcsImpl::Git::Git;
 use VcsImpl::Hg::Hg;
@@ -82,4 +83,38 @@ pub fn find_Branch(remote: &Remote, pattern: &str) -> Option<uint> {
     remote          .branches
                     .iter()
                     .position ( |b| b.contains( pattern ) )
+}
+
+///<Summary>
+///Find path (smartinit)
+///</Summary>
+pub fn find_Path(rep : &Repository) -> Path {
+    let smartpath = |l : &str, cloneThing: |p : &str|| -> Path {
+        let ssps: ~[&str] = l.split('/').collect();
+        let sspslen = ssps.len();
+        if sspslen > 1 {
+            let ssp = ssps[sspslen - 1];
+            let ps: ~[&str] = ssp.split('.').collect();
+            if ps.len() > 0 {
+                let project = ps[0];
+                let prefix = getenv("HOME").unwrap_or(~"./");
+                let p = format!("{}/{}", prefix, project);
+                if ! (&Path::new( p.as_slice() )).exists() {
+                    println!(" * > clone into : {:s}", p);
+                    cloneThing(p);
+                }
+                Path::new( p )
+            } else { Path::new( l ) }
+        } else { Path::new( l ) }
+    };
+    if rep.loc.starts_with("git@")
+            || rep.loc.starts_with("https://git") {
+        smartpath(rep.loc, | p: &str | {
+            e("git", [&"clone", rep.loc.as_slice(), p]);
+            })
+    } else if rep.loc.starts_with("hg@") {
+        smartpath(rep.loc, | p: &str | {
+            e("hg", [&"clone", rep.loc.as_slice(), p]);
+            })
+    } else { Path::new( rep.loc.as_slice() ) }
 }

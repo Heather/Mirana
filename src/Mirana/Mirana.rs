@@ -1,11 +1,11 @@
-use Model       ::{Sync, Repository, Custom
-                  , Action, pull, push};
+use Model       ::{Sync, Custom, Action, pull, push};
 use Shell       ::{e, exe};
 use Wrappers    ::{λ, ξ};
 use Misc        ::{toVCS, toTrait
                   , find_Repo
                   , find_Remote
-                  , find_Branch};
+                  , find_Branch
+                  , find_Path};
 use Core        ::{runSync, make_any, check};
 use Config      ::{ save_RepoList
                   , save_Defaults
@@ -85,36 +85,6 @@ fn print_usage(program: &str, _opts: &[Opt], nix: bool) {
 }
 fn getOption(matches: &Matches, opts: &[&str]) -> Option<~str> {
     opts.iter().filter_map(|opt| matches.opt_str(*opt)).next()
-}
-fn smartinit(rep : &Repository) -> Path {
-    let smartpath = |l : &str, cloneThing: |p : &str|| -> Path {
-        let ssps: ~[&str] = l.split('/').collect();
-        let sspslen = ssps.len();
-        if sspslen > 1 {
-            let ssp = ssps[sspslen - 1];
-            let ps: ~[&str] = ssp.split('.').collect();
-            if ps.len() > 0 {
-                let project = ps[0];
-                let prefix = getenv("HOME").unwrap_or(~"./");
-                let p = format!("{}/{}", prefix, project);
-                if ! (&Path::new( p.as_slice() )).exists() {
-                    println!(" * > clone into : {:s}", p);
-                    cloneThing(p);
-                }
-                Path::new( p )
-            } else { Path::new( l ) }
-        } else { Path::new( l ) }
-    };
-    if rep.loc.starts_with("git@")
-            || rep.loc.starts_with("https://git") {
-        smartpath(rep.loc, | p: &str | {
-            e("git", [&"clone", rep.loc.as_slice(), p]);
-            })
-    } else if rep.loc.starts_with("hg@") {
-        smartpath(rep.loc, | p: &str | {
-            e("hg", [&"clone", rep.loc.as_slice(), p]);
-            })
-    } else { Path::new( rep.loc.as_slice() ) }
 }
 #[main]
 fn main() {
@@ -207,7 +177,7 @@ fn main() {
                             Some(ind) => {
                                 let rep = Sync[0].repositories[ind];
                                 //-------------------------- Real loc ----------------------------------
-                                let loc = &smartinit(&rep);
+                                let loc = &find_Path(&rep);
                                 if loc.exists() {
                                     change_dir(loc);
                                     runSync( app, rep, None, 1);
@@ -456,7 +426,7 @@ fn main() {
             let atclone = maybe_type.clone();
             let rclone  = rep.clone();
             match do task::try { unsafe {
-                let loc = & smartinit(&rclone);
+                let loc = & find_Path(&rclone);
                 let repx = rclone;
                 if loc.exists() {
                     change_dir(loc);
