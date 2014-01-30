@@ -8,7 +8,7 @@ use std::comm::Empty;
 fn λFly<Ψ>(animation: &[&str], symbols: int, delay: u64, Ω: || -> Ψ) -> Ψ {
     let howtofly = animation.map(|x|x.to_owned());
     let (port, chan) = Chan::new();
-    do spawn {
+    spawn(proc() {
         let mut prefix = ~"";
         for _ in range (0, symbols) {
             print!(" ");
@@ -20,7 +20,7 @@ fn λFly<Ψ>(animation: &[&str], symbols: int, delay: u64, Ω: || -> Ψ) -> Ψ {
                 sleep(delay);
             }
         }
-    }       let res = Ω();
+    });     let res = Ω();
             chan.send(());
             res
 }

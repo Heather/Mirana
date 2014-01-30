@@ -52,8 +52,10 @@ pub fn toAction(s: ~str) -> Action {
 ///Convert to VcsImpl
 ///</Summary>
 pub fn toTrait(vcs: VcsFlavor) -> Option<&'static Vcs> {
-    match vcs { git => Some( &Git as &'static Vcs )
-              , hg  => Some( &Hg  as &'static Vcs )
+    static HG:  Hg  = Hg;
+    static GIT: Git = Git;
+    match vcs { git => Some( &GIT as &'static Vcs )
+              , hg  => Some( &HG  as &'static Vcs )
               , _   => None
     }
 }
@@ -63,8 +65,8 @@ pub fn toTrait(vcs: VcsFlavor) -> Option<&'static Vcs> {
 ///</Summary>
 pub fn find_Repo(Sync: &[Sync], shade: uint, pattern: &str) -> Option<uint> {
     Sync[shade]    .repositories
-                    .iter()
-                    .position ( |r| r.loc.contains( pattern ) )
+                   .iter()
+                   .position ( |r| r.loc.contains( pattern ) )
 }
 
 ///<Summary>

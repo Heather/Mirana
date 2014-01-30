@@ -28,7 +28,7 @@ use std::os::{change_dir, self_exe_path, getenv, make_absolute};
 // ExtrA:
 use extra::getopts::{optflag, optopt, getopts, Matches};
 
-static r_version: &'static str = "  Mirana v0.3.7";
+static r_version: &'static str = "  Mirana v0.3.8";
 static mut ncore: uint = 1;
 
 fn getOption(matches: &Matches, opts: &[&str]) -> Option<~str> {
@@ -42,14 +42,14 @@ fn main() {
     let nix = !cfg!(target_os = "win32");
     if nix {
         print! (", POSIX");
-        match do task::try {
+        match task::try(proc() {
             let nproc = exe("nproc", []);
             match from_str::<uint> (nproc.trim()) {
                 Some(0) => 1,
                 Some(n) => n + 1,
                 None => 1
             }
-        } {  Ok(n)  => {  println!(", {:u} Core", n); unsafe { ncore = n; }
+        }){  Ok(n)  => {  println!(", {:u} Core", n); unsafe { ncore = n; }
           }, Err(e) => {  println!(" -> can't get cores count: {:?}", e);
           }
         }
@@ -373,7 +373,7 @@ fn main() {
             let aclone  = app.clone();
             let atclone = maybe_type.clone();
             let rclone  = rep.clone();
-            match do task::try { unsafe {
+            match task::try(proc() { unsafe {
                 let loc = & find_Path(&rclone);
                 let repx = rclone;
                 if loc.exists() {
@@ -385,7 +385,7 @@ fn main() {
                     println!(" -> {:s} does not exist", repx.loc);
                 }
             }
-            } { Ok(_) => { success += 1; },
+            }){ Ok(_) => { success += 1; },
                 Err(e) => {
                     println!("  * failed: {:?}", e);
                     failed += 1; 
