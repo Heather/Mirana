@@ -58,21 +58,21 @@ pub fn make_any(app: &App) {
     }
 }
 
-pub fn runSync(app: App, repo: Repository, typeFilter: Option<~str>, ncore: uint) {
+pub fn runSync(app: &App, repo: &Repository, typeFilter: Option<~str>, ncore: uint) {
     let nowt = time::now_utc();
     let nowt_str = nowt.rfc3339();
-    for r in repo.remotes.iter().filter(
+    for r in (*repo).remotes.iter().filter(
         |&r| match typeFilter {
             Some(ref rt) => r.t == toVCS(rt.to_owned()),
             None => true
         }) {
         match r.t {
-        Gentoo => gentooFullUpdate(repo.loc, ncore),
+        Gentoo => gentooFullUpdate((*repo).loc, ncore),
         _ => {  for b in r.branches.iter() {
                     println!(" [{:s}]  branch: {:s}", nowt_str, *b);
                     match toTrait(r.t) {
                         Some(vcs) => {
-                            for action in repo.actions.iter() {
+                            for action in (*repo).actions.iter() {
                                 match *action {
                                     pull    => vcs.pull_branch(*b),
                                     push    => vcs.pull_branch(*b),
@@ -84,8 +84,8 @@ pub fn runSync(app: App, repo: Repository, typeFilter: Option<~str>, ncore: uint
                             }
                         }, None => fail!("Non trait implementation found")
                     }
-                    match repo.make {
-                        Some(ref mk) => { make_single(&app, mk.to_owned());
+                    match (*repo).make {
+                        Some(ref mk) => { make_single(app, mk.to_owned());
                         }, None => println!(" [No make]")
                     }
                 }

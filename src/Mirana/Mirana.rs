@@ -28,7 +28,7 @@ use std::os::{change_dir, self_exe_path, getenv, make_absolute};
 // ExtrA:
 use extra::getopts::{optflag, optopt, getopts, Matches};
 
-static r_version: &'static str = "  Mirana v0.3.8";
+static r_version: &'static str = "  Mirana v0.3.9";
 static mut ncore: uint = 1;
 
 fn getOption(matches: &Matches, opts: &[&str]) -> Option<~str> {
@@ -121,20 +121,21 @@ fn main() {
                 "sync" => {
                     if args.len() > 2 {
                         let y = args[2].as_slice();
-                        match find_Repo(Sync, 0, y) { /* TODO: search in all syncs... or something else */
-                            Some(ind) => {
-                                let rep = Sync[0].repositories[ind];
-                                //-------------------------- Real loc ----------------------------------
-                                let loc = &find_Path(&rep);
-                                if loc.exists() {
-                                    change_dir(loc);
-                                    runSync( app, rep, None, 1);
-                                    change_dir(&self_exe_path().unwrap());
-                                } else {
-                                    println!(" -> {:s} does not exist", rep.loc);
-                                }
-                            },
-                            None => fail!("{} not found", y)
+                        for (i, sx) in Sync.iter().enumerate() {
+                            match find_Repo(Sync, i, y) {
+                                Some(ind) => {
+                                    let rep = &Sync[i].repositories[ind];
+                                    let loc = &find_Path(rep);
+                                    if loc.exists() {
+                                        change_dir(loc);
+                                        runSync( &app, rep, None, 1);
+                                        change_dir(&self_exe_path().unwrap());
+                                    } else {
+                                        println!(" -> {:s} does not exist", rep.loc);
+                                    }
+                                },
+                                None => fail!("{} not found in {}", y, sx.sync)
+                            }
                         }
                     } else { println!("You must say what to sync");
                     }
@@ -378,8 +379,8 @@ fn main() {
                 let repx = rclone;
                 if loc.exists() {
                     change_dir(loc);
-                    runSync(        aclone
-                           , repx,  atclone
+                    runSync( &aclone
+                           , &repx, atclone
                            , ncore);
                 } else {
                     println!(" -> {:s} does not exist", repx.loc);

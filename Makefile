@@ -1,5 +1,5 @@
 #           Mirana - Repo synchronizer
-#          Copyright (C)  2013 Heather
+#       Copyright (C)  2013-2014 Heather
 #
 
 RUSTC=rustc
