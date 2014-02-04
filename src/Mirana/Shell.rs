@@ -10,10 +10,10 @@ use std::io::print;
 pub fn exe(cmd: &str, args : &[&str]) -> ~str {
     let oargs = args.map(|x|x.to_owned());
     match process_output(cmd, oargs) {
-        Some(po)    => match from_utf8_owned(po.output.clone()) {
+        Ok(po)      => match from_utf8_owned(po.output.clone()) {
             Some(o) => o,
             None    => ~"" },
-        None        => format!("could not exec `{}`", cmd)
+        Err(er)     => format!("could not exec `{}` : {}", cmd, er)
     }
 }
 
@@ -31,7 +31,13 @@ pub fn exec(cmd: &str, args : &[&str]) {
 #[inline]
 pub fn e(cmd: &str, args : &[&str]) {
     let oargs = args.map(|x|x.to_owned());
-    process_status(cmd, oargs);
+    match process_status(cmd, oargs) {
+        Ok(exit) => {
+            if !exit.success() {
+                println!("`{}` : NO SUCCESS", cmd)
+            }
+        } , Err(err) => println!("could not exec `{}` : {}", cmd, err)
+    };
 }
 
 ///<Summary>
@@ -41,13 +47,13 @@ pub fn e(cmd: &str, args : &[&str]) {
 pub fn exy(cmd: &str, args : &[&str]) {
     let oargs = args.map(|x|x.to_owned());
     match process_output(cmd, oargs) {
-        Some(po)    => {
+        Ok(po) => {
             match from_utf8_owned(po.output.clone()) {
                 Some(o) => print(o),
                 None    => () };
             match from_utf8_owned(po.error.clone()) {
                 Some(o) => print(o),
                 None    => () };
-            }, None     => println!("could not exec `{}`", cmd)
+        }, Err(err) => println!("could not exec `{}` : {}", cmd, err)
     }
 }

@@ -28,7 +28,7 @@ use std::os::{change_dir, self_exe_path, getenv, make_absolute};
 // ExtrA:
 use extra::getopts::{optflag, optopt, getopts, Matches};
 
-static r_version: &'static str = "  Mirana v0.3.9";
+static r_version: &'static str = "  Mirana v0.4.0";
 static mut ncore: uint = 1;
 
 fn getOption(matches: &Matches, opts: &[&str]) -> Option<~str> {
@@ -61,7 +61,11 @@ fn main() {
                     getenv("XDG_CONFIG_HOME")
                     .unwrap_or(getenv("HOME")
                     .unwrap_or(~"./"))).join("Mirana");
-                if !prefix.exists() { mkdir(&prefix, S_IRWXU as u32); }
+                if !prefix.exists() { 
+                    match mkdir(&prefix, S_IRWXU as u32) { Ok(_) => ()
+                        , Err(er) => fail!("failed to create prefix dir : {}", er)
+                    }
+                };
                 (   prefix.join( ".sync.conf" ),
                     prefix.join( ".mirana.conf" )
                 )

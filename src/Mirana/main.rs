@@ -1,5 +1,5 @@
 #[crate_id(name = "Mirana",
-       vers = "0.3.9",
+       vers = "0.4.0",
        author = "Heather Cynede",
        url = "https://github.com/Heather/Mirana")];
 
