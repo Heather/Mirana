@@ -9,8 +9,8 @@ use std::io::File;
 use std::path::Path;
 
 use extra::json;
-use extra::serialize::{Decodable, Encodable};
-use extra::serialize::Encoder;
+use serialize::{Decodable, Encodable};
+use serialize::Encoder;
 
 ///<Summary>
 ///Load JSON config

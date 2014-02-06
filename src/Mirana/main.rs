@@ -1,5 +1,5 @@
 #[crate_id(name = "Mirana",
-       vers = "0.4.0",
+       vers = "0.4.1",
        author = "Heather Cynede",
        url = "https://github.com/Heather/Mirana")];
 
@@ -10,6 +10,7 @@
 
 #[crate_type = "bin"];
 extern mod extra;
+extern mod serialize;
 
 /* Base modules */
 pub mod Model;

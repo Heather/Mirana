@@ -28,7 +28,7 @@ use std::os::{change_dir, self_exe_path, getenv, make_absolute};
 // ExtrA:
 use extra::getopts::{optflag, optopt, getopts, Matches};
 
-static r_version: &'static str = "  Mirana v0.4.0";
+static r_version: &'static str = "  Mirana v0.4.1";
 static mut ncore: uint = 1;
 
 fn getOption(matches: &Matches, opts: &[&str]) -> Option<~str> {
