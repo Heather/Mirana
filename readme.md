@@ -5,6 +5,10 @@ Global repositories synchronizer
 
 Config example will be generated if you will run app first time w/o config
 
+Project is currently abandoned due
+
+ - this : https://github.com/Heather/Mirana/blob/master/src/Mirana/VcsCmd/Git.rs#L48
+ - and this : https://github.com/mozilla/rust/pull/12007#issuecomment-33922375
 
 ``` rust
 #[inline]
